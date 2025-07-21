@@ -8,6 +8,7 @@ public class BusinessRuleService
 {
     private readonly string _rulesFile;
     private readonly List<Workflow> _workflows;
+    private readonly object _lock = new();
     private RulesEngine.RulesEngine _engine;
 
     public BusinessRuleService(string? rulesFile = null)
@@ -26,19 +27,31 @@ public class BusinessRuleService
 
     private void SaveWorkflows()
     {
-        var json = JsonConvert.SerializeObject(_workflows, Formatting.Indented);
-        File.WriteAllText(_rulesFile, json);
-        _engine = new RulesEngine.RulesEngine(_workflows.ToArray());
+        lock (_lock)
+        {
+            var json = JsonConvert.SerializeObject(_workflows, Formatting.Indented);
+            File.WriteAllText(_rulesFile, json);
+            _engine = new RulesEngine.RulesEngine(_workflows.ToArray());
+        }
     }
 
-    public List<Workflow> GetWorkflows() => _workflows;
+    public List<Workflow> GetWorkflows()
+    {
+        lock (_lock)
+        {
+            return new List<Workflow>(_workflows);
+        }
+    }
 
     public void AddOrUpdateWorkflow(Workflow workflow)
     {
-        var existing = _workflows.FirstOrDefault(
-            w => w.WorkflowName.Equals(workflow.WorkflowName, StringComparison.OrdinalIgnoreCase));
-        if (existing != null) _workflows.Remove(existing);
-        _workflows.Add(workflow);
+        lock (_lock)
+        {
+            var existing = _workflows.FirstOrDefault(
+                w => w.WorkflowName.Equals(workflow.WorkflowName, StringComparison.OrdinalIgnoreCase));
+            if (existing != null) _workflows.Remove(existing);
+            _workflows.Add(workflow);
+        }
         SaveWorkflows();
     }
 
