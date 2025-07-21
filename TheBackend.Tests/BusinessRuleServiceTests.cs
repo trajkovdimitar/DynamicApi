@@ -35,4 +35,33 @@ public class BusinessRuleServiceTests
             File.Delete(tempFile);
         }
     }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsSuccess()
+    {
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            var service = new BusinessRuleService(tempFile);
+            var workflow = new Workflow
+            {
+                WorkflowName = "Order.Create",
+                Rules = new List<Rule>
+                {
+                    new Rule { RuleName = "AlwaysTrue", Expression = "true" }
+                }
+            };
+            service.AddOrUpdateWorkflow(workflow);
+
+            var obj = new { Id = 1 };
+            var results = await service.ExecuteAsync("order.Create", new RuleParameter("entity", obj));
+
+            Assert.Single(results);
+            Assert.True(results[0].IsSuccess);
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
 }

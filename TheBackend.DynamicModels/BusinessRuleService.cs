@@ -35,7 +35,8 @@ public class BusinessRuleService
 
     public void AddOrUpdateWorkflow(Workflow workflow)
     {
-        var existing = _workflows.FirstOrDefault(w => w.WorkflowName == workflow.WorkflowName);
+        var existing = _workflows.FirstOrDefault(
+            w => w.WorkflowName.Equals(workflow.WorkflowName, StringComparison.OrdinalIgnoreCase));
         if (existing != null) _workflows.Remove(existing);
         _workflows.Add(workflow);
         SaveWorkflows();
@@ -45,5 +46,10 @@ public class BusinessRuleService
         => _workflows.Any(w => w.WorkflowName.Equals(workflowName, StringComparison.OrdinalIgnoreCase));
 
     public ValueTask<List<RuleResultTree>> ExecuteAsync(string workflowName, params RuleParameter[] parameters)
-        => _engine.ExecuteAllRulesAsync(workflowName, parameters);
+    {
+        var actualName = _workflows
+            .FirstOrDefault(w => w.WorkflowName.Equals(workflowName, StringComparison.OrdinalIgnoreCase))
+            ?.WorkflowName ?? workflowName;
+        return _engine.ExecuteAllRulesAsync(actualName, parameters);
+    }
 }
