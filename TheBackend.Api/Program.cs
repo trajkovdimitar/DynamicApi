@@ -1,6 +1,10 @@
 using TheBackend.DynamicModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using TheBackend.Application.Repositories;
+using TheBackend.Infrastructure.Repositories;
 using TheBackend.Api;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +12,12 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<ModelDefinitionService>();
 builder.Services.AddSingleton<DynamicDbContextService>();
 builder.Services.AddSingleton<BusinessRuleService>();
+builder.Services.AddScoped<DbContext>(provider =>
+{
+    var dbService = provider.GetRequiredService<DynamicDbContextService>();
+    return dbService.GetDbContext();
+});
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 var app = builder.Build();
 var dbService = app.Services.GetRequiredService<DynamicDbContextService>();

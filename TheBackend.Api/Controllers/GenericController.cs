@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using TheBackend.Application.Repositories;
 using TheBackend.DynamicModels;
 using TheBackend.Infrastructure.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 using RulesEngine.Models;
 using System.Linq;
 using TheBackend.Api;
@@ -16,11 +17,13 @@ namespace TheBackend.Api.Controllers
     {
         private readonly DynamicDbContextService _dbContextService;
         private readonly BusinessRuleService _ruleService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public GenericController(DynamicDbContextService dbContextService, BusinessRuleService ruleService)
+        public GenericController(DynamicDbContextService dbContextService, BusinessRuleService ruleService, IServiceProvider serviceProvider)
         {
             _dbContextService = dbContextService;
             _ruleService = ruleService;
+            _serviceProvider = serviceProvider;
         }
 
         [HttpGet]
@@ -30,7 +33,7 @@ namespace TheBackend.Api.Controllers
             if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), _dbContextService.GetDbContext());
+            var repo = _serviceProvider.GetRequiredService(repoType);
 
             var getAllMethod = repoType.GetMethod("GetAllAsync");
             var resultTask = (Task)getAllMethod.Invoke(repo, null);
@@ -65,7 +68,7 @@ namespace TheBackend.Api.Controllers
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
+            var repo = _serviceProvider.GetRequiredService(repoType);
 
             var getMethod = repoType.GetMethod("GetByIdAsync");
             var resultTask = (Task)getMethod.Invoke(repo, new[] { convertedId });
@@ -109,7 +112,7 @@ namespace TheBackend.Api.Controllers
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
+            var repo = _serviceProvider.GetRequiredService(repoType);
 
             var addMethod = repoType.GetMethod("AddAsync");
             var task = (Task)addMethod.Invoke(repo, new[] { entity });
@@ -168,7 +171,7 @@ namespace TheBackend.Api.Controllers
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
+            var repo = _serviceProvider.GetRequiredService(repoType);
 
             var updateMethod = repoType.GetMethod("UpdateAsync");
             var task = (Task)updateMethod.Invoke(repo, new[] { entity });
@@ -207,7 +210,7 @@ namespace TheBackend.Api.Controllers
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
+            var repo = _serviceProvider.GetRequiredService(repoType);
 
             var deleteMethod = repoType.GetMethod("DeleteAsync");
             var task = (Task)deleteMethod.Invoke(repo, new[] { convertedId });
