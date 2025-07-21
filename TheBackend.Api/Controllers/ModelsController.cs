@@ -1,5 +1,6 @@
 ﻿using TheBackend.DynamicModels;
 using Microsoft.AspNetCore.Mvc;
+using TheBackend.Api;
 
 namespace TheBackend.Api.Controllers
 {
@@ -35,7 +36,7 @@ namespace TheBackend.Api.Controllers
             // Regenerate DbContext, apply migration
             await _dbContextService.RegenerateAndMigrateAsync();
 
-            return Ok($"Model {definition.ModelName} created/updated and migrated.");
+            return Ok(ApiResponse<string>.Ok($"Model {definition.ModelName} created/updated and migrated."));
         }
     }
 }
