@@ -16,6 +16,13 @@ namespace TheBackend.Api.Controllers
             _dbContextService = dbContextService;
         }
 
+        [HttpGet]
+        public IActionResult GetModels()
+        {
+            var models = _modelService.LoadModels();
+            return Ok(models);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateOrUpdateModel([FromBody] ModelDefinition definition)
         {
