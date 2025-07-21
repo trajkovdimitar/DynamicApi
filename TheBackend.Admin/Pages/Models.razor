@@ -1,0 +1,43 @@
+@page "/models"
+@inject HttpClient Http
+
+<h1 class="text-2xl font-bold mb-4">Models</h1>
+
+@if (models == null)
+{
+    <p>Loading...</p>
+}
+else if (!models.Any())
+{
+    <p>No models defined.</p>
+}
+else
+{
+    <ul class="space-y-2">
+        @foreach (var model in models)
+        {
+            <li class="border p-2 rounded">@model.ModelName</li>
+        }
+    </ul>
+}
+
+@code {
+    private List<ModelDefinition>? models;
+
+    protected override async Task OnInitializedAsync()
+    {
+        models = await Http.GetFromJsonAsync<List<ModelDefinition>>("api/models");
+    }
+
+    public class ModelDefinition
+    {
+        public string? ModelName { get; set; }
+        public List<PropertyDefinition> Properties { get; set; } = new();
+    }
+
+    public class PropertyDefinition
+    {
+        public string? PropertyName { get; set; }
+        public string? PropertyType { get; set; }
+    }
+}
