@@ -2,10 +2,10 @@
 @inject ApiClient Api
 @using TheBackend.Domain.Models
 
-<h1 class="text-3xl font-bold mb-4">Models</h1>
+<h1 class="mdl-typography--headline4">Models</h1>
 
 <div class="mb-4">
-    <button class="bg-blue-500 text-white px-4 py-2 rounded" @onclick="NewModel">Add Model</button>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @onclick="NewModel">Add Model</button>
 </div>
 
 @if (models == null)
@@ -23,10 +23,10 @@ else
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             @foreach (var model in models)
             {
-                <div class="bg-white rounded border shadow">
-                    <div class="bg-gray-50 border-b px-4 py-2 flex justify-between items-center">
-                        <h3 class="font-semibold">@model.ModelName</h3>
-                        <button class="text-blue-600 hover:underline" @onclick="() => EditModel(model)">Edit</button>
+                <div class="mdl-card mdl-shadow--2dp">
+                    <div class="mdl-card__title">
+                        <h3 class="mdl-card__title-text">@model.ModelName</h3>
+                        <button class="mdl-button mdl-js-button" @onclick="() => EditModel(model)">Edit</button>
                     </div>
                     <table class="w-full text-sm">
                         <tbody>
@@ -47,36 +47,48 @@ else
 
 @if (editingModel != null)
 {
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded shadow-lg w-full max-w-2xl">
+    <div class="overlay">
+        <div class="modal">
             <h2 class="text-xl font-bold mb-4">@formTitle</h2>
             <EditForm Model="editingModel" OnValidSubmit="SaveModel">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Model Name</label>
-                    <InputText class="border rounded w-full p-2" @bind-Value="editingModel.ModelName" />
+                <div class="mdl-textfield mdl-js-textfield">
+                    <InputText class="mdl-textfield__input" @bind-Value="editingModel.ModelName" />
+                    <label class="mdl-textfield__label">Model Name</label>
                 </div>
                 <h3 class="font-semibold mb-2">Properties</h3>
                 @foreach (var prop in editingModel.Properties)
                 {
-                    <div class="grid grid-cols-6 gap-2 mb-2 items-center">
-                        <InputText class="border rounded p-2" placeholder="Name" @bind-Value="prop.Name" />
-                        <InputText class="border rounded p-2" placeholder="Type" @bind-Value="prop.Type" />
-                        <div class="flex items-center">
-                            <InputCheckbox class="mr-1" @bind-Value="prop.IsKey" />
-                            <span class="text-sm">Key</span>
+                    <div class="mdl-grid" style="align-items:center;">
+                        <div class="mdl-cell mdl-cell--2-col">
+                            <InputText class="mdl-textfield__input" placeholder="Name" @bind-Value="prop.Name" />
                         </div>
-                        <div class="flex items-center">
-                            <InputCheckbox class="mr-1" @bind-Value="prop.IsRequired" />
-                            <span class="text-sm">Required</span>
+                        <div class="mdl-cell mdl-cell--2-col">
+                            <InputText class="mdl-textfield__input" placeholder="Type" @bind-Value="prop.Type" />
                         </div>
-                        <InputNumber class="border rounded p-2" placeholder="MaxLength" @bind-Value="prop.MaxLength" />
-                        <button type="button" class="text-red-600" @onclick="() => RemoveProperty(prop)">Remove</button>
+                        <div class="mdl-cell mdl-cell--2-col">
+                            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect">
+                                <InputCheckbox class="mdl-checkbox__input" @bind-Value="prop.IsKey" />
+                                <span class="mdl-checkbox__label">Key</span>
+                            </label>
+                        </div>
+                        <div class="mdl-cell mdl-cell--2-col">
+                            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect">
+                                <InputCheckbox class="mdl-checkbox__input" @bind-Value="prop.IsRequired" />
+                                <span class="mdl-checkbox__label">Required</span>
+                            </label>
+                        </div>
+                        <div class="mdl-cell mdl-cell--2-col">
+                            <InputNumber class="mdl-textfield__input" placeholder="Max Length" @bind-Value="prop.MaxLength" />
+                        </div>
+                        <div class="mdl-cell mdl-cell--2-col">
+                            <button type="button" class="mdl-button mdl-js-button" @onclick="() => RemoveProperty(prop)">Remove</button>
+                        </div>
                     </div>
                 }
-                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded mb-4" @onclick="AddProperty">Add Property</button>
-                <div class="flex justify-end space-x-2">
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
-                    <button type="button" class="bg-gray-300 px-4 py-2 rounded" @onclick="CancelEdit">Cancel</button>
+                <button type="button" class="mdl-button mdl-js-button mdl-button--raised" @onclick="AddProperty">Add Property</button>
+                <div class="mt-4" style="text-align:right;">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Save</button>
+                    <button type="button" class="mdl-button mdl-js-button" @onclick="CancelEdit">Cancel</button>
                 </div>
             </EditForm>
         </div>

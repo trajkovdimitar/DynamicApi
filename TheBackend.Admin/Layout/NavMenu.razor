@@ -1,13 +1,25 @@
-<nav class="bg-gray-800 text-white w-48 min-h-screen p-4 shadow">
-    <ul class="space-y-2">
+<nav class="nav-menu">
+    <div class="logo">
+        <img src="https://source.unsplash.com/random/64x64?logo" alt="Logo" />
+    </div>
+    <ul>
         <li>
-            <NavLink class="block hover:bg-gray-700 px-3 py-2 rounded" href="" Match="NavLinkMatch.All">Home</NavLink>
+            <NavLink class="" href="" Match="NavLinkMatch.All">
+                <span class="material-icons">home</span>
+                Home
+            </NavLink>
         </li>
         <li>
-            <NavLink class="block hover:bg-gray-700 px-3 py-2 rounded" href="models">Models</NavLink>
+            <NavLink href="models">
+                <span class="material-icons">list</span>
+                Models
+            </NavLink>
         </li>
         <li>
-            <NavLink class="block hover:bg-gray-700 px-3 py-2 rounded" href="data">Data</NavLink>
+            <NavLink href="data">
+                <span class="material-icons">table_chart</span>
+                Data
+            </NavLink>
         </li>
     </ul>
 </nav>
