@@ -1,4 +1,5 @@
-﻿using TheBackend.DynamicModels;
+using TheBackend.DynamicModels;
+using TheBackend.SharedModels;
 using Xunit;
 
 namespace TheBackend.Tests;

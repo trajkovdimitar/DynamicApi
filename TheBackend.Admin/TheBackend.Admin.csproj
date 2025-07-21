@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TheBackend.DynamicModels\TheBackend.DynamicModels.csproj" />
+    <ProjectReference Include="..\TheBackend.SharedModels\TheBackend.SharedModels.csproj" />
   </ItemGroup>
 
 </Project>

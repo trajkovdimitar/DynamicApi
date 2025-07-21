@@ -12,6 +12,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 namespace TheBackend.DynamicModels;
+using TheBackend.SharedModels;
 
 public class DynamicDbContextService : IDisposable
 {

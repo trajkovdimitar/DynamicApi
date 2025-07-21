@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TheBackend.SharedModels;
 namespace TheBackend.DynamicModels
 {
     public class DynamicDbContext : DbContext
