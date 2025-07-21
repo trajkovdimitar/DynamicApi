@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="../TheBackend.Application/TheBackend.Application.csproj" />
     <ProjectReference Include="../TheBackend.Domain/TheBackend.Domain.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
   </ItemGroup>
 
 </Project>

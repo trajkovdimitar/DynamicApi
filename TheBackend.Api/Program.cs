@@ -1,5 +1,4 @@
 using TheBackend.DynamicModels;
-using TheBackend.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();

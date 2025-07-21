@@ -9,5 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TheBackend.DynamicModels\TheBackend.DynamicModels.csproj" />
+    <ProjectReference Include="..\TheBackend.Application\TheBackend.Application.csproj" />
+    <ProjectReference Include="..\TheBackend.Infrastructure\TheBackend.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
