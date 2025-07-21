@@ -6,27 +6,28 @@ namespace TheBackend.DynamicModels;
 
 public class BusinessRuleService
 {
-    private const string RulesFile = "rules.json";
+    private readonly string _rulesFile;
     private readonly List<Workflow> _workflows;
     private RulesEngine.RulesEngine _engine;
 
-    public BusinessRuleService()
+    public BusinessRuleService(string? rulesFile = null)
     {
-        _workflows = LoadWorkflows();
+        _rulesFile = rulesFile ?? "rules.json";
+        _workflows = LoadWorkflows(_rulesFile);
         _engine = new RulesEngine.RulesEngine(_workflows.ToArray());
     }
 
-    private static List<Workflow> LoadWorkflows()
+    private static List<Workflow> LoadWorkflows(string file)
     {
-        if (!File.Exists(RulesFile)) return new List<Workflow>();
-        var json = File.ReadAllText(RulesFile);
+        if (!File.Exists(file)) return new List<Workflow>();
+        var json = File.ReadAllText(file);
         return JsonConvert.DeserializeObject<List<Workflow>>(json) ?? new List<Workflow>();
     }
 
     private void SaveWorkflows()
     {
         var json = JsonConvert.SerializeObject(_workflows, Formatting.Indented);
-        File.WriteAllText(RulesFile, json);
+        File.WriteAllText(_rulesFile, json);
         _engine = new RulesEngine.RulesEngine(_workflows.ToArray());
     }
 
