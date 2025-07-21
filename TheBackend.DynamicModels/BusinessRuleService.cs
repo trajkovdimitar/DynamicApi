@@ -45,5 +45,15 @@ public class BusinessRuleService
         => _workflows.Any(w => w.WorkflowName.Equals(workflowName, StringComparison.OrdinalIgnoreCase));
 
     public ValueTask<List<RuleResultTree>> ExecuteAsync(string workflowName, params RuleParameter[] parameters)
-        => _engine.ExecuteAllRulesAsync(workflowName, parameters);
+    {
+        var workflow = _workflows.FirstOrDefault(w =>
+            w.WorkflowName.Equals(workflowName, StringComparison.OrdinalIgnoreCase));
+
+        if (workflow == null)
+        {
+            return ValueTask.FromResult(new List<RuleResultTree>());
+        }
+
+        return _engine.ExecuteAllRulesAsync(workflow.WorkflowName, parameters);
+    }
 }
