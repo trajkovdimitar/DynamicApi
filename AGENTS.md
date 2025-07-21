@@ -14,3 +14,6 @@
 ## Pull Request
 - Summaries should mention key changes.
 - Tests section should include output from build or test commands.
+
+## Project Guidelines
+- Refer to `DOTNET_GUIDELINES.md` for full .NET microservices standards.
