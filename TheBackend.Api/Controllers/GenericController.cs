@@ -4,6 +4,7 @@ using TheBackend.Application.Repositories;
 using TheBackend.DynamicModels;
 using TheBackend.Infrastructure.Repositories;
 using RulesEngine.Models;
+using Microsoft.Extensions.Logging;
 using System.Linq;
 using TheBackend.Api;
 
@@ -16,16 +17,19 @@ namespace TheBackend.Api.Controllers
     {
         private readonly DynamicDbContextService _dbContextService;
         private readonly BusinessRuleService _ruleService;
+        private readonly ILogger<GenericController> _logger;
 
-        public GenericController(DynamicDbContextService dbContextService, BusinessRuleService ruleService)
+        public GenericController(DynamicDbContextService dbContextService, BusinessRuleService ruleService, ILogger<GenericController> logger)
         {
             _dbContextService = dbContextService;
             _ruleService = ruleService;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll(string modelName)
         {
+            _logger.LogInformation("Get all {Model}", modelName);
             var modelType = _dbContextService.GetModelType(modelName);
             if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
@@ -45,6 +49,7 @@ namespace TheBackend.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string modelName, string id)
         {
+            _logger.LogInformation("Get {Model} with id {Id}", modelName, id);
             var modelType = _dbContextService.GetModelType(modelName);
             if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
@@ -54,15 +59,7 @@ namespace TheBackend.Api.Controllers
             if (key == null || key.Properties.Count != 1) return BadRequest(ApiResponse<object>.Fail("Unsupported key"));
 
             var keyType = key.Properties[0].ClrType;
-            object convertedId;
-            try
-            {
-                convertedId = Convert.ChangeType(id, keyType);
-            }
-            catch
-            {
-                return BadRequest(ApiResponse<object>.Fail("Invalid id"));
-            }
+            var convertedId = Convert.ChangeType(id, keyType);
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
             var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
@@ -80,6 +77,7 @@ namespace TheBackend.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(string modelName)
         {
+            _logger.LogInformation("Create {Model}", modelName);
             var modelType = _dbContextService.GetModelType(modelName);
             if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
@@ -91,15 +89,7 @@ namespace TheBackend.Api.Controllers
                 body = await reader.ReadToEndAsync();
             }
 
-            object entity;
-            try
-            {
-                entity = JsonConvert.DeserializeObject(body, modelType);
-            }
-            catch
-            {
-                return BadRequest(ApiResponse<object>.Fail("Invalid body"));
-            }
+            var entity = JsonConvert.DeserializeObject(body, modelType)!;
 
             var workflowName = $"{modelName}.Create";
             if (_ruleService.HasWorkflow(workflowName))
@@ -121,6 +111,7 @@ namespace TheBackend.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(string modelName, string id)
         {
+            _logger.LogInformation("Update {Model} with id {Id}", modelName, id);
             var modelType = _dbContextService.GetModelType(modelName);
             if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
@@ -131,15 +122,7 @@ namespace TheBackend.Api.Controllers
 
             var keyType = key.Properties[0].ClrType;
             var keyPropertyInfo = key.Properties[0].PropertyInfo;
-            object convertedId;
-            try
-            {
-                convertedId = Convert.ChangeType(id, keyType);
-            }
-            catch
-            {
-                return BadRequest(ApiResponse<object>.Fail("Invalid id"));
-            }
+            var convertedId = Convert.ChangeType(id, keyType);
 
             string body;
             using (var reader = new StreamReader(Request.Body))
@@ -147,15 +130,7 @@ namespace TheBackend.Api.Controllers
                 body = await reader.ReadToEndAsync();
             }
 
-            object entity;
-            try
-            {
-                entity = JsonConvert.DeserializeObject(body, modelType);
-            }
-            catch
-            {
-                return BadRequest(ApiResponse<object>.Fail("Invalid body"));
-            }
+            var entity = JsonConvert.DeserializeObject(body, modelType)!;
 
             object entityId = keyPropertyInfo.GetValue(entity);
             if (!Equals(entityId, convertedId)) return BadRequest(ApiResponse<object>.Fail("Id mismatch"));
@@ -180,6 +155,7 @@ namespace TheBackend.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string modelName, string id)
         {
+            _logger.LogInformation("Delete {Model} with id {Id}", modelName, id);
             var modelType = _dbContextService.GetModelType(modelName);
             if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
@@ -189,15 +165,7 @@ namespace TheBackend.Api.Controllers
             if (key == null || key.Properties.Count != 1) return BadRequest(ApiResponse<object>.Fail("Unsupported key"));
 
             var keyType = key.Properties[0].ClrType;
-            object convertedId;
-            try
-            {
-                convertedId = Convert.ChangeType(id, keyType);
-            }
-            catch
-            {
-                return BadRequest(ApiResponse<object>.Fail("Invalid id"));
-            }
+            var convertedId = Convert.ChangeType(id, keyType);
 
             var workflowName = $"{modelName}.Delete";
             if (_ruleService.HasWorkflow(workflowName))
