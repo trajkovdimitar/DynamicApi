@@ -1,5 +1,7 @@
 @page "/data"
 @inject HttpClient Http
+@using TheBackend.Admin.Shared
+@implements IDisposable
 
 <h1 class="h3">Data</h1>
 
@@ -20,11 +22,15 @@ else
         </select>
     </div>
 
-    if (selectedDefinition != null && records != null)
+    if (selectedDefinition != null && records != null && !records.Any())
     {
-        <div class="mb-2">
-            <button class="btn btn-primary" @onclick="NewRecord">Add Record</button>
+        <div class="text-center my-5">
+            <p>No items.</p>
+            <button class="btn btn-primary" @onclick="NewRecord">Create Item</button>
         </div>
+    }
+    else if (selectedDefinition != null && records != null)
+    {
         <table class="table table-striped">
             <thead class="table-light">
                 <tr>
@@ -51,6 +57,9 @@ else
                 }
             </tbody>
         </table>
+        <div class="fab">
+            <button class="btn btn-success" @onclick="NewRecord"><i class="bi bi-plus"></i></button>
+        </div>
     }
 }
 
@@ -79,6 +88,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    public MainLayout? Layout { get; set; }
+
     private List<ModelDefinition>? models;
     private string? selectedModel;
     private ModelDefinition? selectedDefinition;
@@ -103,6 +115,7 @@ else
         {
             selectedDefinition = null;
             records = null;
+            Layout?.SetRightSidebar(null);
             return;
         }
 
@@ -112,6 +125,8 @@ else
         records = doc.RootElement.EnumerateArray()
             .Select(e => e.EnumerateObject().ToDictionary(p => p.Name, p => (object?)p.Value.ToString() ?? string.Empty))
             .ToList();
+
+        Layout?.SetRightSidebar(@<RightSidebar Definition="selectedDefinition" />);
     }
 
     private void NewRecord()
@@ -162,5 +177,10 @@ else
 
         await Http.DeleteAsync($"api/{selectedModel}/{row[keyProp.Name]}");
         await LoadRecords();
+    }
+
+    public void Dispose()
+    {
+        Layout?.SetRightSidebar(null);
     }
 }
