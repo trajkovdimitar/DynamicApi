@@ -8,3 +8,13 @@
 /DynamicModelApi/obj
 /DynamicData/bin/Debug/net9.0
 /DynamicModelApi/bin/Debug/net9.0
+/DynamicData/bin
+/DynamicModelApi/bin
+/TheBackend.Domain/bin
+/TheBackend.Domain/obj
+/TheBackend.Application/bin
+/TheBackend.Application/obj
+/TheBackend.Infrastructure/bin
+/TheBackend.Infrastructure/obj
+/TheBackend.Tests/bin
+/TheBackend.Tests/obj
