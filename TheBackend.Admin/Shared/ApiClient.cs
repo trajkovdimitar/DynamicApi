@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Net.Http.Json;
 using TheBackend.Admin.Shared;
 
 namespace TheBackend.Admin.Shared;
@@ -18,11 +19,27 @@ public class ApiClient
         return DeserializeData<T>(json);
     }
 
+    public async Task<TResponse?> PostAsync<TRequest, TResponse>(string uri, TRequest payload)
+        where TResponse : class
+    {
+        var response = await _http.PostAsJsonAsync(uri, payload);
+        var json = await response.Content.ReadAsStringAsync();
+        return DeserializeData<TResponse>(json);
+    }
+
+    public async Task<TResponse?> PutAsync<TRequest, TResponse>(string uri, TRequest payload)
+        where TResponse : class
+    {
+        var response = await _http.PutAsJsonAsync(uri, payload);
+        var json = await response.Content.ReadAsStringAsync();
+        return DeserializeData<TResponse>(json);
+    }
+
     private static T? DeserializeData<T>(string json) where T : class
     {
         var options = new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true 
+            PropertyNameCaseInsensitive = true
         };
 
         try

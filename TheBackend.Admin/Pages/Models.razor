@@ -2,31 +2,139 @@
 @inject ApiClient Api
 @using TheBackend.Domain.Models
 
-<h1 class="text-2xl font-bold mb-4">Models</h1>
+<h1 class="text-3xl font-bold mb-4">Models</h1>
+
+<div class="mb-4">
+    <button class="bg-blue-500 text-white px-4 py-2 rounded" @onclick="NewModel">Add Model</button>
+</div>
 
 @if (models == null)
 {
     <p>Loading...</p>
 }
-else if (!models.Any())
-{
-    <p>No models defined.</p>
-}
 else
 {
-    <ul class="space-y-2">
-        @foreach (var model in models)
-        {
-            <li class="border p-2 rounded">@model.ModelName</li>
-        }
-    </ul>
+    @if (!models.Any())
+    {
+        <p>No models defined.</p>
+    }
+    else
+    {
+        <ul class="space-y-2">
+            @foreach (var model in models)
+            {
+                <li class="border p-4 rounded bg-white shadow flex justify-between items-center">
+                    <div>
+                        <h3 class="font-semibold">@model.ModelName</h3>
+                        <ul class="text-sm list-disc list-inside">
+                            @foreach (var prop in model.Properties)
+                            {
+                                <li>@prop.Name (@prop.Type)</li>
+                            }
+                        </ul>
+                    </div>
+                    <button class="text-blue-600 hover:underline" @onclick="() => EditModel(model)">Edit</button>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@if (editingModel != null)
+{
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded shadow-lg w-full max-w-2xl">
+            <h2 class="text-xl font-bold mb-4">@formTitle</h2>
+            <EditForm Model="editingModel" OnValidSubmit="SaveModel">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">Model Name</label>
+                    <InputText class="border rounded w-full p-2" @bind-Value="editingModel.ModelName" />
+                </div>
+                <h3 class="font-semibold mb-2">Properties</h3>
+                @foreach (var prop in editingModel.Properties)
+                {
+                    <div class="grid grid-cols-6 gap-2 mb-2 items-center">
+                        <InputText class="border rounded p-2" placeholder="Name" @bind-Value="prop.Name" />
+                        <InputText class="border rounded p-2" placeholder="Type" @bind-Value="prop.Type" />
+                        <div class="flex items-center">
+                            <InputCheckbox class="mr-1" @bind-Value="prop.IsKey" />
+                            <span class="text-sm">Key</span>
+                        </div>
+                        <div class="flex items-center">
+                            <InputCheckbox class="mr-1" @bind-Value="prop.IsRequired" />
+                            <span class="text-sm">Required</span>
+                        </div>
+                        <InputNumber class="border rounded p-2" placeholder="MaxLength" @bind-Value="prop.MaxLength" />
+                        <button type="button" class="text-red-600" @onclick="() => RemoveProperty(prop)">Remove</button>
+                    </div>
+                }
+                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded mb-4" @onclick="AddProperty">Add Property</button>
+                <div class="flex justify-end space-x-2">
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
+                    <button type="button" class="bg-gray-300 px-4 py-2 rounded" @onclick="CancelEdit">Cancel</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
 }
 
 @code {
     private List<ModelDefinition>? models;
+    private ModelDefinition? editingModel;
+    private string formTitle = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadModels();
+    }
+
+    private async Task LoadModels()
+    {
         models = await Api.GetAsync<List<ModelDefinition>>("api/models");
+    }
+
+    private void NewModel()
+    {
+        editingModel = new ModelDefinition();
+        formTitle = "Create Model";
+    }
+
+    private void EditModel(ModelDefinition model)
+    {
+        editingModel = new ModelDefinition
+        {
+            ModelName = model.ModelName,
+            Properties = model.Properties.Select(p => new PropertyDefinition
+            {
+                Name = p.Name,
+                Type = p.Type,
+                IsKey = p.IsKey,
+                IsRequired = p.IsRequired,
+                MaxLength = p.MaxLength
+            }).ToList()
+        };
+        formTitle = $"Edit {model.ModelName}";
+    }
+
+    private void AddProperty()
+    {
+        editingModel!.Properties.Add(new PropertyDefinition());
+    }
+
+    private void RemoveProperty(PropertyDefinition prop)
+    {
+        editingModel!.Properties.Remove(prop);
+    }
+
+    private async Task SaveModel()
+    {
+        await Api.PostAsync<ModelDefinition, string>("api/models", editingModel!);
+        editingModel = null;
+        await LoadModels();
+    }
+
+    private void CancelEdit()
+    {
+        editingModel = null;
     }
 }
