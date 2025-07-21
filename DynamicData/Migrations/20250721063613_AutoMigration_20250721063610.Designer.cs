@@ -3,6 +3,7 @@ using DynamicData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DynamicData.Migrations
 {
     [DbContext(typeof(DynamicDbContext))]
-    partial class DynamicDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250721063613_AutoMigration_20250721063610")]
+    partial class AutoMigration_20250721063610
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

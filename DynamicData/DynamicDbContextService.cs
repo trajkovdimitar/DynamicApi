@@ -221,6 +221,11 @@ namespace DynamicData
     private string GenerateSingleModelCode(ModelDefinition model, string @namespace = "DynamicData")
     {
         var sb = new StringBuilder();
+        sb.AppendLine("using System;");
+        sb.AppendLine("using System.Collections.Generic;");
+        sb.AppendLine("using System.Linq;");
+        sb.AppendLine("using System.Text;");
+        sb.AppendLine("using System.Threading.Tasks;");
         sb.AppendLine($"namespace {@namespace}");
         sb.AppendLine("{");
         sb.AppendLine($"    public class {model.ModelName}");

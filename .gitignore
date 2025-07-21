@@ -6,3 +6,5 @@
 /.vs/ProjectEvaluation
 /DynamicData/obj
 /DynamicModelApi/obj
+/DynamicData/bin/Debug/net9.0
+/DynamicModelApi/bin/Debug/net9.0

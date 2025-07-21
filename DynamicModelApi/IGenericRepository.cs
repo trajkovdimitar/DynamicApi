@@ -2,17 +2,15 @@
 
 namespace DynamicModelApi
 {
-    // Repositories/IGenericRepository.cs
     public interface IGenericRepository<T> where T : class
     {
         Task<IEnumerable<T>> GetAllAsync();
         Task<T> GetByIdAsync(object id);
         Task AddAsync(T entity);
-        // Add Update, Delete
+        Task UpdateAsync(T entity);
+        Task DeleteAsync(object id);
     }
 
-    // Repositories/GenericRepository.cs
-    // Repositories/GenericRepository.cs
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         private readonly DbContext _dbContext;
@@ -37,7 +35,6 @@ namespace DynamicModelApi
             await _dbContext.SaveChangesAsync();
         }
 
-        // Optionally add UpdateAsync and DeleteAsync for completeness
         public async Task UpdateAsync(T entity)
         {
             _dbSet.Update(entity);

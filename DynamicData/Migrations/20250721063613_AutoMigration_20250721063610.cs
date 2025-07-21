@@ -5,7 +5,7 @@
 namespace DynamicData.Migrations
 {
     /// <inheritdoc />
-    public partial class AutoMigration_20250721010012 : Migration
+    public partial class AutoMigration_20250721063610 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
