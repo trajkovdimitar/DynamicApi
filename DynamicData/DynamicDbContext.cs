@@ -3,7 +3,7 @@ namespace DynamicData
 {
     public class DynamicDbContext : DbContext
     {
-        public DynamicDbContext(DbContextOptions<DynamicDbContext> options) : base(options) {}
+        public DynamicDbContext(DbContextOptions<DynamicDbContext> options) : base(options) { }
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Customer> Customers { get; set; }
