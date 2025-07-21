@@ -26,5 +26,8 @@
     <PackageReference Include="RulesEngine" Version="6.0.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TheBackend.Domain\TheBackend.Domain.csproj" />
+  </ItemGroup>
 
 </Project>
