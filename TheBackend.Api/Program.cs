@@ -1,4 +1,5 @@
 using TheBackend.DynamicModels;
+using TheBackend.Domain.Models;
 using TheBackend.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,24 +1,10 @@
-﻿namespace TheBackend.DynamicModels
+namespace TheBackend.DynamicModels
 {
     // Services/ModelDefinitionService.cs
     using Newtonsoft.Json;
     using System.Collections.Generic;
     using System.IO;
-
-    public class ModelDefinition
-    {
-        public string ModelName { get; set; }
-        public List<PropertyDefinition> Properties { get; set; }
-    }
-
-    public class PropertyDefinition
-    {
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public bool IsKey { get; set; }
-        public bool IsRequired { get; set; }
-        public int? MaxLength { get; set; }
-    }
+    using TheBackend.Domain.Models;
 
     public class ModelDefinitionService
     {
