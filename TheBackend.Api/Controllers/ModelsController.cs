@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TheBackend.Api;
 
+using Microsoft.Extensions.Logging;
 namespace TheBackend.Api.Controllers
 {
     [ApiController]
@@ -10,16 +11,19 @@ namespace TheBackend.Api.Controllers
     {
         private readonly ModelDefinitionService _modelService;
         private readonly DynamicDbContextService _dbContextService;  // See Step 4
+        private readonly ILogger<ModelsController> _logger;
 
-        public ModelsController(ModelDefinitionService modelService, DynamicDbContextService dbContextService)
+        public ModelsController(ModelDefinitionService modelService, DynamicDbContextService dbContextService, ILogger<ModelsController> logger)
         {
             _modelService = modelService;
             _dbContextService = dbContextService;
+            _logger = logger;
         }
 
         [HttpGet]
         public IActionResult GetModels()
         {
+            _logger.LogInformation("List models");
             var models = _modelService.LoadModels();
             return Ok(models);
         }
@@ -27,6 +31,7 @@ namespace TheBackend.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrUpdateModel([FromBody] ModelDefinition definition)
         {
+            _logger.LogInformation("Create or update model {Name}", definition.ModelName);
             var models = _modelService.LoadModels();
             var existing = models.FirstOrDefault(m => m.ModelName == definition.ModelName);
             if (existing != null) models.Remove(existing);
