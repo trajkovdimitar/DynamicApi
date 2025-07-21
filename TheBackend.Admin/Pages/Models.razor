@@ -20,23 +20,28 @@ else
     }
     else
     {
-        <ul class="space-y-2">
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             @foreach (var model in models)
             {
-                <li class="border p-4 rounded bg-white shadow flex justify-between items-center">
-                    <div>
+                <div class="bg-white rounded border shadow">
+                    <div class="bg-gray-50 border-b px-4 py-2 flex justify-between items-center">
                         <h3 class="font-semibold">@model.ModelName</h3>
-                        <ul class="text-sm list-disc list-inside">
+                        <button class="text-blue-600 hover:underline" @onclick="() => EditModel(model)">Edit</button>
+                    </div>
+                    <table class="w-full text-sm">
+                        <tbody>
                             @foreach (var prop in model.Properties)
                             {
-                                <li>@prop.Name (@prop.Type)</li>
+                                <tr>
+                                    <td class="px-4 py-1 font-medium">@prop.Name</td>
+                                    <td class="px-4 py-1 text-right">@prop.Type</td>
+                                </tr>
                             }
-                        </ul>
-                    </div>
-                    <button class="text-blue-600 hover:underline" @onclick="() => EditModel(model)">Edit</button>
-                </li>
+                        </tbody>
+                    </table>
+                </div>
             }
-        </ul>
+        </div>
     }
 }
 
