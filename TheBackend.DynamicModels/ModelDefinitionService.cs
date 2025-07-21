@@ -4,6 +4,7 @@
     using Newtonsoft.Json;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading.Tasks;
 
     public class ModelDefinition
     {
@@ -25,30 +26,30 @@
         private const string ModelsFile = "models.json";
         private const string MigrationFilesFile = "migrations.json";
 
-        public List<ModelDefinition> LoadModels()
+        public async Task<List<ModelDefinition>> LoadModelsAsync()
         {
             if (!File.Exists(ModelsFile)) return new List<ModelDefinition>();
-            var json = File.ReadAllText(ModelsFile);
+            var json = await File.ReadAllTextAsync(ModelsFile);
             return JsonConvert.DeserializeObject<List<ModelDefinition>>(json);
         }
 
-        public void SaveModels(List<ModelDefinition> models)
+        public async Task SaveModelsAsync(List<ModelDefinition> models)
         {
             var json = JsonConvert.SerializeObject(models, Formatting.Indented);
-            File.WriteAllText(ModelsFile, json);
+            await File.WriteAllTextAsync(ModelsFile, json);
         }
 
-        public Dictionary<string, string>? LoadMigrationFiles()
+        public async Task<Dictionary<string, string>?> LoadMigrationFilesAsync()
         {
             if (!File.Exists(MigrationFilesFile)) return null;
-            var json = File.ReadAllText(MigrationFilesFile);
+            var json = await File.ReadAllTextAsync(MigrationFilesFile);
             return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
         }
 
-        public void SaveMigrationFiles(Dictionary<string, string> migrationFiles)
+        public async Task SaveMigrationFilesAsync(Dictionary<string, string> migrationFiles)
         {
             var json = JsonConvert.SerializeObject(migrationFiles, Formatting.Indented);
-            File.WriteAllText(MigrationFilesFile, json);
+            await File.WriteAllTextAsync(MigrationFilesFile, json);
         }
     }
 }

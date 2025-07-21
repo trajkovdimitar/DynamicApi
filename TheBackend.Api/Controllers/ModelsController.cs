@@ -1,6 +1,7 @@
 ﻿using TheBackend.DynamicModels;
 using Microsoft.AspNetCore.Mvc;
 using TheBackend.Api;
+using System.Threading.Tasks;
 
 namespace TheBackend.Api.Controllers
 {
@@ -18,20 +19,20 @@ namespace TheBackend.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetModels()
+        public async Task<IActionResult> GetModels()
         {
-            var models = _modelService.LoadModels();
+            var models = await _modelService.LoadModelsAsync();
             return Ok(models);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateOrUpdateModel([FromBody] ModelDefinition definition)
         {
-            var models = _modelService.LoadModels();
+            var models = await _modelService.LoadModelsAsync();
             var existing = models.FirstOrDefault(m => m.ModelName == definition.ModelName);
             if (existing != null) models.Remove(existing);
             models.Add(definition);
-            _modelService.SaveModels(models);
+            await _modelService.SaveModelsAsync(models);
 
             // Regenerate DbContext, apply migration
             await _dbContextService.RegenerateAndMigrateAsync();

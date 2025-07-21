@@ -5,13 +5,14 @@ using System.IO;
 using TheBackend.DynamicModels;
 using Xunit;
 using Rule = RulesEngine.Models.Rule;
+using System.Threading.Tasks;
 
 namespace TheBackend.Tests;
 
 public class BusinessRuleServiceTests
 {
     [Fact]
-    public void AddOrUpdateWorkflow_PersistsWorkflow()
+    public async Task AddOrUpdateWorkflow_PersistsWorkflow()
     {
         var tempFile = Path.GetTempFileName();
         try
@@ -25,7 +26,7 @@ public class BusinessRuleServiceTests
                     new Rule { RuleName = "AlwaysTrue", Expression = "true" }
                 }
             };
-            service.AddOrUpdateWorkflow(workflow);
+            await service.AddOrUpdateWorkflowAsync(workflow);
 
             var serviceReloaded = new BusinessRuleService(tempFile);
             Assert.True(serviceReloaded.HasWorkflow("TestWorkflow"));
@@ -51,7 +52,7 @@ public class BusinessRuleServiceTests
                     new Rule { RuleName = "AlwaysTrue", Expression = "true" }
                 }
             };
-            service.AddOrUpdateWorkflow(workflow);
+            await service.AddOrUpdateWorkflowAsync(workflow);
 
             var obj = new { Id = 1 };
             var results = await service.ExecuteAsync("order.Create", new RuleParameter("entity", obj));

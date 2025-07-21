@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Linq;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace TheBackend.DynamicModels;
 
@@ -43,14 +45,14 @@ public class DynamicDbContextService
 
     public async Task RegenerateAndMigrateAsync()
     {
-        var models = _modelService.LoadModels();
+        var models = await _modelService.LoadModelsAsync();
 
         foreach (var model in models)
         {
-            File.WriteAllText(Path.Combine(ModelsDir, $"{model.ModelName}.cs"), GenerateSingleModelCode(model));
+            await File.WriteAllTextAsync(Path.Combine(ModelsDir, $"{model.ModelName}.cs"), GenerateSingleModelCode(model));
         }
-        File.WriteAllText(DbContextFile, GenerateDbContextCode(models));
-        File.WriteAllText(DesignTimeFactoryFile, GenerateDesignTimeFactory());
+        await File.WriteAllTextAsync(DbContextFile, GenerateDbContextCode(models));
+        await File.WriteAllTextAsync(DesignTimeFactoryFile, GenerateDesignTimeFactory());
 
         try
         {
@@ -62,7 +64,7 @@ public class DynamicDbContextService
                 throw;
         }
 
-        _dynamicAssembly = CompileInMemory(models);
+        _dynamicAssembly = await CompileInMemoryAsync(models);
         _dynamicDbContextType = _dynamicAssembly.GetType("TheBackend.DynamicModels.DynamicDbContext")
             ?? throw new InvalidOperationException("DynamicDbContext not found");
 
@@ -93,20 +95,23 @@ namespace TheBackend.DynamicModels
 }}";
     }
 
-    private Assembly CompileInMemory(List<ModelDefinition> models)
+    private async Task<Assembly> CompileInMemoryAsync(List<ModelDefinition> models)
     {
         var syntaxTrees = new List<SyntaxTree>();
         foreach (var model in models)
         {
-            syntaxTrees.Add(CSharpSyntaxTree.ParseText(File.ReadAllText(Path.Combine(ModelsDir, $"{model.ModelName}.cs"))));
+            var text = await File.ReadAllTextAsync(Path.Combine(ModelsDir, $"{model.ModelName}.cs"));
+            syntaxTrees.Add(CSharpSyntaxTree.ParseText(text));
         }
-        syntaxTrees.Add(CSharpSyntaxTree.ParseText(File.ReadAllText(DbContextFile)));
+        var contextText = await File.ReadAllTextAsync(DbContextFile);
+        syntaxTrees.Add(CSharpSyntaxTree.ParseText(contextText));
 
         if (Directory.Exists(MigrationsDir))
         {
             foreach (var file in Directory.GetFiles(MigrationsDir, "*.cs"))
             {
-                syntaxTrees.Add(CSharpSyntaxTree.ParseText(File.ReadAllText(file)));
+                var fileText = await File.ReadAllTextAsync(file);
+                syntaxTrees.Add(CSharpSyntaxTree.ParseText(fileText));
             }
         }
 

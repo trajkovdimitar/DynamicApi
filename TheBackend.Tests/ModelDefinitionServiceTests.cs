@@ -1,12 +1,13 @@
 ﻿using TheBackend.DynamicModels;
 using Xunit;
 
+using System.Threading.Tasks;
 namespace TheBackend.Tests;
 
 public class ModelDefinitionServiceTests
 {
     [Fact]
-    public void SaveAndLoadModels()
+    public async Task SaveAndLoadModels()
     {
         var originalDir = Directory.GetCurrentDirectory();
         var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -23,8 +24,8 @@ public class ModelDefinitionServiceTests
                     Properties = new List<PropertyDefinition>()
                 }
             };
-            service.SaveModels(models);
-            var loaded = service.LoadModels();
+            await service.SaveModelsAsync(models);
+            var loaded = await service.LoadModelsAsync();
             Assert.Single(loaded);
             Assert.Equal("Sample", loaded[0].ModelName);
         }

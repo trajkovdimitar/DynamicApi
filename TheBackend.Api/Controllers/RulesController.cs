@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using RulesEngine.Models;
 using TheBackend.DynamicModels;
 using TheBackend.Api;
+using System.Threading.Tasks;
 
 namespace TheBackend.Api.Controllers;
 
@@ -30,9 +31,9 @@ public class RulesController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateOrUpdate([FromBody] Workflow workflow)
+    public async Task<IActionResult> CreateOrUpdate([FromBody] Workflow workflow)
     {
-        _ruleService.AddOrUpdateWorkflow(workflow);
+        await _ruleService.AddOrUpdateWorkflowAsync(workflow);
         return Ok(ApiResponse<string>.Ok("Workflow saved"));
     }
 }
