@@ -1,0 +1,54 @@
+﻿namespace DynamicData
+{
+    // Services/ModelDefinitionService.cs
+    using Newtonsoft.Json;
+    using System.Collections.Generic;
+    using System.IO;
+
+    public class ModelDefinition
+    {
+        public string ModelName { get; set; }
+        public List<PropertyDefinition> Properties { get; set; }
+    }
+
+    public class PropertyDefinition
+    {
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public bool IsKey { get; set; }
+        public bool IsRequired { get; set; }
+        public int? MaxLength { get; set; }
+    }
+
+    public class ModelDefinitionService
+    {
+        private const string ModelsFile = "models.json";
+        private const string MigrationFilesFile = "migrations.json";
+
+        public List<ModelDefinition> LoadModels()
+        {
+            if (!File.Exists(ModelsFile)) return new List<ModelDefinition>();
+            var json = File.ReadAllText(ModelsFile);
+            return JsonConvert.DeserializeObject<List<ModelDefinition>>(json);
+        }
+
+        public void SaveModels(List<ModelDefinition> models)
+        {
+            var json = JsonConvert.SerializeObject(models, Formatting.Indented);
+            File.WriteAllText(ModelsFile, json);
+        }
+
+        public Dictionary<string, string>? LoadMigrationFiles()
+        {
+            if (!File.Exists(MigrationFilesFile)) return null;
+            var json = File.ReadAllText(MigrationFilesFile);
+            return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+        }
+
+        public void SaveMigrationFiles(Dictionary<string, string> migrationFiles)
+        {
+            var json = JsonConvert.SerializeObject(migrationFiles, Formatting.Indented);
+            File.WriteAllText(MigrationFilesFile, json);
+        }
+    }
+}
