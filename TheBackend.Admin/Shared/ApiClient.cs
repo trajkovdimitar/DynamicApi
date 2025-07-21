@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using TheBackend.Admin.Shared;
 
 namespace TheBackend.Admin.Shared;
@@ -20,15 +20,21 @@ public class ApiClient
 
     private static T? DeserializeData<T>(string json) where T : class
     {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true 
+        };
+
         try
         {
-            var api = JsonSerializer.Deserialize<ApiResponse<T>>(json);
+            var api = JsonSerializer.Deserialize<ApiResponse<T>>(json, options);
             if (api?.Data != null) return api.Data;
         }
         catch
         {
         }
 
-        return JsonSerializer.Deserialize<T>(json);
+        return JsonSerializer.Deserialize<T>(json, options);
     }
+
 }

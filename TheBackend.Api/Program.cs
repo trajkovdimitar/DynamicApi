@@ -9,10 +9,22 @@ builder.Services.AddSingleton<DynamicDbContextService>();
 builder.Services.AddSingleton<BusinessRuleService>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5281")
+                      .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+
 var app = builder.Build();
 var dbService = app.Services.GetRequiredService<DynamicDbContextService>();
 app.Lifetime.ApplicationStopped.Register(() => dbService.Dispose());
 await dbService.RegenerateAndMigrateAsync();
+app.UseCors();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 
