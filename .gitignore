@@ -3,3 +3,6 @@
 ################################################################################
 
 /.vs/DynamicModelApi
+/.vs/ProjectEvaluation
+/DynamicData/obj
+/DynamicModelApi/obj
