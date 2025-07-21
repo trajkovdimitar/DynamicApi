@@ -8,7 +8,6 @@
   <ItemGroup>
     <ProjectReference Include="../TheBackend.Application/TheBackend.Application.csproj" />
     <ProjectReference Include="../TheBackend.Domain/TheBackend.Domain.csproj" />
-    <ProjectReference Include="../DynamicData/DynamicData.csproj" />
   </ItemGroup>
 
 </Project>
