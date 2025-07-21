@@ -1,5 +1,6 @@
 @page "/models"
-@inject HttpClient Http
+@inject ApiClient Api
+@using TheBackend.DynamicModels
 
 <h1 class="text-2xl font-bold mb-4">Models</h1>
 
@@ -26,18 +27,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        models = await Http.GetFromJsonAsync<List<ModelDefinition>>("api/models");
-    }
-
-    public class ModelDefinition
-    {
-        public string? ModelName { get; set; }
-        public List<PropertyDefinition> Properties { get; set; } = new();
-    }
-
-    public class PropertyDefinition
-    {
-        public string? PropertyName { get; set; }
-        public string? PropertyType { get; set; }
+        models = await Api.GetAsync<List<ModelDefinition>>("api/models");
     }
 }
