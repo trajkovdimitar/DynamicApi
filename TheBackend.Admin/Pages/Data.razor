@@ -1,7 +1,7 @@
 @page "/data"
 @inject HttpClient Http
 
-<h1 class="mdl-typography--headline4">Data</h1>
+<h1 class="h3">Data</h1>
 
 @if (models == null)
 {
@@ -10,29 +10,27 @@
 else
 {
     <div class="mb-4">
-        <label>Select Model</label>
-        <div class="mdl-textfield mdl-js-textfield">
-            <select class="mdl-textfield__input" value="@selectedModel" @onchange="OnModelChanged">
+        <label class="form-label">Select Model</label>
+        <select class="form-select" value="@selectedModel" @onchange="OnModelChanged">
             <option value="">-- choose --</option>
             @foreach (var m in models)
             {
                 <option value="@m.ModelName">@m.ModelName</option>
             }
-            </select>
-        </div>
+        </select>
     </div>
 
     if (selectedDefinition != null && records != null)
     {
         <div class="mb-2">
-            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @onclick="NewRecord">Add Record</button>
+            <button class="btn btn-primary" @onclick="NewRecord">Add Record</button>
         </div>
-        <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-            <thead class="bg-gray-50 border-b">
+        <table class="table table-striped">
+            <thead class="table-light">
                 <tr>
                     @foreach (var p in selectedDefinition.Properties)
                     {
-                        <th class="text-left px-3 py-2 font-semibold">@p.Name</th>
+                        <th class="text-start px-3 py-2 fw-semibold">@p.Name</th>
                     }
                     <th class="px-3 py-2"></th>
                 </tr>
@@ -45,9 +43,9 @@ else
                         {
                             <td class="px-3 py-2">@row[p.Name]</td>
                         }
-                        <td class="text-right">
-                            <button class="mdl-button mdl-js-button" @onclick="() => EditRecord(row)">Edit</button>
-                            <button class="mdl-button mdl-js-button" @onclick="() => DeleteRecord(row)">Delete</button>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-secondary me-2" @onclick="() => EditRecord(row)">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteRecord(row)">Delete</button>
                         </td>
                     </tr>
                 }
@@ -64,16 +62,16 @@ else
             <EditForm OnValidSubmit="SaveRecord">
                 @foreach (var p in selectedDefinition!.Properties)
                 {
-                    <div class="mdl-textfield mdl-js-textfield">
-                        <InputText class="mdl-textfield__input"
+                    <div class="mb-3">
+                        <label class="form-label">@p.Name</label>
+                        <InputText class="form-control"
                                    value="@editingRecord[p.Name]?.ToString()"
                                    @onchange="(e => editingRecord[p.Name] = e.Value?.ToString() ?? string.Empty)" />
-                        <label class="mdl-textfield__label">@p.Name</label>
                     </div>
                 }
-                <div class="mt-4" style="text-align:right;">
-                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Save</button>
-                    <button type="button" class="mdl-button mdl-js-button" @onclick="CancelEdit">Cancel</button>
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary me-2">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
                 </div>
             </EditForm>
         </div>
