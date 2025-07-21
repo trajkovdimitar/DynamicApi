@@ -3,6 +3,8 @@ using Newtonsoft.Json;
 using TheBackend.Application.Repositories;
 using TheBackend.DynamicModels;
 using TheBackend.Infrastructure.Repositories;
+using RulesEngine.Models;
+using System.Linq;
 
 namespace TheBackend.Api.Controllers
 {
@@ -12,10 +14,12 @@ namespace TheBackend.Api.Controllers
     public class GenericController : ControllerBase
     {
         private readonly DynamicDbContextService _dbContextService;
+        private readonly BusinessRuleService _ruleService;
 
-        public GenericController(DynamicDbContextService dbContextService)
+        public GenericController(DynamicDbContextService dbContextService, BusinessRuleService ruleService)
         {
             _dbContextService = dbContextService;
+            _ruleService = ruleService;
         }
 
         [HttpGet]
@@ -96,6 +100,13 @@ namespace TheBackend.Api.Controllers
                 return BadRequest("Invalid body");
             }
 
+            var workflowName = $"{modelName}.Create";
+            if (_ruleService.HasWorkflow(workflowName))
+            {
+                var results = await _ruleService.ExecuteAsync(workflowName, new RuleParameter("entity", entity));
+                if (results.Any(r => !r.IsSuccess)) return BadRequest("Business rule validation failed");
+            }
+
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
             var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
 
@@ -148,6 +159,13 @@ namespace TheBackend.Api.Controllers
             object entityId = keyPropertyInfo.GetValue(entity);
             if (!Equals(entityId, convertedId)) return BadRequest("Id mismatch");
 
+            var workflowName = $"{modelName}.Update";
+            if (_ruleService.HasWorkflow(workflowName))
+            {
+                var results = await _ruleService.ExecuteAsync(workflowName, new RuleParameter("entity", entity));
+                if (results.Any(r => !r.IsSuccess)) return BadRequest("Business rule validation failed");
+            }
+
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
             var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
 
@@ -178,6 +196,13 @@ namespace TheBackend.Api.Controllers
             catch
             {
                 return BadRequest("Invalid id");
+            }
+
+            var workflowName = $"{modelName}.Delete";
+            if (_ruleService.HasWorkflow(workflowName))
+            {
+                var results = await _ruleService.ExecuteAsync(workflowName, new RuleParameter("id", convertedId));
+                if (results.Any(r => !r.IsSuccess)) return BadRequest("Business rule validation failed");
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
