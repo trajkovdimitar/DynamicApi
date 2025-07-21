@@ -1,8 +1,26 @@
 @inherits LayoutComponentBase
 
-<div class="app-layout">
-    <NavMenu />
-    <div class="app-content">
-        @Body
+<CascadingValue Value="this">
+    <div class="app-layout">
+        <NavMenu />
+        <div class="app-content">
+            @Body
+        </div>
+        @if (RightSidebarContent != null)
+        {
+            <div class="right-sidebar">
+                @RightSidebarContent
+            </div>
+        }
     </div>
-</div>
+</CascadingValue>
+
+@code {
+    private RenderFragment? RightSidebarContent { get; set; }
+
+    public void SetRightSidebar(RenderFragment? content)
+    {
+        RightSidebarContent = content;
+        StateHasChanged();
+    }
+}

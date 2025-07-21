@@ -15,6 +15,14 @@ body.app-body {
     overflow: auto;
 }
 
+.right-sidebar {
+    width: 300px;
+    padding: 16px;
+    border-left: 1px solid #ddd;
+    background-color: #f8f9fa;
+    overflow-y: auto;
+}
+
 .nav-menu {
     width: 240px;
     min-height: 100vh;
@@ -66,4 +74,19 @@ body.app-body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     width: 100%;
     max-width: 600px;
+}
+
+.fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1000;
+}
+
+.fab .btn {
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+    padding: 0;
 }
