@@ -9,16 +9,18 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace TheBackend.DynamicModels;
 
-public class DynamicDbContextService
+public class DynamicDbContextService : IDisposable
 {
     private readonly ModelDefinitionService _modelService;
     private readonly IConfiguration _config;
     private Assembly _dynamicAssembly = default!;
     private Type _dynamicDbContextType = default!;
     private AssemblyLoadContext? _loadContext;
+    private readonly List<ServiceProvider> _serviceProviders = new();
 
     private readonly string ProjectDir;
     private string ModelsDir => Path.Combine(ProjectDir, "Models");
@@ -74,8 +76,8 @@ public class DynamicDbContextService
     private string GenerateDesignTimeFactory()
     {
         var connString = _config.GetConnectionString("Default")!.Replace(@"\", @"\\").Replace("\"", "\\\"");
-        var provider = _config["DbProvider"];
-        var useProvider = provider == "SqlServer" ? $"optionsBuilder.UseSqlServer(\"{connString}\");" : $"optionsBuilder.UseNpgsql(\"{connString}\");";
+        var dbProvider = _config["DbProvider"];
+        var useProvider = dbProvider == "SqlServer" ? $"optionsBuilder.UseSqlServer(\"{connString}\");" : $"optionsBuilder.UseNpgsql(\"{connString}\");";
         return $@"using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -110,8 +112,8 @@ namespace TheBackend.DynamicModels
             }
         }
 
-        var provider = _config["DbProvider"];
-        string providerAssemblyName = provider == "SqlServer" ? "Microsoft.EntityFrameworkCore.SqlServer" : "Npgsql.EntityFrameworkCore.PostgreSQL";
+        var dbProvider = _config["DbProvider"];
+        string providerAssemblyName = dbProvider == "SqlServer" ? "Microsoft.EntityFrameworkCore.SqlServer" : "Npgsql.EntityFrameworkCore.PostgreSQL";
         var providerAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == providerAssemblyName);
         if (providerAssembly == null)
         {
@@ -152,7 +154,7 @@ namespace TheBackend.DynamicModels
     {
         var services = new ServiceCollection();
         var connString = _config.GetConnectionString("Default");
-        var provider = _config["DbProvider"];
+        var dbProvider = _config["DbProvider"];
 
         var addMethod = typeof(EntityFrameworkServiceCollectionExtensions)
             .GetMethods()
@@ -167,9 +169,9 @@ namespace TheBackend.DynamicModels
             services,
             (Action<DbContextOptionsBuilder>)(opts =>
             {
-                if (provider == "SqlServer")
+                if (dbProvider == "SqlServer")
                     opts.UseSqlServer(connString);
-                else if (provider == "Postgres")
+                else if (dbProvider == "Postgres")
                     opts.UseNpgsql(connString);
                 else throw new NotSupportedException("Unknown provider");
             }),
@@ -178,7 +180,9 @@ namespace TheBackend.DynamicModels
         };
 
         generic.Invoke(null, args);
-        return (DbContext)services.BuildServiceProvider().GetRequiredService(_dynamicDbContextType);
+        var provider = services.BuildServiceProvider();
+        _serviceProviders.Add(provider);
+        return (DbContext)provider.GetRequiredService(_dynamicDbContextType);
     }
 
     private void RunDotnetCommand(string arguments, string? workingDir = null)
@@ -275,4 +279,14 @@ namespace TheBackend.DynamicModels
         ?? throw new Exception($"Model '{modelName}' not found");
 
     public DbContext GetDbContext() => CreateDbContextInstance();
+
+    public void Dispose()
+    {
+        _loadContext?.Unload();
+        foreach (var provider in _serviceProviders)
+        {
+            provider.Dispose();
+        }
+        _serviceProviders.Clear();
+    }
 }

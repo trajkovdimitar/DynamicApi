@@ -10,6 +10,7 @@ builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
 var app = builder.Build();
 var dbService = app.Services.GetRequiredService<DynamicDbContextService>();
+app.Lifetime.ApplicationStopped.Register(() => dbService.Dispose());
 await dbService.RegenerateAndMigrateAsync();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
