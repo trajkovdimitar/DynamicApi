@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
+using System.Linq;
 
 namespace TheBackend.DynamicModels;
 
@@ -269,7 +270,8 @@ namespace TheBackend.DynamicModels
     }
 
     public Type GetModelType(string modelName) =>
-        _dynamicAssembly.GetType($"TheBackend.DynamicModels.{modelName}")
+        _dynamicAssembly.GetTypes()
+            .FirstOrDefault(t => t.Name.Equals(modelName, StringComparison.OrdinalIgnoreCase))
         ?? throw new Exception($"Model '{modelName}' not found");
 
     public DbContext GetDbContext() => CreateDbContextInstance();
