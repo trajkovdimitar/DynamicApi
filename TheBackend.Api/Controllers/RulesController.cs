@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RulesEngine.Models;
 using TheBackend.DynamicModels;
+using TheBackend.Api;
 
 namespace TheBackend.Api.Controllers;
 
@@ -16,20 +17,22 @@ public class RulesController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAll() => Ok(_ruleService.GetWorkflows());
+    public IActionResult GetAll() => Ok(ApiResponse<object>.Ok(_ruleService.GetWorkflows()));
 
     [HttpGet("{workflowName}")]
     public IActionResult Get(string workflowName)
     {
         var wf = _ruleService.GetWorkflows()
             .FirstOrDefault(w => w.WorkflowName.Equals(workflowName, StringComparison.OrdinalIgnoreCase));
-        return wf == null ? NotFound() : Ok(wf);
+        return wf == null
+            ? NotFound(ApiResponse<object>.Fail("Workflow not found"))
+            : Ok(ApiResponse<object>.Ok(wf!));
     }
 
     [HttpPost]
     public IActionResult CreateOrUpdate([FromBody] Workflow workflow)
     {
         _ruleService.AddOrUpdateWorkflow(workflow);
-        return Ok();
+        return Ok(ApiResponse<string>.Ok("Workflow saved"));
     }
 }

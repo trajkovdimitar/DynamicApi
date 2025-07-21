@@ -5,6 +5,7 @@ using TheBackend.DynamicModels;
 using TheBackend.Infrastructure.Repositories;
 using RulesEngine.Models;
 using System.Linq;
+using TheBackend.Api;
 
 namespace TheBackend.Api.Controllers
 {
@@ -26,7 +27,7 @@ namespace TheBackend.Api.Controllers
         public async Task<IActionResult> GetAll(string modelName)
         {
             var modelType = _dbContextService.GetModelType(modelName);
-            if (modelType == null) return NotFound();
+            if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
             var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), _dbContextService.GetDbContext());
@@ -38,19 +39,19 @@ namespace TheBackend.Api.Controllers
             var resultProperty = resultTask.GetType().GetProperty("Result");
             var result = resultProperty.GetValue(resultTask);
 
-            return Ok(result);
+            return Ok(ApiResponse<object>.Ok(result!));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string modelName, string id)
         {
             var modelType = _dbContextService.GetModelType(modelName);
-            if (modelType == null) return NotFound();
+            if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
             var dbContext = _dbContextService.GetDbContext();
             var entityType = dbContext.Model.FindEntityType(modelType);
             var key = entityType.FindPrimaryKey();
-            if (key == null || key.Properties.Count != 1) return BadRequest("Unsupported key");
+            if (key == null || key.Properties.Count != 1) return BadRequest(ApiResponse<object>.Fail("Unsupported key"));
 
             var keyType = key.Properties[0].ClrType;
             object convertedId;
@@ -60,7 +61,7 @@ namespace TheBackend.Api.Controllers
             }
             catch
             {
-                return BadRequest("Invalid id");
+                return BadRequest(ApiResponse<object>.Fail("Invalid id"));
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
@@ -71,16 +72,16 @@ namespace TheBackend.Api.Controllers
             await resultTask.ConfigureAwait(false);
 
             var result = resultTask.GetType().GetProperty("Result").GetValue(resultTask);
-            if (result == null) return NotFound();
+            if (result == null) return NotFound(ApiResponse<object>.Fail("Not found"));
 
-            return Ok(result);
+            return Ok(ApiResponse<object>.Ok(result!));
         }
 
         [HttpPost]
         public async Task<IActionResult> Post(string modelName)
         {
             var modelType = _dbContextService.GetModelType(modelName);
-            if (modelType == null) return NotFound();
+            if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
             var dbContext = _dbContextService.GetDbContext();
 
@@ -97,14 +98,14 @@ namespace TheBackend.Api.Controllers
             }
             catch
             {
-                return BadRequest("Invalid body");
+                return BadRequest(ApiResponse<object>.Fail("Invalid body"));
             }
 
             var workflowName = $"{modelName}.Create";
             if (_ruleService.HasWorkflow(workflowName))
             {
                 var results = await _ruleService.ExecuteAsync(workflowName, new RuleParameter("entity", entity));
-                if (results.Any(r => !r.IsSuccess)) return BadRequest("Business rule validation failed");
+                if (results.Any(r => !r.IsSuccess)) return BadRequest(ApiResponse<object>.Fail("Business rule validation failed"));
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
@@ -114,19 +115,19 @@ namespace TheBackend.Api.Controllers
             var task = (Task)addMethod.Invoke(repo, new[] { entity });
             await task.ConfigureAwait(false);
 
-            return Ok(entity);
+            return Ok(ApiResponse<object>.Ok(entity));
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(string modelName, string id)
         {
             var modelType = _dbContextService.GetModelType(modelName);
-            if (modelType == null) return NotFound();
+            if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
             var dbContext = _dbContextService.GetDbContext();
             var entityType = dbContext.Model.FindEntityType(modelType);
             var key = entityType.FindPrimaryKey();
-            if (key == null || key.Properties.Count != 1) return BadRequest("Unsupported key");
+            if (key == null || key.Properties.Count != 1) return BadRequest(ApiResponse<object>.Fail("Unsupported key"));
 
             var keyType = key.Properties[0].ClrType;
             var keyPropertyInfo = key.Properties[0].PropertyInfo;
@@ -137,7 +138,7 @@ namespace TheBackend.Api.Controllers
             }
             catch
             {
-                return BadRequest("Invalid id");
+                return BadRequest(ApiResponse<object>.Fail("Invalid id"));
             }
 
             string body;
@@ -153,17 +154,17 @@ namespace TheBackend.Api.Controllers
             }
             catch
             {
-                return BadRequest("Invalid body");
+                return BadRequest(ApiResponse<object>.Fail("Invalid body"));
             }
 
             object entityId = keyPropertyInfo.GetValue(entity);
-            if (!Equals(entityId, convertedId)) return BadRequest("Id mismatch");
+            if (!Equals(entityId, convertedId)) return BadRequest(ApiResponse<object>.Fail("Id mismatch"));
 
             var workflowName = $"{modelName}.Update";
             if (_ruleService.HasWorkflow(workflowName))
             {
                 var results = await _ruleService.ExecuteAsync(workflowName, new RuleParameter("entity", entity));
-                if (results.Any(r => !r.IsSuccess)) return BadRequest("Business rule validation failed");
+                if (results.Any(r => !r.IsSuccess)) return BadRequest(ApiResponse<object>.Fail("Business rule validation failed"));
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
@@ -173,19 +174,19 @@ namespace TheBackend.Api.Controllers
             var task = (Task)updateMethod.Invoke(repo, new[] { entity });
             await task.ConfigureAwait(false);
 
-            return Ok(entity);
+            return Ok(ApiResponse<object>.Ok(entity));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string modelName, string id)
         {
             var modelType = _dbContextService.GetModelType(modelName);
-            if (modelType == null) return NotFound();
+            if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
             var dbContext = _dbContextService.GetDbContext();
             var entityType = dbContext.Model.FindEntityType(modelType);
             var key = entityType.FindPrimaryKey();
-            if (key == null || key.Properties.Count != 1) return BadRequest("Unsupported key");
+            if (key == null || key.Properties.Count != 1) return BadRequest(ApiResponse<object>.Fail("Unsupported key"));
 
             var keyType = key.Properties[0].ClrType;
             object convertedId;
@@ -195,14 +196,14 @@ namespace TheBackend.Api.Controllers
             }
             catch
             {
-                return BadRequest("Invalid id");
+                return BadRequest(ApiResponse<object>.Fail("Invalid id"));
             }
 
             var workflowName = $"{modelName}.Delete";
             if (_ruleService.HasWorkflow(workflowName))
             {
                 var results = await _ruleService.ExecuteAsync(workflowName, new RuleParameter("id", convertedId));
-                if (results.Any(r => !r.IsSuccess)) return BadRequest("Business rule validation failed");
+                if (results.Any(r => !r.IsSuccess)) return BadRequest(ApiResponse<object>.Fail("Business rule validation failed"));
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
@@ -212,7 +213,7 @@ namespace TheBackend.Api.Controllers
             var task = (Task)deleteMethod.Invoke(repo, new[] { convertedId });
             await task.ConfigureAwait(false);
 
-            return NoContent();
+            return Ok(ApiResponse<object>.Ok(null!, "Deleted"));
         }
     }
 }
