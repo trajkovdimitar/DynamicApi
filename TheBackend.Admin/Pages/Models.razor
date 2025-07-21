@@ -2,10 +2,10 @@
 @inject ApiClient Api
 @using TheBackend.Domain.Models
 
-<h1 class="mdl-typography--headline4">Models</h1>
+<h1 class="h3">Models</h1>
 
 <div class="mb-4">
-    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @onclick="NewModel">Add Model</button>
+    <button class="btn btn-primary" @onclick="NewModel">Add Model</button>
 </div>
 
 @if (models == null)
@@ -20,25 +20,27 @@ else
     }
     else
     {
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div class="row g-3">
             @foreach (var model in models)
             {
-                <div class="mdl-card mdl-shadow--2dp">
-                    <div class="mdl-card__title">
-                        <h3 class="mdl-card__title-text">@model.ModelName</h3>
-                        <button class="mdl-button mdl-js-button" @onclick="() => EditModel(model)">Edit</button>
-                    </div>
-                    <table class="w-full text-sm">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="h5 mb-0">@model.ModelName</h3>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => EditModel(model)">Edit</button>
+                        </div>
+                        <table class="table table-sm mb-0">
                         <tbody>
                             @foreach (var prop in model.Properties)
                             {
                                 <tr>
-                                    <td class="px-4 py-1 font-medium">@prop.Name</td>
-                                    <td class="px-4 py-1 text-right">@prop.Type</td>
+                                    <td class="fw-medium">@prop.Name</td>
+                                    <td class="text-end">@prop.Type</td>
                                 </tr>
                             }
                         </tbody>
                     </table>
+                    </div>
                 </div>
             }
         </div>
@@ -51,44 +53,44 @@ else
         <div class="modal">
             <h2 class="text-xl font-bold mb-4">@formTitle</h2>
             <EditForm Model="editingModel" OnValidSubmit="SaveModel">
-                <div class="mdl-textfield mdl-js-textfield">
-                    <InputText class="mdl-textfield__input" @bind-Value="editingModel.ModelName" />
-                    <label class="mdl-textfield__label">Model Name</label>
+                <div class="mb-3">
+                    <label class="form-label">Model Name</label>
+                    <InputText class="form-control" @bind-Value="editingModel.ModelName" />
                 </div>
-                <h3 class="font-semibold mb-2">Properties</h3>
+                <h3 class="h5 mb-2">Properties</h3>
                 @foreach (var prop in editingModel.Properties)
                 {
-                    <div class="mdl-grid" style="align-items:center;">
-                        <div class="mdl-cell mdl-cell--2-col">
-                            <InputText class="mdl-textfield__input" placeholder="Name" @bind-Value="prop.Name" />
+                    <div class="row align-items-end mb-2">
+                        <div class="col-3">
+                            <InputText class="form-control" placeholder="Name" @bind-Value="prop.Name" />
                         </div>
-                        <div class="mdl-cell mdl-cell--2-col">
-                            <InputText class="mdl-textfield__input" placeholder="Type" @bind-Value="prop.Type" />
+                        <div class="col-3">
+                            <InputText class="form-control" placeholder="Type" @bind-Value="prop.Type" />
                         </div>
-                        <div class="mdl-cell mdl-cell--2-col">
-                            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect">
-                                <InputCheckbox class="mdl-checkbox__input" @bind-Value="prop.IsKey" />
-                                <span class="mdl-checkbox__label">Key</span>
-                            </label>
+                        <div class="col-2">
+                            <div class="form-check">
+                                <InputCheckbox class="form-check-input" @bind-Value="prop.IsKey" />
+                                <label class="form-check-label">Key</label>
+                            </div>
                         </div>
-                        <div class="mdl-cell mdl-cell--2-col">
-                            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect">
-                                <InputCheckbox class="mdl-checkbox__input" @bind-Value="prop.IsRequired" />
-                                <span class="mdl-checkbox__label">Required</span>
-                            </label>
+                        <div class="col-2">
+                            <div class="form-check">
+                                <InputCheckbox class="form-check-input" @bind-Value="prop.IsRequired" />
+                                <label class="form-check-label">Required</label>
+                            </div>
                         </div>
-                        <div class="mdl-cell mdl-cell--2-col">
-                            <InputNumber class="mdl-textfield__input" placeholder="Max Length" @bind-Value="prop.MaxLength" />
+                        <div class="col-2">
+                            <InputNumber class="form-control" placeholder="Max Length" @bind-Value="prop.MaxLength" />
                         </div>
-                        <div class="mdl-cell mdl-cell--2-col">
-                            <button type="button" class="mdl-button mdl-js-button" @onclick="() => RemoveProperty(prop)">Remove</button>
+                        <div class="col-12 col-md-1 mt-2 mt-md-0">
+                            <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveProperty(prop)">Remove</button>
                         </div>
                     </div>
                 }
-                <button type="button" class="mdl-button mdl-js-button mdl-button--raised" @onclick="AddProperty">Add Property</button>
-                <div class="mt-4" style="text-align:right;">
-                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Save</button>
-                    <button type="button" class="mdl-button mdl-js-button" @onclick="CancelEdit">Cancel</button>
+                <button type="button" class="btn btn-secondary mb-3" @onclick="AddProperty">Add Property</button>
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary me-2">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
                 </div>
             </EditForm>
         </div>
