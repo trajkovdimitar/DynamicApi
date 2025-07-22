@@ -1,6 +1,8 @@
 using TheBackend.DynamicModels;
 using TheBackend.Domain.Models;
 using TheBackend.Api.Middleware;
+using HotChocolate.Types;
+using TheBackend.Api.GraphQL;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -9,6 +11,11 @@ builder.Services.AddSingleton<DynamicDbContextService>();
 builder.Services.AddSingleton<BusinessRuleService>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
+builder.Services
+    .AddGraphQLServer()
+    .BindRuntimeType<object, AnyType>()
+    .AddQueryType<DynamicQuery>()
+    .AddMutationType<DynamicMutation>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -29,4 +36,5 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 
 app.MapControllers();
+app.MapGraphQL();
 app.Run();
