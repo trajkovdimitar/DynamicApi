@@ -274,10 +274,11 @@ namespace TheBackend.DynamicModels
         return sb.ToString();
     }
 
-    public Type GetModelType(string modelName) =>
-        _dynamicAssembly.GetTypes()
-            .FirstOrDefault(t => t.Name.Equals(modelName, StringComparison.OrdinalIgnoreCase))
-        ?? throw new Exception($"Model '{modelName}' not found");
+    public Type? GetModelType(string modelName)
+    {
+        return _dynamicAssembly.GetTypes()
+            .FirstOrDefault(t => t.Name.Equals(modelName, StringComparison.OrdinalIgnoreCase));
+    }
 
     public DbContext GetDbContext() => CreateDbContextInstance();
 
