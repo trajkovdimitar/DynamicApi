@@ -12,15 +12,18 @@ public class DynamicMutation
 {
     public async Task<Dictionary<string, object?>> AddEntity(
         string modelName,
-        Dictionary<string, object?> input,
+        [GraphQLType(typeof(AnyType))] object input,
         [Service] DynamicDbContextService dbService,
         [Service] BusinessRuleService ruleService)
     {
+        var inputDict = input as IReadOnlyDictionary<string, object?>
+            ?? throw new ArgumentException("Invalid input", nameof(input));
+
         var modelType = dbService.GetModelType(modelName);
         var entity = Activator.CreateInstance(modelType)!;
         foreach (var prop in modelType.GetProperties())
         {
-            if (input.TryGetValue(prop.Name, out var value) && value != null)
+            if (inputDict.TryGetValue(prop.Name, out var value) && value != null)
             {
                 prop.SetValue(entity, Convert.ChangeType(value, prop.PropertyType));
             }
