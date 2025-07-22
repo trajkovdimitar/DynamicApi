@@ -10,6 +10,23 @@ namespace TheBackend.DynamicModels
     {
         private const string ModelsFile = "models.json";
         private const string MigrationFilesFile = "migrations.json";
+        private static readonly HashSet<string> AllowedTypes = new(
+            new[]
+            {
+                "bool",
+                "byte",
+                "short",
+                "int",
+                "long",
+                "float",
+                "double",
+                "decimal",
+                "string",
+                "char",
+                "DateTime",
+                "Guid"
+            },
+            StringComparer.OrdinalIgnoreCase);
 
         public List<ModelDefinition> LoadModels()
         {
@@ -22,6 +39,18 @@ namespace TheBackend.DynamicModels
         {
             var json = JsonConvert.SerializeObject(models, Formatting.Indented);
             File.WriteAllText(ModelsFile, json);
+        }
+
+        public void ValidateModel(ModelDefinition model)
+        {
+            foreach (var prop in model.Properties)
+            {
+                if (string.IsNullOrWhiteSpace(prop.Type) || !AllowedTypes.Contains(prop.Type))
+                {
+                    throw new InvalidOperationException(
+                        $"Property '{prop.Name}' has unsupported type '{prop.Type}'. Allowed types: {string.Join(", ", AllowedTypes)}");
+                }
+            }
         }
 
         public Dictionary<string, string>? LoadMigrationFiles()

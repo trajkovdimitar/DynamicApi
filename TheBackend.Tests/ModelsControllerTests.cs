@@ -46,4 +46,39 @@ public class ModelsControllerTests
             Directory.Delete(tempDir, true);
         }
     }
+
+    [Fact]
+    public async Task CreateOrUpdateModel_ReturnsBadRequest_ForInvalidType()
+    {
+        var originalDir = Directory.GetCurrentDirectory();
+        var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(tempDir);
+        Directory.SetCurrentDirectory(tempDir);
+        try
+        {
+            var service = new ModelDefinitionService();
+            var config = new ConfigurationBuilder().Build();
+            using var dbService = new DynamicDbContextService(service, config);
+            var controller = new ModelsController(service, dbService, NullLogger<ModelsController>.Instance);
+
+            var model = new ModelDefinition
+            {
+                ModelName = "Invalid",
+                Properties = new List<PropertyDefinition>
+                {
+                    new PropertyDefinition { Name = "Id", Type = "notatype", IsKey = true }
+                }
+            };
+
+            var result = await controller.CreateOrUpdateModel(model);
+            var bad = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(bad.Value);
+            Assert.Contains("notatype", response.Message);
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(originalDir);
+            Directory.Delete(tempDir, true);
+        }
+    }
 }

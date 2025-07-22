@@ -33,6 +33,14 @@ namespace TheBackend.Api.Controllers
         public async Task<IActionResult> CreateOrUpdateModel([FromBody] ModelDefinition definition)
         {
             _logger.LogInformation("Create or update model {Name}", definition.ModelName);
+            try
+            {
+                _modelService.ValidateModel(definition);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ApiResponse<string>.Fail(ex.Message));
+            }
             var models = _modelService.LoadModels();
             var existing = models.FirstOrDefault(m => m.ModelName == definition.ModelName);
             if (existing != null) models.Remove(existing);
