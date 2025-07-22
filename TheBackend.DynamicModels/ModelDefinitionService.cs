@@ -1,40 +1,40 @@
-namespace TheBackend.DynamicModels
+using Newtonsoft.Json;
+using TheBackend.Domain.Models;
+
+public class ModelDefinitionService
 {
-    // Services/ModelDefinitionService.cs
-    using Newtonsoft.Json;
-    using System.Collections.Generic;
-    using System.IO;
-    using TheBackend.Domain.Models;
+    private readonly string _modelsFilePath;
+    private readonly string _migrationsFilePath;
 
-    public class ModelDefinitionService
+    public ModelDefinitionService(string? modelsPath = null, string? migrationsPath = null)
     {
-        private const string ModelsFile = "models.json";
-        private const string MigrationFilesFile = "migrations.json";
+        _modelsFilePath = modelsPath ?? "models.json";
+        _migrationsFilePath = migrationsPath ?? "migrations.json";
+    }
 
-        public List<ModelDefinition> LoadModels()
-        {
-            if (!File.Exists(ModelsFile)) return new List<ModelDefinition>();
-            var json = File.ReadAllText(ModelsFile);
-            return JsonConvert.DeserializeObject<List<ModelDefinition>>(json);
-        }
+    public List<ModelDefinition> LoadModels()
+    {
+        if (!File.Exists(_modelsFilePath)) return new();
+        var json = File.ReadAllText(_modelsFilePath);
+        return JsonConvert.DeserializeObject<List<ModelDefinition>>(json) ?? new();
+    }
 
-        public void SaveModels(List<ModelDefinition> models)
-        {
-            var json = JsonConvert.SerializeObject(models, Formatting.Indented);
-            File.WriteAllText(ModelsFile, json);
-        }
+    public void SaveModels(List<ModelDefinition> models)
+    {
+        var json = JsonConvert.SerializeObject(models, Formatting.Indented);
+        File.WriteAllText(_modelsFilePath, json);
+    }
 
-        public Dictionary<string, string>? LoadMigrationFiles()
-        {
-            if (!File.Exists(MigrationFilesFile)) return null;
-            var json = File.ReadAllText(MigrationFilesFile);
-            return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-        }
+    public Dictionary<string, string>? LoadMigrationFiles()
+    {
+        if (!File.Exists(_migrationsFilePath)) return null;
+        var json = File.ReadAllText(_migrationsFilePath);
+        return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+    }
 
-        public void SaveMigrationFiles(Dictionary<string, string> migrationFiles)
-        {
-            var json = JsonConvert.SerializeObject(migrationFiles, Formatting.Indented);
-            File.WriteAllText(MigrationFilesFile, json);
-        }
+    public void SaveMigrationFiles(Dictionary<string, string> migrationFiles)
+    {
+        var json = JsonConvert.SerializeObject(migrationFiles, Formatting.Indented);
+        File.WriteAllText(_migrationsFilePath, json);
     }
 }

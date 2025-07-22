@@ -9,21 +9,21 @@ public class ModelDefinitionServiceTests
     [Fact]
     public void SaveAndLoadModels()
     {
-        var originalDir = Directory.GetCurrentDirectory();
         var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         Directory.CreateDirectory(tempDir);
-        Directory.SetCurrentDirectory(tempDir);
+        var modelsPath = Path.Combine(tempDir, "models.json");
+
         try
         {
-            var service = new ModelDefinitionService();
+            var service = new ModelDefinitionService(modelsPath);
             var models = new List<ModelDefinition>
+        {
+            new ModelDefinition
             {
-                new ModelDefinition
-                {
-                    ModelName = "Sample",
-                    Properties = new List<PropertyDefinition>()
-                }
-            };
+                ModelName = "Sample",
+                Properties = new List<PropertyDefinition>()
+            }
+        };
             service.SaveModels(models);
             var loaded = service.LoadModels();
             Assert.Single(loaded);
@@ -31,8 +31,8 @@ public class ModelDefinitionServiceTests
         }
         finally
         {
-            Directory.SetCurrentDirectory(originalDir);
-            Directory.Delete(tempDir, true);
+            Directory.Delete(tempDir, recursive: true);
         }
     }
+
 }
