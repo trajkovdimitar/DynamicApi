@@ -64,8 +64,8 @@ Follow Microsoft's official C# coding conventions, customized for our projects. 
   - Resilience: Implement health checks, retries, circuit breakers.
 - Avoid tight coupling; prefer API Gateway (Ocelot) for client-facing aggregation.
 
-2.4 Security Practices
-- Authentication: JWT with IdentityServer or Azure AD.
+- Authentication: JWT with IdentityServer, OpenIddict, or Azure AD.
+- Open-source identity servers (e.g., OpenIddict) may be configured via the AdminUI to enable or disable features.
 - Authorization: Policy-based; use `[Authorize]` attributes.
 - Input Validation: FluentValidation for commands.
 - Secrets: Never hardcode; use configuration providers.
