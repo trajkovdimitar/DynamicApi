@@ -95,7 +95,15 @@ namespace TheBackend.Api.Controllers
             if (_ruleService.HasWorkflow(workflowName))
             {
                 var results = await _ruleService.ExecuteAsync(workflowName, new RuleParameter("entity", entity));
-                if (results.Any(r => !r.IsSuccess)) return BadRequest(ApiResponse<object>.Fail("Business rule validation failed"));
+                var failures = results
+                    .Where(r => !r.IsSuccess)
+                    .Select(r => new ValidationError
+                    {
+                        Field = r.Rule.RuleName,
+                        Error = r.ExceptionMessage ?? r.Rule.ErrorMessage
+                    })
+                    .ToList();
+                if (failures.Any()) return BadRequest(ApiResponse<object>.Fail("Business rule validation failed", failures));
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
@@ -139,7 +147,15 @@ namespace TheBackend.Api.Controllers
             if (_ruleService.HasWorkflow(workflowName))
             {
                 var results = await _ruleService.ExecuteAsync(workflowName, new RuleParameter("entity", entity));
-                if (results.Any(r => !r.IsSuccess)) return BadRequest(ApiResponse<object>.Fail("Business rule validation failed"));
+                var failures = results
+                    .Where(r => !r.IsSuccess)
+                    .Select(r => new ValidationError
+                    {
+                        Field = r.Rule.RuleName,
+                        Error = r.ExceptionMessage ?? r.Rule.ErrorMessage
+                    })
+                    .ToList();
+                if (failures.Any()) return BadRequest(ApiResponse<object>.Fail("Business rule validation failed", failures));
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
@@ -171,7 +187,15 @@ namespace TheBackend.Api.Controllers
             if (_ruleService.HasWorkflow(workflowName))
             {
                 var results = await _ruleService.ExecuteAsync(workflowName, new RuleParameter("id", convertedId));
-                if (results.Any(r => !r.IsSuccess)) return BadRequest(ApiResponse<object>.Fail("Business rule validation failed"));
+                var failures = results
+                    .Where(r => !r.IsSuccess)
+                    .Select(r => new ValidationError
+                    {
+                        Field = r.Rule.RuleName,
+                        Error = r.ExceptionMessage ?? r.Rule.ErrorMessage
+                    })
+                    .ToList();
+                if (failures.Any()) return BadRequest(ApiResponse<object>.Fail("Business rule validation failed", failures));
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
