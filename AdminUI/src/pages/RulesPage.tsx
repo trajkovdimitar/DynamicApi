@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { getWorkflows, saveWorkflow } from '../services/rules';
+import { getModels } from '../services/models';
 import type { Workflow } from '../types/models';
+import { RuleEditorForm } from '../components/RuleEditorForm';
 
 export default function RulesPage() {
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
     const [editing, setEditing] = useState<Workflow | null>(null);
-    const [text, setText] = useState('');
+    const [suggestions, setSuggestions] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true); // Tracks initial data loading
     const [isSaving, setIsSaving] = useState(false); // Tracks saving process
     const [error, setError] = useState<string | null>(null); // Stores any error messages
@@ -30,29 +32,38 @@ export default function RulesPage() {
         fetchWorkflows();
     }, []); // Empty dependency array means this runs once on mount
 
-    const startEdit = (wf?: Workflow) => {
-        // If no workflow is provided, create a new empty one
+    useEffect(() => {
+        if (!editing) return;
+        (async () => {
+            const models = await getModels();
+            const modelName = editing.workflowName.split('.')[0];
+            const model = models.find(m => m.modelName === modelName);
+            setSuggestions(model ? model.properties.map(p => p.name) : []);
+        })();
+    }, [editing?.workflowName]);
+
+    const startEdit = async (wf?: Workflow) => {
         const w = wf ?? { workflowName: '', rules: [] };
         setEditing(w);
-        setText(JSON.stringify(w, null, 2));
-        setError(null); // Clear any previous errors when starting an edit
+        setError(null);
+        const models = await getModels();
+        const modelName = w.workflowName.split('.')[0];
+        const model = models.find(m => m.modelName === modelName);
+        setSuggestions(model ? model.properties.map(p => p.name) : []);
     };
 
     const save = async () => {
-        if (!editing) return; // Should not happen if UI is correctly controlled
+        if (!editing) return;
         setIsSaving(true);
-        setError(null); // Clear previous errors
+        setError(null);
         try {
-            const parsedWorkflow: Workflow = JSON.parse(text); // Ensure parsing is robust
-            await saveWorkflow(parsedWorkflow);
-            setEditing(null); // Close the edit form
-            // Re-fetch all workflows to get the most up-to-date list, including the new/updated one
+            await saveWorkflow(editing);
+            setEditing(null);
             const updatedWorkflows = await getWorkflows();
             setWorkflows(updatedWorkflows);
         } catch (err) {
             console.error(err);
-            // Provide a more user-friendly error message for saving
-            setError(`Failed to save workflow. Please check the JSON format or network connection. Error: ${(err as Error).message}`);
+            setError(`Failed to save workflow. ${(err as Error).message}`);
         } finally {
             setIsSaving(false);
         }
@@ -94,15 +105,10 @@ export default function RulesPage() {
             {editing && (
                 <div className="space-y-2 mt-4 p-4 border rounded shadow-md dark:bg-neutral-700">
                     <h3 className="text-lg font-semibold">{editing.workflowName ? `Editing: ${editing.workflowName}` : 'New Workflow'}</h3>
-                    <textarea
-                        className="w-full h-40 border border-gray-300 dark:border-neutral-600 dark:bg-neutral-800 p-2 rounded resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={text}
-                        onChange={e => setText(e.target.value)}
-                        placeholder="Enter workflow JSON here..."
-                    />
+                    <RuleEditorForm workflow={editing} onChange={setEditing} suggestions={suggestions} />
                     <div className="flex justify-end space-x-2">
                         <button
-                            onClick={() => setEditing(null)} // Cancel button
+                            onClick={() => setEditing(null)}
                             className="px-4 py-2 rounded bg-gray-300 text-gray-800 hover:bg-gray-400"
                             disabled={isSaving}
                         >

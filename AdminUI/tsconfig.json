@@ -1,7 +1,22 @@
+// tsconfig.app.json
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+    "target": "es2020", // Or "es5" for older browser support
+    "module": "esnext", // Or "es2020", "commonjs" (if using webpack that transpiles)
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true, // <-- **CRUCIAL: Make sure this is true**
+    "allowSyntheticDefaultImports": true, // Often good to have with esModuleInterop
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "bundler", // <-- **CRUCIAL: Use "node" or "bundler"**
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true, // Typically true if a bundler (Vite, Webpack) handles JS emission
+    "jsx": "react-jsx"
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx"], // <-- **Verify this includes models.ts**
+  "exclude": ["node_modules", "dist"] // Common exclusions
 }
