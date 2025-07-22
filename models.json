@@ -89,6 +89,57 @@
         "IsRequired": true,
         "MaxLength": null
       }
+    ],
+    "Relationships": [
+      {
+        "RelationshipType": "OneToMany",
+        "TargetModel": "Order",
+        "NavigationName": "Orders",
+        "ForeignKey": "CustomerId",
+        "InverseNavigation": "Customer"
+      }
+    ]
+  },
+  {
+    "ModelName": "Order",
+    "Properties": [
+      {
+        "Name": "OrderId",
+        "Type": "int",
+        "IsKey": true,
+        "IsRequired": true,
+        "MaxLength": null
+      },
+      {
+        "Name": "CustomerId",
+        "Type": "int",
+        "IsKey": false,
+        "IsRequired": true,
+        "MaxLength": null
+      },
+      {
+        "Name": "OrderDate",
+        "Type": "DateTime",
+        "IsKey": false,
+        "IsRequired": true,
+        "MaxLength": null
+      },
+      {
+        "Name": "Amount",
+        "Type": "decimal",
+        "IsKey": false,
+        "IsRequired": true,
+        "MaxLength": null
+      }
+    ],
+    "Relationships": [
+      {
+        "RelationshipType": "ManyToOne",
+        "TargetModel": "Customer",
+        "NavigationName": "Customer",
+        "ForeignKey": "CustomerId",
+        "InverseNavigation": "Orders"
+      }
     ]
   }
 ]
