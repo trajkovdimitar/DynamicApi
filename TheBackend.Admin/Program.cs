@@ -9,5 +9,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7020/") });
 builder.Services.AddScoped<ApiClient>();
+builder.Services.AddSingleton<TheBackend.Admin.Services.CollectionService>();
 
 await builder.Build().RunAsync();

@@ -1,0 +1,26 @@
+@page "/collections/{CollectionName}"
+@inject TheBackend.Admin.Services.CollectionService CollectionService
+@inject NavigationManager NavigationManager
+
+<ContentHeader Title="@CollectionName" OnCreate="NewRecord" />
+
+<RecordTable Definition="Definition" Records="Records" OnCreate="NewRecord" />
+
+@code {
+    [Parameter]
+    public string CollectionName { get; set; } = string.Empty;
+
+    private TheBackend.Admin.Services.DynamicCollection? Definition;
+    private List<Dictionary<string, object>>? Records;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Definition = await CollectionService.GetCollectionAsync(CollectionName);
+        Records = await CollectionService.GetRecordsAsync(CollectionName);
+    }
+
+    private void NewRecord()
+    {
+        NavigationManager.NavigateTo($"/collections/{CollectionName}/record");
+    }
+}

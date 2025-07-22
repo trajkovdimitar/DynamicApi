@@ -1,0 +1,12 @@
+@page "/collections/{CollectionName}/record/{RecordId?}"
+
+<h3>Edit Record</h3>
+<p>This is a stub page for collection <strong>@CollectionName</strong> with id <em>@RecordId</em>.</p>
+
+@code {
+    [Parameter]
+    public string CollectionName { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? RecordId { get; set; }
+}

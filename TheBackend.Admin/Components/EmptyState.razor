@@ -1,0 +1,12 @@
+<div class="text-center my-5">
+    <p>@Message</p>
+    <button class="btn btn-primary" @onclick="OnCreate">Create Item</button>
+</div>
+
+@code {
+    [Parameter]
+    public string Message { get; set; } = "No items.";
+
+    [Parameter]
+    public EventCallback OnCreate { get; set; }
+}

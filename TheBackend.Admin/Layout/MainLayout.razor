@@ -2,16 +2,11 @@
 
 <CascadingValue Value="this">
     <div class="app-layout">
-        <NavMenu />
+        <SidebarNav />
         <div class="app-content">
             @Body
         </div>
-        @if (RightSidebarContent != null)
-        {
-            <div class="right-sidebar">
-                @RightSidebarContent
-            </div>
-        }
+        <ContextSidebar />
     </div>
 </CascadingValue>
 

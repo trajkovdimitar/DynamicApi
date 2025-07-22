@@ -1,0 +1,14 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 m-0">@Title</h1>
+    <button class="btn btn-success" @onclick="OnCreate">
+        <i class="bi bi-plus"></i> Create
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback OnCreate { get; set; }
+}

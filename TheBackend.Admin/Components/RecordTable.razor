@@ -1,0 +1,43 @@
+@if (Definition == null || Records == null)
+{
+    <p>Loading...</p>
+}
+else if (!Records.Any())
+{
+    <EmptyState Message="No records found" OnCreate="OnCreate" />
+}
+else
+{
+    <table class="table table-striped">
+        <thead class="table-light">
+            <tr>
+                @foreach (var p in Definition.Properties)
+                {
+                    <th class="text-start">@p.Name</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Records)
+            {
+                <tr>
+                    @foreach (var p in Definition.Properties)
+                    {
+                        <td>@row[p.Name]</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public TheBackend.Admin.Services.DynamicCollection? Definition { get; set; }
+
+    [Parameter]
+    public List<Dictionary<string, object>>? Records { get; set; }
+
+    [Parameter]
+    public EventCallback OnCreate { get; set; }
+}

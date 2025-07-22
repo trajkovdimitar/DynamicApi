@@ -1,0 +1,33 @@
+@inject TheBackend.Admin.Services.CollectionService CollectionService
+
+@if (collections == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <nav class="nav-menu bg-dark text-light p-3">
+        <div class="logo mb-3 text-center">
+            <img src="https://source.unsplash.com/random/64x64?logo" alt="Logo" />
+        </div>
+        <ul class="nav flex-column">
+            @foreach (var c in collections)
+            {
+                <li class="nav-item mb-2">
+                    <NavLink class="nav-link text-light" href="@($"/collections/{c.ModelName}")">
+                        @c.ModelName
+                    </NavLink>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+@code {
+    private List<TheBackend.Admin.Services.DynamicCollection>? collections;
+
+    protected override async Task OnInitializedAsync()
+    {
+        collections = await CollectionService.GetCollectionsAsync();
+    }
+}
