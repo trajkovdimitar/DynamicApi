@@ -233,6 +233,22 @@ namespace TheBackend.DynamicModels
         sb.AppendLine("    {");
         foreach (var prop in model.Properties)
             sb.AppendLine($"        public {prop.Type} {prop.Name} {{ get; set; }}");
+        foreach (var rel in model.Relationships)
+        {
+            if (!string.IsNullOrWhiteSpace(rel.ForeignKey) &&
+                !model.Properties.Any(p => p.Name == rel.ForeignKey))
+            {
+                var fkType = model.Properties.FirstOrDefault(p => p.IsKey)?.Type ?? "int";
+                sb.AppendLine($"        public {fkType} {rel.ForeignKey} {{ get; set; }}");
+            }
+
+            var isCollection = rel.RelationshipType == "OneToMany" || rel.RelationshipType == "ManyToMany";
+            if (isCollection)
+                sb.AppendLine(
+                    $"        public ICollection<{rel.TargetModel}> {rel.NavigationName} {{ get; set; }} = new List<{rel.TargetModel}>();");
+            else
+                sb.AppendLine($"        public {rel.TargetModel}? {rel.NavigationName} {{ get; set; }}");
+        }
         sb.AppendLine("    }");
         sb.AppendLine("}");
         return sb.ToString();
