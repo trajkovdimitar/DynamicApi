@@ -21,5 +21,42 @@
                 Data
             </NavLink>
         </li>
+        <li class="nav-item mb-2">
+            <button class="btn btn-sm text-light w-100 text-start" @onclick="ToggleCollections">
+                <i class="bi bi-collection"></i>
+                Collections
+            </button>
+            @if (showCollections && collections != null)
+            {
+                <ul class="nav flex-column ms-3 mt-1">
+                    @foreach (var c in collections)
+                    {
+                        <li class="nav-item mb-1">
+                            <NavLink class="nav-link text-light" href="@($"/collections/{c.ModelName}")">
+                                <i class="bi bi-folder"></i>
+                                @c.ModelName
+                            </NavLink>
+                        </li>
+                    }
+                </ul>
+            }
+        </li>
     </ul>
 </nav>
+
+@code {
+    [Inject] private ApiClient Api { get; set; } = default!;
+
+    private List<ModelDefinition>? collections;
+    private bool showCollections;
+
+    protected override async Task OnInitializedAsync()
+    {
+        collections = await Api.GetAsync<List<ModelDefinition>>("api/models");
+    }
+
+    private void ToggleCollections()
+    {
+        showCollections = !showCollections;
+    }
+}

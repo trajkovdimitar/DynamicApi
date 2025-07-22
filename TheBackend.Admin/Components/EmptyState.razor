@@ -1,0 +1,9 @@
+@code {
+    [Parameter] public string Message { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnCreate { get; set; }
+}
+
+<div class="text-center my-5">
+    <p>@Message</p>
+    <button class="btn btn-primary" @onclick="OnCreate">Create Item</button>
+</div>

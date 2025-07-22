@@ -126,7 +126,7 @@ else
             .Select(e => e.EnumerateObject().ToDictionary(p => p.Name, p => (object?)p.Value.ToString() ?? string.Empty))
             .ToList();
 
-        Layout?.SetRightSidebar(@<RightSidebar Definition="selectedDefinition" />);
+        Layout?.SetRightSidebar(@<ContextSidebar Definition="selectedDefinition" />);
     }
 
     private void NewRecord()
