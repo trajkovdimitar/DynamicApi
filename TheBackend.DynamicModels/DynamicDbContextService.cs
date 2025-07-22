@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using System.Reflection;
@@ -20,6 +21,7 @@ public class DynamicDbContextService : IDisposable
     private Assembly _dynamicAssembly = default!;
     private Type _dynamicDbContextType = default!;
     private AssemblyLoadContext? _loadContext;
+    private readonly InMemoryDatabaseRoot _inMemoryRoot = new();
 
     private readonly string ProjectDir;
     private string ModelsDir => Path.Combine(ProjectDir, "Models");
@@ -76,7 +78,11 @@ public class DynamicDbContextService : IDisposable
     {
         var connString = _config.GetConnectionString("Default")!.Replace(@"\", @"\\").Replace("\"", "\\\"");
         var dbProvider = _config["DbProvider"];
-        var useProvider = dbProvider == "SqlServer" ? $"optionsBuilder.UseSqlServer(\"{connString}\");" : $"optionsBuilder.UseNpgsql(\"{connString}\");";
+        var useProvider = dbProvider == "SqlServer"
+            ? $"optionsBuilder.UseSqlServer(\"{connString}\");"
+            : dbProvider == "Postgres"
+                ? $"optionsBuilder.UseNpgsql(\"{connString}\");"
+                : $"optionsBuilder.UseInMemoryDatabase(\"{connString}\");";
         return $@"using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -112,7 +118,11 @@ namespace TheBackend.DynamicModels
         }
 
         var dbProvider = _config["DbProvider"];
-        string providerAssemblyName = dbProvider == "SqlServer" ? "Microsoft.EntityFrameworkCore.SqlServer" : "Npgsql.EntityFrameworkCore.PostgreSQL";
+        string providerAssemblyName = dbProvider == "SqlServer"
+            ? "Microsoft.EntityFrameworkCore.SqlServer"
+            : dbProvider == "Postgres"
+                ? "Npgsql.EntityFrameworkCore.PostgreSQL"
+                : "Microsoft.EntityFrameworkCore.InMemory";
         var providerAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == providerAssemblyName);
         if (providerAssembly == null)
         {
@@ -161,6 +171,8 @@ namespace TheBackend.DynamicModels
             optionsBuilder.UseSqlServer(connString);
         else if (dbProvider == "Postgres")
             optionsBuilder.UseNpgsql(connString);
+        else if (dbProvider == "InMemory")
+            opts.UseInMemoryDatabase(connString ?? "DynamicInMemory", _inMemoryRoot);
         else
             throw new NotSupportedException("Unknown provider");
 
