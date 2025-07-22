@@ -11,6 +11,7 @@ export interface ModelDefinition {
     properties: PropertyDefinition[];
 }
 
+// Ensure these are exported
 export interface Rule {
     ruleName: string;
     expression?: string;
