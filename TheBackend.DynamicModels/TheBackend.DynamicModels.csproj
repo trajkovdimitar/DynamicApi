@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TheBackend.Domain\TheBackend.Domain.csproj" />
+    <ProjectReference Include="..\TheBackend.Application\TheBackend.Application.csproj" />
   </ItemGroup>
 
 </Project>

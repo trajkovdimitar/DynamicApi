@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using TheBackend.Application.Repositories;
 using TheBackend.DynamicModels;
 using TheBackend.Infrastructure.Repositories;
+using TheBackend.Application.Events;
 using RulesEngine.Models;
 using Microsoft.Extensions.Logging;
 using System.Linq;
@@ -18,12 +19,14 @@ namespace TheBackend.Api.Controllers
         private readonly DynamicDbContextService _dbContextService;
         private readonly BusinessRuleService _ruleService;
         private readonly ILogger<GenericController> _logger;
+        private readonly EventBus _eventBus;
 
-        public GenericController(DynamicDbContextService dbContextService, BusinessRuleService ruleService, ILogger<GenericController> logger)
+        public GenericController(DynamicDbContextService dbContextService, BusinessRuleService ruleService, EventBus eventBus, ILogger<GenericController> logger)
         {
             _dbContextService = dbContextService;
             _ruleService = ruleService;
             _logger = logger;
+            _eventBus = eventBus;
         }
 
         [HttpGet]
@@ -34,7 +37,10 @@ namespace TheBackend.Api.Controllers
             if (modelType == null) return NotFound(ApiResponse<object>.Fail("Model not found"));
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), _dbContextService.GetDbContext());
+            var repo = Activator.CreateInstance(
+                typeof(GenericRepository<>).MakeGenericType(modelType),
+                _dbContextService.GetDbContext(),
+                _eventBus);
 
             var getAllMethod = repoType.GetMethod("GetAllAsync");
             var resultTask = (Task)getAllMethod.Invoke(repo, null);
@@ -62,7 +68,10 @@ namespace TheBackend.Api.Controllers
             var convertedId = Convert.ChangeType(id, keyType);
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
+            var repo = Activator.CreateInstance(
+                typeof(GenericRepository<>).MakeGenericType(modelType),
+                dbContext,
+                _eventBus);
 
             var getMethod = repoType.GetMethod("GetByIdAsync");
             var resultTask = (Task)getMethod.Invoke(repo, new[] { convertedId });
@@ -107,7 +116,10 @@ namespace TheBackend.Api.Controllers
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
+            var repo = Activator.CreateInstance(
+                typeof(GenericRepository<>).MakeGenericType(modelType),
+                dbContext,
+                _eventBus);
 
             var addMethod = repoType.GetMethod("AddAsync");
             var task = (Task)addMethod.Invoke(repo, new[] { entity });
@@ -159,7 +171,10 @@ namespace TheBackend.Api.Controllers
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
+            var repo = Activator.CreateInstance(
+                typeof(GenericRepository<>).MakeGenericType(modelType),
+                dbContext,
+                _eventBus);
 
             var updateMethod = repoType.GetMethod("UpdateAsync");
             var task = (Task)updateMethod.Invoke(repo, new[] { entity });
@@ -199,7 +214,10 @@ namespace TheBackend.Api.Controllers
             }
 
             var repoType = typeof(IGenericRepository<>).MakeGenericType(modelType);
-            var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
+            var repo = Activator.CreateInstance(
+                typeof(GenericRepository<>).MakeGenericType(modelType),
+                dbContext,
+                _eventBus);
 
             var deleteMethod = repoType.GetMethod("DeleteAsync");
             var task = (Task)deleteMethod.Invoke(repo, new[] { convertedId });
