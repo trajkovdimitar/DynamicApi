@@ -1,0 +1,38 @@
+@page "/users"
+@inject ApiClient Api
+
+<h3>Users</h3>
+
+@if (users == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead class="table-light">
+            <tr>
+                <th>UserName</th>
+                <th>Roles</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in users)
+            {
+                <tr>
+                    <td>@u.UserName</td>
+                    <td>@string.Join(",", u.Roles)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<AuthUser>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Api.GetAsync<List<AuthUser>>("api/users");
+    }
+}

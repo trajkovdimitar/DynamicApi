@@ -1,0 +1,33 @@
+@page "/login"
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<h3>Login</h3>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+<EditForm Model="login" OnValidSubmit="HandleLogin">
+    <InputText class="form-control mb-2" @bind-Value="login.UserName" placeholder="Username" />
+    <InputText class="form-control mb-2" @bind-Value="login.Password" placeholder="Password" type="password" />
+    <button class="btn btn-primary" type="submit">Login</button>
+</EditForm>
+
+@code {
+    private AuthUser login = new();
+    private string? error;
+
+    private async Task HandleLogin()
+    {
+        var token = await Api.PostAsync<AuthUser, string>("api/auth/login", login);
+        if (token == null)
+        {
+            error = "Invalid credentials";
+            return;
+        }
+        Api.SetToken(token);
+        Nav.NavigateTo("/");
+    }
+}

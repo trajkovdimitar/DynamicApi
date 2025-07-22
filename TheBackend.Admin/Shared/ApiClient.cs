@@ -7,10 +7,17 @@ namespace TheBackend.Admin.Shared;
 public class ApiClient
 {
     private readonly HttpClient _http;
+    private string? _token;
 
     public ApiClient(HttpClient http)
     {
         _http = http;
+    }
+
+    public void SetToken(string token)
+    {
+        _token = token;
+        _http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
     }
 
     public async Task<T?> GetAsync<T>(string uri) where T : class
