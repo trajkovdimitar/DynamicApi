@@ -26,7 +26,7 @@ namespace TheBackend.Api.Controllers
         {
             _logger.LogInformation("List models");
             var models = _modelService.LoadModels();
-            return Ok(models);
+            return Ok(ApiResponse<List<ModelDefinition>>.Ok(models));
         }
 
         [HttpPost]
