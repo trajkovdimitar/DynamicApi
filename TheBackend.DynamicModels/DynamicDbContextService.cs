@@ -172,7 +172,7 @@ namespace TheBackend.DynamicModels
         else if (dbProvider == "Postgres")
             optionsBuilder.UseNpgsql(connString);
         else if (dbProvider == "InMemory")
-            opts.UseInMemoryDatabase(connString ?? "DynamicInMemory", _inMemoryRoot);
+            optionsBuilder.UseInMemoryDatabase(connString ?? "DynamicInMemory", _inMemoryRoot);
         else
             throw new NotSupportedException("Unknown provider");
 
@@ -279,6 +279,6 @@ namespace TheBackend.DynamicModels
 
     public void Dispose()
     {
-        _loadContext?.Unload();        
+        _loadContext?.Unload();
     }
 }
