@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -21,7 +20,6 @@ public class DynamicDbContextService : IDisposable
     private Assembly _dynamicAssembly = default!;
     private Type _dynamicDbContextType = default!;
     private AssemblyLoadContext? _loadContext;
-    private readonly List<ServiceProvider> _serviceProviders = new();
 
     private readonly string ProjectDir;
     private string ModelsDir => Path.Combine(ProjectDir, "Models");
@@ -153,37 +151,22 @@ namespace TheBackend.DynamicModels
 
     private DbContext CreateDbContextInstance()
     {
-        var services = new ServiceCollection();
         var connString = _config.GetConnectionString("Default");
         var dbProvider = _config["DbProvider"];
 
-        var addMethod = typeof(EntityFrameworkServiceCollectionExtensions)
-            .GetMethods()
-            .First(m => m.Name == "AddDbContext" &&
-                        m.GetGenericArguments().Length == 1 &&
-                        m.GetParameters().Length >= 2 &&
-                        m.GetParameters()[1].ParameterType == typeof(Action<DbContextOptionsBuilder>));
+        var builderType = typeof(DbContextOptionsBuilder<>).MakeGenericType(_dynamicDbContextType);
+        var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(builderType)!;
 
-        var generic = addMethod.MakeGenericMethod(_dynamicDbContextType);
-        object[] args = new object[]
-        {
-            services,
-            (Action<DbContextOptionsBuilder>)(opts =>
-            {
-                if (dbProvider == "SqlServer")
-                    opts.UseSqlServer(connString);
-                else if (dbProvider == "Postgres")
-                    opts.UseNpgsql(connString);
-                else throw new NotSupportedException("Unknown provider");
-            }),
-            ServiceLifetime.Scoped,
-            ServiceLifetime.Scoped
-        };
+        if (dbProvider == "SqlServer")
+            optionsBuilder.UseSqlServer(connString);
+        else if (dbProvider == "Postgres")
+            optionsBuilder.UseNpgsql(connString);
+        else
+            throw new NotSupportedException("Unknown provider");
 
-        generic.Invoke(null, args);
-        var provider = services.BuildServiceProvider();
-        _serviceProviders.Add(provider);
-        return (DbContext)provider.GetRequiredService(_dynamicDbContextType);
+        var options = optionsBuilder.Options;
+
+        return (DbContext)Activator.CreateInstance(_dynamicDbContextType, options)!;
     }
 
     private void RunDotnetCommand(string arguments, string? workingDir = null)
@@ -284,11 +267,6 @@ namespace TheBackend.DynamicModels
 
     public void Dispose()
     {
-        _loadContext?.Unload();
-        foreach (var provider in _serviceProviders)
-        {
-            provider.Dispose();
-        }
-        _serviceProviders.Clear();
+        _loadContext?.Unload();        
     }
 }
