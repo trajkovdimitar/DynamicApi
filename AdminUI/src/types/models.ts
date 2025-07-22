@@ -9,6 +9,15 @@ export interface PropertyDefinition {
 export interface ModelDefinition {
     modelName: string;
     properties: PropertyDefinition[];
+    relationships: RelationshipDefinition[];
+}
+
+export interface RelationshipDefinition {
+    relationshipType: string;
+    targetModel: string;
+    navigationName: string;
+    foreignKey: string;
+    inverseNavigation: string;
 }
 
 // Ensure these are exported

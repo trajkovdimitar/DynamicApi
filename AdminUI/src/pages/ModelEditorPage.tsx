@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { saveModel, getModels } from '../services/models';
-import type { ModelDefinition, PropertyDefinition } from '../types/models';
+import type {
+    ModelDefinition,
+    PropertyDefinition,
+    RelationshipDefinition,
+} from '../types/models';
 
 export default function ModelEditorPage() {
     const { name } = useParams();
@@ -9,6 +13,7 @@ export default function ModelEditorPage() {
     const [model, setModel] = useState<ModelDefinition>({
         modelName: name === 'new' || !name ? '' : name,
         properties: [],
+        relationships: [],
     });
 
     useEffect(() => {
@@ -30,6 +35,31 @@ export default function ModelEditorPage() {
         const props = [...model.properties];
         props[index] = { ...props[index], ...field } as PropertyDefinition;
         setModel({ ...model, properties: props });
+    };
+
+    const addRelationship = () => {
+        setModel(m => ({
+            ...m,
+            relationships: [
+                ...m.relationships,
+                {
+                    relationshipType: '',
+                    targetModel: '',
+                    navigationName: '',
+                    foreignKey: '',
+                    inverseNavigation: '',
+                },
+            ],
+        }));
+    };
+
+    const updateRelationship = (
+        index: number,
+        rel: Partial<RelationshipDefinition>,
+    ) => {
+        const list = [...model.relationships];
+        list[index] = { ...list[index], ...rel } as RelationshipDefinition;
+        setModel({ ...model, relationships: list });
     };
 
     const save = async () => {
@@ -95,9 +125,50 @@ export default function ModelEditorPage() {
                     Add Field
                 </button>
             </div>
+            <div className="space-y-2">
+                <h3 className="font-semibold">Relationships</h3>
+                {model.relationships.map((r, idx) => (
+                    <div key={idx} className="grid grid-cols-5 gap-2 items-end">
+                        <input
+                            className="border rounded p-2 dark:bg-neutral-800"
+                            placeholder="Type"
+                            value={r.relationshipType}
+                            onChange={e => updateRelationship(idx, { relationshipType: e.target.value })}
+                        />
+                        <input
+                            className="border rounded p-2 dark:bg-neutral-800"
+                            placeholder="Target Model"
+                            value={r.targetModel}
+                            onChange={e => updateRelationship(idx, { targetModel: e.target.value })}
+                        />
+                        <input
+                            className="border rounded p-2 dark:bg-neutral-800"
+                            placeholder="Navigation Name"
+                            value={r.navigationName}
+                            onChange={e => updateRelationship(idx, { navigationName: e.target.value })}
+                        />
+                        <input
+                            className="border rounded p-2 dark:bg-neutral-800"
+                            placeholder="Foreign Key"
+                            value={r.foreignKey}
+                            onChange={e => updateRelationship(idx, { foreignKey: e.target.value })}
+                        />
+                        <input
+                            className="border rounded p-2 dark:bg-neutral-800"
+                            placeholder="Inverse Navigation"
+                            value={r.inverseNavigation}
+                            onChange={e => updateRelationship(idx, { inverseNavigation: e.target.value })}
+                        />
+                    </div>
+                ))}
+                <button onClick={addRelationship} className="px-3 py-1 rounded bg-gray-300 dark:bg-neutral-700">
+                    Add Relationship
+                </button>
+            </div>
             <button onClick={save} className="px-3 py-1 rounded bg-blue-600 text-white">
                 Save
             </button>
         </div>
     );
 }
+
