@@ -6,8 +6,8 @@ interface Field {
 
 interface Props {
     fields: Field[];
-    values: Record<string, any>;
-    onChange: (name: string, value: any) => void;
+    values: Record<string, unknown>;
+    onChange: (name: string, value: unknown) => void;
 }
 
 export function FormFieldBuilder({ fields, values, onChange }: Props) {

@@ -17,3 +17,4 @@
 
 ## Project Guidelines
 - Refer to `DOTNET_GUIDELINES.md` for full .NET microservices standards.
+- Avoid committing binary files (executables, images, archives) to the repository.

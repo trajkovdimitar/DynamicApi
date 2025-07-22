@@ -1,16 +1,29 @@
 export interface PropertyDefinition {
     name: string;
     type: string;
-    required?: boolean;
+    isKey?: boolean;
+    isRequired?: boolean;
+    maxLength?: number | null;
 }
 
 export interface ModelDefinition {
-    name: string;
+    modelName: string;
     properties: PropertyDefinition[];
 }
 
+export interface Rule {
+    ruleName: string;
+    expression?: string;
+    errorMessage?: string;
+}
+
 export interface Workflow {
-    name: string;
-    trigger: string;
-    actions: any[];
+    workflowName: string;
+    rules: Rule[];
+}
+
+export interface ApiResponse<T> {
+    success: boolean;
+    message: string;
+    data: T;
 }
