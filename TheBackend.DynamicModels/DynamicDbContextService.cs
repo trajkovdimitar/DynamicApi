@@ -277,6 +277,62 @@ namespace TheBackend.DynamicModels
                 if (prop.IsRequired) sb.AppendLine($"                entity.Property(e => e.{prop.Name}).IsRequired();");
                 if (prop.MaxLength.HasValue) sb.AppendLine($"                entity.Property(e => e.{prop.Name}).HasMaxLength({prop.MaxLength});");
             }
+            foreach (var rel in model.Relationships)
+            {
+                var hasFk = !string.IsNullOrWhiteSpace(rel.ForeignKey);
+                var inverse = string.IsNullOrWhiteSpace(rel.InverseNavigation) ? null : rel.InverseNavigation;
+                switch (rel.RelationshipType)
+                {
+                    case "ManyToOne":
+                        sb.AppendLine($"                entity.HasOne<{rel.TargetModel}>(e => e.{rel.NavigationName})");
+                        sb.Append("                    .WithMany(");
+                        sb.Append(string.IsNullOrWhiteSpace(inverse) ? ")" : $"d => d.{inverse})");
+                        if (hasFk)
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine($"                    .HasForeignKey(e => e.{rel.ForeignKey});");
+                        }
+                        else
+                        {
+                            sb.AppendLine(";");
+                        }
+                        break;
+                    case "OneToMany":
+                        sb.AppendLine($"                entity.HasMany(e => e.{rel.NavigationName})");
+                        sb.Append("                    .WithOne(");
+                        sb.Append(string.IsNullOrWhiteSpace(inverse) ? ")" : $"d => d.{inverse})");
+                        if (hasFk)
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine($"                    .HasForeignKey<{rel.TargetModel}>(d => d.{rel.ForeignKey});");
+                        }
+                        else
+                        {
+                            sb.AppendLine(";");
+                        }
+                        break;
+                    case "OneToOne":
+                        sb.AppendLine($"                entity.HasOne<{rel.TargetModel}>(e => e.{rel.NavigationName})");
+                        sb.Append("                    .WithOne(");
+                        sb.Append(string.IsNullOrWhiteSpace(inverse) ? ")" : $"d => d.{inverse})");
+                        if (hasFk)
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine($"                    .HasForeignKey<{model.ModelName}>(e => e.{rel.ForeignKey});");
+                        }
+                        else
+                        {
+                            sb.AppendLine(";");
+                        }
+                        break;
+                    case "ManyToMany":
+                        sb.AppendLine($"                entity.HasMany(e => e.{rel.NavigationName})");
+                        sb.Append("                    .WithMany(");
+                        sb.Append(string.IsNullOrWhiteSpace(inverse) ? ")" : $"d => d.{inverse})");
+                        sb.AppendLine(";");
+                        break;
+                }
+            }
             sb.AppendLine("            });");
         }
         sb.AppendLine("        }");
