@@ -308,6 +308,7 @@ namespace TheBackend.DynamicModels
     {
         var sb = new StringBuilder();
         sb.AppendLine("using Microsoft.EntityFrameworkCore;");
+        sb.AppendLine("using TheBackend.Domain.Models;");
         sb.AppendLine($"namespace {@namespace}");
         sb.AppendLine("{");
         sb.AppendLine("    public class DynamicDbContext : DbContext");
@@ -315,6 +316,7 @@ namespace TheBackend.DynamicModels
         sb.AppendLine("        public DynamicDbContext(DbContextOptions<DynamicDbContext> options) : base(options) {}");
         foreach (var model in models)
             sb.AppendLine($"        public DbSet<{model.ModelName}> {model.ModelName}s {{ get; set; }}");
+        sb.AppendLine("        public DbSet<ModelHistory> ModelHistories { get; set; } = default!;");
         sb.AppendLine("        protected override void OnModelCreating(ModelBuilder modelBuilder)");
         sb.AppendLine("        {");
         foreach (var model in models)
@@ -391,6 +393,7 @@ namespace TheBackend.DynamicModels
             }
             sb.AppendLine("            });");
         }
+        sb.AppendLine("            modelBuilder.Entity<ModelHistory>();");
         sb.AppendLine("        }");
         sb.AppendLine("    }");
         sb.AppendLine("}");
