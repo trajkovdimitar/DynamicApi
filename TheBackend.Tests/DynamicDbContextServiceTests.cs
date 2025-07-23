@@ -11,7 +11,8 @@ public class DynamicDbContextServiceTests
     {
         var modelService = new ModelDefinitionService();
         var config = new ConfigurationBuilder().Build();
-        var service = new DynamicDbContextService(modelService, config);
+        var history = new ModelHistoryService(config);
+        var service = new DynamicDbContextService(modelService, config, history);
         typeof(DynamicDbContextService)
             .GetField("_dynamicAssembly", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
             .SetValue(service, typeof(DynamicDbContextServiceTests).Assembly);

@@ -12,12 +12,14 @@ namespace TheBackend.Api.Controllers
     {
         private readonly ModelDefinitionService _modelService;
         private readonly DynamicDbContextService _dbContextService;  // See Step 4
+        private readonly ModelHistoryService _historyService;
         private readonly ILogger<ModelsController> _logger;
 
-        public ModelsController(ModelDefinitionService modelService, DynamicDbContextService dbContextService, ILogger<ModelsController> logger)
+        public ModelsController(ModelDefinitionService modelService, DynamicDbContextService dbContextService, ModelHistoryService historyService, ILogger<ModelsController> logger)
         {
             _modelService = modelService;
             _dbContextService = dbContextService;
+            _historyService = historyService;
             _logger = logger;
         }
 
@@ -41,6 +43,9 @@ namespace TheBackend.Api.Controllers
 
             // Regenerate DbContext, apply migration
             await _dbContextService.RegenerateAndMigrateAsync();
+            var hash = _modelService.ComputeModelsHash();
+            var action = existing == null ? "Created" : "Updated";
+            _historyService.RecordModelChange(definition, action, hash);
 
             return Ok(ApiResponse<string>.Ok($"Model {definition.ModelName} created/updated and migrated."));
         }

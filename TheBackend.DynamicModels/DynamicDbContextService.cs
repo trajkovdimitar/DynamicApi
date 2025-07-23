@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using TheBackend.Domain.Models;
+using TheBackend.DynamicModels;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -18,6 +19,7 @@ public class DynamicDbContextService : IDisposable
 {
     private readonly ModelDefinitionService _modelService;
     private readonly IConfiguration _config;
+    private readonly ModelHistoryService _historyService;
     private Assembly _dynamicAssembly = default!;
     private Type _dynamicDbContextType = default!;
     private AssemblyLoadContext? _loadContext;
@@ -29,10 +31,11 @@ public class DynamicDbContextService : IDisposable
     private string DbContextFile => Path.Combine(ProjectDir, "DynamicDbContext.cs");
     private string DesignTimeFactoryFile => Path.Combine(ProjectDir, "DesignTimeFactory.cs");
 
-    public DynamicDbContextService(ModelDefinitionService modelService, IConfiguration config)
+    public DynamicDbContextService(ModelDefinitionService modelService, IConfiguration config, ModelHistoryService historyService)
     {
         _modelService = modelService;
         _config = config;
+        _historyService = historyService;
         ProjectDir = GetProjectDirectory();
         Directory.CreateDirectory(ModelsDir);
         Directory.CreateDirectory(MigrationsDir);
@@ -48,7 +51,7 @@ public class DynamicDbContextService : IDisposable
     {
         var models = _modelService.LoadModels();
         var currentHash = _modelService.ComputeModelsHash();
-        var lastHash = _modelService.LoadLastModelsHash();
+        var lastHash = _historyService.GetLastHash() ?? _modelService.LoadLastModelsHash();
 
         foreach (var model in models)
         {
@@ -69,6 +72,7 @@ public class DynamicDbContextService : IDisposable
                     "--namespace TheBackend.DynamicModels.Migrations --output-dir Migrations";
                 RunDotnetCommand(cmd, ProjectDir);
                 _modelService.SaveModelsHash(currentHash);
+                _historyService.RecordSnapshot(currentHash);
             }
             catch (Exception ex)
             {
