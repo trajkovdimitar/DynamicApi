@@ -1,0 +1,24 @@
+[
+  {
+    "WorkflowName": "Comment.Create",
+    "WorkflowsToInject": null,
+    "RuleExpressionType": 0,
+    "GlobalParams": null,
+    "Rules": [
+      {
+        "RuleName": "MinLength",
+        "Properties": null,
+        "Operator": null,
+        "ErrorMessage": "Comment must be at least 11 characters long",
+        "Enabled": true,
+        "RuleExpressionType": 0,
+        "WorkflowsToInject": null,
+        "Rules": null,
+        "LocalParams": null,
+        "Expression": "entity.Content != null && entity.Content.Length >= 11",
+        "Actions": null,
+        "SuccessEvent": null
+      }
+    ]
+  }
+]
