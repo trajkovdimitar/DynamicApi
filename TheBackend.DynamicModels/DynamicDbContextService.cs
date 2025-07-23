@@ -403,6 +403,15 @@ namespace TheBackend.DynamicModels
             .FirstOrDefault(t => t.Name.Equals(modelName, StringComparison.OrdinalIgnoreCase));
     }
 
+    public IEnumerable<Type> GetAllModelTypes()
+    {
+        return _dynamicAssembly.GetTypes()
+            .Where(t => t.IsClass && t.Namespace == "TheBackend.DynamicModels" &&
+                         t != _dynamicDbContextType &&
+                         !t.Name.EndsWith("Migration") &&
+                         !t.Name.EndsWith("DesignTimeFactory"));
+    }
+
     public DbContext GetDbContext() => CreateDbContextInstance();
 
     public void Dispose()
