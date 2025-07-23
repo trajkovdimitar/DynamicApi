@@ -3,6 +3,7 @@ using RulesEngine.Models;
 using TheBackend.DynamicModels;
 using TheBackend.Api;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace TheBackend.Api.Controllers;
 
@@ -11,11 +12,13 @@ namespace TheBackend.Api.Controllers;
 public class RulesController : ControllerBase
 {
     private readonly BusinessRuleService _ruleService;
+    private readonly RuleHistoryService _historyService;
     private readonly ILogger<RulesController> _logger;
 
-    public RulesController(BusinessRuleService ruleService, ILogger<RulesController> logger)
+    public RulesController(BusinessRuleService ruleService, RuleHistoryService historyService, ILogger<RulesController> logger)
     {
         _ruleService = ruleService;
+        _historyService = historyService;
         _logger = logger;
     }
 
@@ -41,7 +44,12 @@ public class RulesController : ControllerBase
     public IActionResult CreateOrUpdate([FromBody] Workflow workflow)
     {
         _logger.LogInformation("Save workflow {Name}", workflow.WorkflowName);
+        var existing = _ruleService.GetWorkflows()
+            .FirstOrDefault(w => w.WorkflowName.Equals(workflow.WorkflowName, StringComparison.OrdinalIgnoreCase));
         _ruleService.AddOrUpdateWorkflow(workflow);
+        var hash = _ruleService.ComputeRulesHash();
+        var action = existing == null ? "Created" : "Updated";
+        _historyService.RecordRuleChange(workflow, action, hash);
         return Ok(ApiResponse<string>.Ok("Workflow saved"));
     }
 }

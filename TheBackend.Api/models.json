@@ -1,0 +1,106 @@
+[
+  {
+    "ModelName": "User",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Type": "int",
+        "IsKey": true,
+        "IsRequired": true,
+        "MaxLength": null
+      },
+      {
+        "Name": "Username",
+        "Type": "string",
+        "IsKey": false,
+        "IsRequired": true,
+        "MaxLength": 100
+      },
+      {
+        "Name": "Email",
+        "Type": "string",
+        "IsKey": false,
+        "IsRequired": true,
+        "MaxLength": 150
+      }
+    ],
+    "Relationships": []
+  },
+  {
+    "ModelName": "Post",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Type": "int",
+        "IsKey": true,
+        "IsRequired": true,
+        "MaxLength": null
+      },
+      {
+        "Name": "Title",
+        "Type": "string",
+        "IsKey": false,
+        "IsRequired": true,
+        "MaxLength": 200
+      },
+      {
+        "Name": "Content",
+        "Type": "string",
+        "IsKey": false,
+        "IsRequired": false,
+        "MaxLength": null
+      },
+      {
+        "Name": "UserId",
+        "Type": "int",
+        "IsKey": false,
+        "IsRequired": true,
+        "MaxLength": null
+      }
+    ],
+    "Relationships": [
+      {
+        "RelationshipType": "ManyToOne",
+        "TargetModel": "User",
+        "NavigationName": "User",
+        "ForeignKey": "UserId",
+        "InverseNavigation": ""
+      }
+    ]
+  },
+  {
+    "ModelName": "Comment",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Type": "int",
+        "IsKey": true,
+        "IsRequired": true,
+        "MaxLength": null
+      },
+      {
+        "Name": "PostId",
+        "Type": "int",
+        "IsKey": false,
+        "IsRequired": true,
+        "MaxLength": null
+      },
+      {
+        "Name": "Content",
+        "Type": "string",
+        "IsKey": false,
+        "IsRequired": true,
+        "MaxLength": 500
+      }
+    ],
+    "Relationships": [
+      {
+        "RelationshipType": "ManyToOne",
+        "TargetModel": "Post",
+        "NavigationName": "Post",
+        "ForeignKey": "PostId",
+        "InverseNavigation": ""
+      }
+    ]
+  }
+]

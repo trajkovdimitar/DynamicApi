@@ -35,6 +35,14 @@ public class BusinessRuleService
         }
     }
 
+    public string ComputeRulesHash()
+    {
+        if (!File.Exists(_rulesFile)) return string.Empty;
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        var bytes = File.ReadAllBytes(_rulesFile);
+        return Convert.ToHexString(sha.ComputeHash(bytes));
+    }
+
     public List<Workflow> GetWorkflows()
     {
         lock (_lock)
