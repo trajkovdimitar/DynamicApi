@@ -47,6 +47,8 @@ public class DynamicDbContextService : IDisposable
     public async Task RegenerateAndMigrateAsync()
     {
         var models = _modelService.LoadModels();
+        var currentHash = _modelService.ComputeModelsHash();
+        var lastHash = _modelService.LoadLastModelsHash();
 
         foreach (var model in models)
         {
@@ -57,14 +59,24 @@ public class DynamicDbContextService : IDisposable
         File.WriteAllText(DbContextFile, GenerateDbContextCode(models));
         File.WriteAllText(DesignTimeFactoryFile, GenerateDesignTimeFactory());
 
-        try
+        if (currentHash != lastHash)
         {
-            RunDotnetCommand($"ef migrations add AutoMigration_{DateTime.UtcNow:yyyyMMddHHmmss} --context DynamicDbContext --namespace TheBackend.DynamicModels.Migrations --output-dir Migrations", ProjectDir);
-        }
-        catch (Exception ex)
-        {
-            if (!ex.Message.Contains("No migrations were added") && !ex.Message.Contains("The model has not changed"))
-                throw;
+            try
+            {
+                var cmd =
+                    $"ef migrations add AutoMigration_{DateTime.UtcNow:yyyyMMddHHmmss} " +
+                    "--context DynamicDbContext " +
+                    "--namespace TheBackend.DynamicModels.Migrations --output-dir Migrations";
+                RunDotnetCommand(cmd, ProjectDir);
+                _modelService.SaveModelsHash(currentHash);
+            }
+            catch (Exception ex)
+            {
+                var noChange = ex.Message.Contains("No migrations were added") ||
+                               ex.Message.Contains("The model has not changed");
+                if (!noChange)
+                    throw;
+            }
         }
 
         _dynamicAssembly = CompileInMemory(models);
@@ -107,7 +119,9 @@ namespace TheBackend.DynamicModels
         var syntaxTrees = new List<SyntaxTree>();
         foreach (var model in models)
         {
-            syntaxTrees.Add(CSharpSyntaxTree.ParseText(File.ReadAllText(Path.Combine(ModelsDir, $"{model.ModelName}.cs"))));
+            var modelFile = Path.Combine(ModelsDir, $"{model.ModelName}.cs");
+            var modelCode = File.ReadAllText(modelFile);
+            syntaxTrees.Add(CSharpSyntaxTree.ParseText(modelCode));
         }
         syntaxTrees.Add(CSharpSyntaxTree.ParseText(File.ReadAllText(DbContextFile)));
 
@@ -125,7 +139,9 @@ namespace TheBackend.DynamicModels
             : dbProvider == "Postgres"
                 ? "Npgsql.EntityFrameworkCore.PostgreSQL"
                 : "Microsoft.EntityFrameworkCore.InMemory";
-        var providerAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == providerAssemblyName);
+        var providerAssembly = AppDomain.CurrentDomain
+            .GetAssemblies()
+            .FirstOrDefault(a => a.GetName().Name == providerAssemblyName);
         if (providerAssembly == null)
         {
             providerAssembly = Assembly.Load(providerAssemblyName);
@@ -217,7 +233,10 @@ namespace TheBackend.DynamicModels
                 buildError = buildProcess.StandardError.ReadToEnd();
                 buildProcess.WaitForExit();
             }
-            throw new Exception($"dotnet {arguments} failed:\nOutput:\n{output}\nError:\n{error}\nBuild Output:\n{buildOutput}\nBuild Error:\n{buildError}");
+            var msg =
+                $"dotnet {arguments} failed:\nOutput:\n{output}\nError:\n{error}\n" +
+                $"Build Output:\n{buildOutput}\nBuild Error:\n{buildError}";
+            throw new Exception(msg);
         }
     }
 
@@ -271,7 +290,8 @@ namespace TheBackend.DynamicModels
             var isCollection = rel.RelationshipType == "OneToMany" || rel.RelationshipType == "ManyToMany";
             if (isCollection)
                 sb.AppendLine(
-                    $"        public ICollection<{rel.TargetModel}> {rel.NavigationName} {{ get; set; }} = new List<{rel.TargetModel}>();");
+                    $"        public ICollection<{rel.TargetModel}> {rel.NavigationName} {{ get; set; }} = " +
+                    $"new List<{rel.TargetModel}>();");
             else
                 sb.AppendLine($"        public {rel.TargetModel}? {rel.NavigationName} {{ get; set; }}");
         }
@@ -299,9 +319,13 @@ namespace TheBackend.DynamicModels
             sb.AppendLine("            {");
             foreach (var prop in model.Properties)
             {
-                if (prop.IsKey) sb.AppendLine($"                entity.HasKey(e => e.{prop.Name});");
-                if (prop.IsRequired) sb.AppendLine($"                entity.Property(e => e.{prop.Name}).IsRequired();");
-                if (prop.MaxLength.HasValue) sb.AppendLine($"                entity.Property(e => e.{prop.Name}).HasMaxLength({prop.MaxLength});");
+                if (prop.IsKey)
+                    sb.AppendLine($"                entity.HasKey(e => e.{prop.Name});");
+                if (prop.IsRequired)
+                    sb.AppendLine($"                entity.Property(e => e.{prop.Name}).IsRequired();");
+                if (prop.MaxLength.HasValue)
+                    sb.AppendLine(
+                        $"                entity.Property(e => e.{prop.Name}).HasMaxLength({prop.MaxLength});");
             }
             foreach (var rel in model.Relationships)
             {
@@ -330,7 +354,8 @@ namespace TheBackend.DynamicModels
                         if (hasFk)
                         {
                             sb.AppendLine();
-                            sb.AppendLine($"                    .HasForeignKey<{rel.TargetModel}>(d => d.{rel.ForeignKey});");
+                            sb.AppendLine(
+                                $"                    .HasForeignKey<{rel.TargetModel}>(d => d.{rel.ForeignKey});");
                         }
                         else
                         {
@@ -344,7 +369,8 @@ namespace TheBackend.DynamicModels
                         if (hasFk)
                         {
                             sb.AppendLine();
-                            sb.AppendLine($"                    .HasForeignKey<{model.ModelName}>(e => e.{rel.ForeignKey});");
+                            sb.AppendLine(
+                                $"                    .HasForeignKey<{model.ModelName}>(e => e.{rel.ForeignKey});");
                         }
                         else
                         {
