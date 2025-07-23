@@ -23,6 +23,8 @@ public class ModelHistoryService
         _options = builder.Options;
 
         using var ctx = new ModelHistoryDbContext(_options);
+        if (provider == "SqlServer" || provider == "Postgres")
+            ctx.Database.Migrate();
         ctx.Database.EnsureCreated();
     }
 
