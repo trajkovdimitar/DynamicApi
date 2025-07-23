@@ -50,7 +50,9 @@ public class DynamicDbContextService : IDisposable
 
         foreach (var model in models)
         {
-            File.WriteAllText(Path.Combine(ModelsDir, $"{model.ModelName}.cs"), GenerateSingleModelCode(model));
+            File.WriteAllText(
+                Path.Combine(ModelsDir, $"{model.ModelName}.cs"),
+                GenerateSingleModelCode(model, models));
         }
         File.WriteAllText(DbContextFile, GenerateDbContextCode(models));
         File.WriteAllText(DesignTimeFactoryFile, GenerateDesignTimeFactory());
@@ -219,7 +221,10 @@ namespace TheBackend.DynamicModels
         }
     }
 
-    private string GenerateSingleModelCode(ModelDefinition model, string @namespace = "TheBackend.DynamicModels")
+    private string GenerateSingleModelCode(
+        ModelDefinition model,
+        List<ModelDefinition> allModels,
+        string @namespace = "TheBackend.DynamicModels")
     {
         var sb = new StringBuilder();
         sb.AppendLine("using System;");
@@ -233,12 +238,33 @@ namespace TheBackend.DynamicModels
         sb.AppendLine("    {");
         foreach (var prop in model.Properties)
             sb.AppendLine($"        public {prop.Type} {prop.Name} {{ get; set; }}");
+
+        var neededForeignKeys = allModels
+            .SelectMany(m => m.Relationships.Select(r => (Model: m, Rel: r)))
+            .Where(x =>
+                x.Rel.TargetModel == model.ModelName &&
+                x.Rel.RelationshipType == "OneToMany" &&
+                !string.IsNullOrWhiteSpace(x.Rel.ForeignKey) &&
+                !model.Properties.Any(p => p.Name == x.Rel.ForeignKey))
+            .ToList();
+
+        foreach (var (principalModel, rel) in neededForeignKeys)
+        {
+            var fkType = principalModel.Properties.FirstOrDefault(p => p.IsKey)?.Type ?? "int";
+            sb.AppendLine($"        public {fkType} {rel.ForeignKey} {{ get; set; }}");
+        }
+
         foreach (var rel in model.Relationships)
         {
-            if (!string.IsNullOrWhiteSpace(rel.ForeignKey) &&
+            var fkOnThis = rel.RelationshipType == "ManyToOne" || rel.RelationshipType == "OneToOne";
+            if (fkOnThis &&
+                !string.IsNullOrWhiteSpace(rel.ForeignKey) &&
                 !model.Properties.Any(p => p.Name == rel.ForeignKey))
             {
-                var fkType = model.Properties.FirstOrDefault(p => p.IsKey)?.Type ?? "int";
+                var targetKeyType = allModels
+                    .FirstOrDefault(m => m.ModelName == rel.TargetModel)?
+                    .Properties.FirstOrDefault(p => p.IsKey)?.Type;
+                var fkType = targetKeyType ?? "int";
                 sb.AppendLine($"        public {fkType} {rel.ForeignKey} {{ get; set; }}");
             }
 
