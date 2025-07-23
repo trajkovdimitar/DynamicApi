@@ -25,8 +25,7 @@ public class ModelHistoryService
         using var ctx = new ModelHistoryDbContext(_options);
         if (provider == "SqlServer" || provider == "Postgres")
             ctx.Database.Migrate();
-        else
-            ctx.Database.EnsureCreated();
+        ctx.Database.EnsureCreated();
     }
 
     public string? GetLastHash()
