@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using TheBackend.Domain.Models;
+using System.Linq;
 
 namespace TheBackend.DynamicModels;
 
@@ -62,6 +63,37 @@ public class ModelHistoryService
             Timestamp = DateTime.UtcNow
         };
         ctx.ModelHistories.Add(entry);
+        ctx.SaveChanges();
+    }
+
+    public void EnsureHistory(IEnumerable<ModelDefinition> models, string hash)
+    {
+        using var ctx = new ModelHistoryDbContext(_options);
+        if (ctx.ModelHistories.Any())
+            return;
+
+        foreach (var model in models)
+        {
+            var entry = new ModelHistory
+            {
+                ModelName = model.ModelName,
+                Action = "Created",
+                Definition = JsonConvert.SerializeObject(model),
+                Hash = hash,
+                Timestamp = DateTime.UtcNow
+            };
+            ctx.ModelHistories.Add(entry);
+        }
+
+        ctx.ModelHistories.Add(new ModelHistory
+        {
+            ModelName = string.Empty,
+            Action = "Snapshot",
+            Definition = string.Empty,
+            Hash = hash,
+            Timestamp = DateTime.UtcNow
+        });
+
         ctx.SaveChanges();
     }
 }

@@ -25,6 +25,9 @@ var app = builder.Build();
 var dbService = app.Services.GetRequiredService<DynamicDbContextService>();
 app.Lifetime.ApplicationStopped.Register(() => dbService.Dispose());
 await dbService.RegenerateAndMigrateAsync();
+var modelService = app.Services.GetRequiredService<ModelDefinitionService>();
+var historyService = app.Services.GetRequiredService<ModelHistoryService>();
+historyService.EnsureHistory(modelService.LoadModels(), modelService.ComputeModelsHash());
 app.UseCors();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
