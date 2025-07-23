@@ -28,8 +28,9 @@ public class ModelsControllerTests
             service.SaveModels(models);
 
             var config = new ConfigurationBuilder().Build();
-            using var dbService = new DynamicDbContextService(service, config);
-            var controller = new ModelsController(service, dbService, NullLogger<ModelsController>.Instance);
+            var history = new ModelHistoryService(config);
+            using var dbService = new DynamicDbContextService(service, config, history);
+            var controller = new ModelsController(service, dbService, history, NullLogger<ModelsController>.Instance);
 
             var result = controller.GetModels();
 

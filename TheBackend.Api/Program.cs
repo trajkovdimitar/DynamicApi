@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddSingleton<ModelDefinitionService>();
 builder.Services.AddSingleton<DynamicDbContextService>();
+builder.Services.AddSingleton<ModelHistoryService>();
 builder.Services.AddSingleton<BusinessRuleService>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
