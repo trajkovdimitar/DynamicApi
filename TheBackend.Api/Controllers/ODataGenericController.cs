@@ -27,8 +27,10 @@ namespace TheBackend.Api.Controllers
             var modelType = _dbContextService.GetModelType(modelName);
             if (modelType == null) return NotFound();
             var dbContext = _dbContextService.GetDbContext();
-            var set = (IQueryable)dbContext.GetType().GetMethod("Set", new[] { typeof(Type) })!
-                .Invoke(dbContext, new object[] { modelType })!;
+            var setMethod = typeof(DbContext)
+                .GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!
+                .MakeGenericMethod(modelType);
+            var set = (IQueryable)setMethod.Invoke(dbContext, null)!;
             return Ok(set);
         }
 
