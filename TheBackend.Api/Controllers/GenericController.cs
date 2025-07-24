@@ -28,7 +28,6 @@ namespace TheBackend.Api.Controllers
         }
 
         [HttpGet]
-        [EnableQuery]
         public async Task<IActionResult> GetAll(string modelName)
         {
             _logger.LogInformation("Get all {Model}", modelName);
@@ -49,7 +48,6 @@ namespace TheBackend.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        [EnableQuery]
         public async Task<IActionResult> GetById(string modelName, string id)
         {
             _logger.LogInformation("Get {Model} with id {Id}", modelName, id);
