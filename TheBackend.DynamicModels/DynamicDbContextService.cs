@@ -406,10 +406,14 @@ namespace TheBackend.DynamicModels
     public IEnumerable<Type> GetAllModelTypes()
     {
         return _dynamicAssembly.GetTypes()
-            .Where(t => t.IsClass && t.Namespace == "TheBackend.DynamicModels" &&
-                         t != _dynamicDbContextType &&
-                         !t.Name.EndsWith("Migration") &&
-                         !t.Name.EndsWith("DesignTimeFactory"));
+            .Where(t => t.IsClass &&
+                        t.IsPublic &&
+                        !t.IsNested &&
+                        t.Namespace == "TheBackend.DynamicModels" &&
+                        t != _dynamicDbContextType &&
+                        !t.Name.EndsWith("Migration") &&
+                        !t.Name.EndsWith("DesignTimeFactory") &&
+                        !Attribute.IsDefined(t, typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute)));
     }
 
     public DbContext GetDbContext() => CreateDbContextInstance();
