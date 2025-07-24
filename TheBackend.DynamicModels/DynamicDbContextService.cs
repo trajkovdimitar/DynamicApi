@@ -312,7 +312,7 @@ namespace TheBackend.DynamicModels
         sb.AppendLine("{");
         sb.AppendLine("    public class DynamicDbContext : DbContext");
         sb.AppendLine("    {");
-        sb.AppendLine("        public DynamicDbContext(DbContextOptions<DynamicDbContext> options) : base(options) {}");
+        sb.AppendLine("        public DynamicDbContext(DbContextOptions<DynamicDbContext> options) : base(options) { }");
         foreach (var model in models)
             sb.AppendLine($"        public DbSet<{model.ModelName}> {model.ModelName}s {{ get; set; }}");
         sb.AppendLine("        protected override void OnModelCreating(ModelBuilder modelBuilder)");
@@ -401,6 +401,19 @@ namespace TheBackend.DynamicModels
     {
         return _dynamicAssembly.GetTypes()
             .FirstOrDefault(t => t.Name.Equals(modelName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public IEnumerable<Type> GetAllModelTypes()
+    {
+        return _dynamicAssembly.GetTypes()
+            .Where(t => t.IsClass &&
+                        t.IsPublic &&
+                        !t.IsNested &&
+                        t.Namespace == "TheBackend.DynamicModels" &&
+                        t != _dynamicDbContextType &&
+                        !t.Name.EndsWith("Migration") &&
+                        !t.Name.EndsWith("DesignTimeFactory") &&
+                        !Attribute.IsDefined(t, typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute)));
     }
 
     public DbContext GetDbContext() => CreateDbContextInstance();

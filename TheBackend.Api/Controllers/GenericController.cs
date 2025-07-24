@@ -5,6 +5,7 @@ using TheBackend.DynamicModels;
 using TheBackend.Infrastructure.Repositories;
 using RulesEngine.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.OData.Query;
 using System.Linq;
 using TheBackend.Api;
 
