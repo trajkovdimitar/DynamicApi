@@ -312,7 +312,7 @@ namespace TheBackend.DynamicModels
         sb.AppendLine("{");
         sb.AppendLine("    public class DynamicDbContext : DbContext");
         sb.AppendLine("    {");
-        sb.AppendLine("        public DynamicDbContext(DbContextOptions<DynamicDbContext> options) : base(options) {}");
+        sb.AppendLine("        public DynamicDbContext(DbContextOptions<DynamicDbContext> options) : base(options) { }");
         foreach (var model in models)
             sb.AppendLine($"        public DbSet<{model.ModelName}> {model.ModelName}s {{ get; set; }}");
         sb.AppendLine("        protected override void OnModelCreating(ModelBuilder modelBuilder)");
