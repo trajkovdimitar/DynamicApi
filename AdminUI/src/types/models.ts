@@ -32,6 +32,11 @@ export interface Workflow {
     rules: Rule[];
 }
 
+export interface WorkflowDefinition {
+    workflowName: string;
+    steps: { type: string }[];
+}
+
 export interface ApiResponse<T> {
     success: boolean;
     message: string;

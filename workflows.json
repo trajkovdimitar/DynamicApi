@@ -1,0 +1,10 @@
+[
+  {
+    "WorkflowName": "Order.AfterCreate",
+    "Steps": [
+      {
+        "Type": "CreateInvoice"
+      }
+    ]
+  }
+]

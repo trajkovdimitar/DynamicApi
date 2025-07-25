@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using TheBackend.Application.Repositories;
 using TheBackend.DynamicModels;
+using TheBackend.DynamicModels.Workflows;
 using TheBackend.Infrastructure.Repositories;
 using RulesEngine.Models;
 using Microsoft.Extensions.Logging;
@@ -18,12 +19,14 @@ namespace TheBackend.Api.Controllers
     {
         private readonly DynamicDbContextService _dbContextService;
         private readonly BusinessRuleService _ruleService;
+        private readonly WorkflowService _workflowService;
         private readonly ILogger<GenericController> _logger;
 
-        public GenericController(DynamicDbContextService dbContextService, BusinessRuleService ruleService, ILogger<GenericController> logger)
+        public GenericController(DynamicDbContextService dbContextService, BusinessRuleService ruleService, WorkflowService workflowService, ILogger<GenericController> logger)
         {
             _dbContextService = dbContextService;
             _ruleService = ruleService;
+            _workflowService = workflowService;
             _logger = logger;
         }
 
@@ -113,6 +116,8 @@ namespace TheBackend.Api.Controllers
             var addMethod = repoType.GetMethod("AddAsync");
             var task = (Task)addMethod.Invoke(repo, new[] { entity });
             await task.ConfigureAwait(false);
+
+            await _workflowService.RunAsync($"{modelName}.AfterCreate", _dbContextService, entity);
 
             return Ok(ApiResponse<object>.Ok(entity));
         }

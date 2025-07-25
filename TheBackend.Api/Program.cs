@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.ModelBuilder;
 using TheBackend.DynamicModels;
+using TheBackend.DynamicModels.Workflows;
 using TheBackend.Domain.Models;
 using TheBackend.Api.Middleware;
 
@@ -10,6 +11,7 @@ builder.Services.AddSingleton<DynamicDbContextService>();
 builder.Services.AddSingleton<ModelHistoryService>();
 builder.Services.AddSingleton<RuleHistoryService>();
 builder.Services.AddSingleton<BusinessRuleService>();
+builder.Services.AddSingleton<WorkflowService>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
 builder.Services.AddCors(options =>
