@@ -14,5 +14,12 @@
         "Type": "CreateComment"
       }
     ]
+  },
+  {
+    "WorkflowName": "User.AfterCreate",
+    "Steps": [
+      { "Type": "CreatePost" },
+      { "Type": "CreateComment" }
+    ]
   }
 ]
