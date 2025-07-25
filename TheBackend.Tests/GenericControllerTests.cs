@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using TheBackend.Api;
 using TheBackend.Api.Controllers;
 using TheBackend.DynamicModels;
+using TheBackend.DynamicModels.Workflows;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +52,8 @@ public class GenericControllerTests
     {
         using var dbService = CreateService();
         var ruleService = new BusinessRuleService(Path.GetTempFileName());
-        var controller = new GenericController(dbService, ruleService, NullLogger<GenericController>.Instance);
+        var wfService = new WorkflowService();
+        var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance);
 
         var result = await controller.GetAll("UnknownModel");
 
@@ -65,7 +67,8 @@ public class GenericControllerTests
     {
         using var dbService = CreateService();
         var ruleService = new BusinessRuleService(Path.GetTempFileName());
-        var controller = new GenericController(dbService, ruleService, NullLogger<GenericController>.Instance);
+        var wfService = new WorkflowService();
+        var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance);
 
         var result = await controller.GetById("UnknownModel", "1");
 
@@ -82,7 +85,8 @@ public class GenericControllerTests
         try
         {
             var ruleService = new BusinessRuleService(tempFile);
-            var controller = new GenericController(dbService, ruleService, NullLogger<GenericController>.Instance)
+            var wfService = new WorkflowService();
+            var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance)
             {
                 ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
             };
@@ -112,7 +116,8 @@ public class GenericControllerTests
         try
         {
             var ruleService = new BusinessRuleService(tempFile);
-            var controller = new GenericController(dbService, ruleService, NullLogger<GenericController>.Instance)
+            var wfService = new WorkflowService();
+            var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance)
             {
                 ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
             };
@@ -144,7 +149,8 @@ public class GenericControllerTests
         try
         {
             var ruleService = new BusinessRuleService(tempFile);
-            var controller = new GenericController(dbService, ruleService, NullLogger<GenericController>.Instance)
+            var wfService = new WorkflowService();
+            var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance)
             {
                 ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
             };

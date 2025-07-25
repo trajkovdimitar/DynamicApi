@@ -142,4 +142,23 @@
       }
     ]
   }
+,
+  {
+    "ModelName": "Invoice",
+    "Properties": [
+      { "Name": "InvoiceId", "Type": "int", "IsKey": true, "IsRequired": true, "MaxLength": null },
+      { "Name": "OrderId", "Type": "int", "IsKey": false, "IsRequired": true, "MaxLength": null },
+      { "Name": "InvoiceDate", "Type": "DateTime", "IsKey": false, "IsRequired": true, "MaxLength": null },
+      { "Name": "Total", "Type": "decimal", "IsKey": false, "IsRequired": true, "MaxLength": null }
+    ],
+    "Relationships": [
+      {
+        "RelationshipType": "OneToOne",
+        "TargetModel": "Order",
+        "NavigationName": "Order",
+        "ForeignKey": "OrderId",
+        "InverseNavigation": "Invoice"
+      }
+    ]
+  }
 ]
