@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using TheBackend.DynamicModels;
 using TheBackend.Domain.Models;
+using System.Collections.Generic;
 
 namespace TheBackend.DynamicModels.Workflows;
 
@@ -17,6 +18,7 @@ public class WorkflowDefinition
 public class WorkflowStep
 {
     public string Type { get; set; } = string.Empty;
+    public Dictionary<string, object> Parameters { get; set; } = new();
 }
 
 public class WorkflowService
@@ -25,11 +27,17 @@ public class WorkflowService
     private readonly List<WorkflowDefinition> _workflows;
     private readonly object _lock = new();
     private readonly WorkflowHistoryService _historyService;
+    private readonly WorkflowStepExecutorRegistry _executorRegistry;
 
-    public WorkflowService(IConfiguration config, WorkflowHistoryService historyService, string? file = null)
+    public WorkflowService(
+        IConfiguration config,
+        WorkflowHistoryService historyService,
+        WorkflowStepExecutorRegistry executorRegistry,
+        string? file = null)
     {
         _file = file ?? "workflows.json";
         _historyService = historyService;
+        _executorRegistry = executorRegistry;
         _workflows = historyService.LoadDefinitions(_file);
     }
 
@@ -94,54 +102,21 @@ public class WorkflowService
         return Convert.ToHexString(sha.ComputeHash(bytes));
     }
 
-    public async Task RunAsync(string workflowName, DynamicDbContextService dbContextService, object entity)
+    public async Task RunAsync(
+        string workflowName,
+        DynamicDbContextService dbContextService,
+        object entity,
+        IServiceProvider serviceProvider)
     {
         var wf = GetWorkflow(workflowName);
         if (wf == null) return;
+
+        object? current = entity;
         foreach (var step in wf.Steps)
         {
-            if (step.Type.Equals("CreateInvoice", StringComparison.OrdinalIgnoreCase))
-            {
-                var type = dbContextService.GetModelType("Invoice");
-                if (type == null) continue;
-                var db = dbContextService.GetDbContext();
-                var invoice = Activator.CreateInstance(type)!;
-                var orderIdProp = entity.GetType().GetProperty("OrderId");
-                type.GetProperty("OrderId")?.SetValue(invoice, orderIdProp?.GetValue(entity));
-                type.GetProperty("InvoiceDate")?.SetValue(invoice, DateTime.UtcNow);
-                var amountProp = entity.GetType().GetProperty("Amount");
-                type.GetProperty("Total")?.SetValue(invoice, amountProp?.GetValue(entity));
-                db.Add(invoice);
-                await db.SaveChangesAsync();
-                entity = invoice;
-            }
-            else if (step.Type.Equals("CreatePost", StringComparison.OrdinalIgnoreCase))
-            {
-                var type = dbContextService.GetModelType("Post");
-                if (type == null) continue;
-                var db = dbContextService.GetDbContext();
-                var post = Activator.CreateInstance(type)!;
-                var idProp = entity.GetType().GetProperty("Id");
-                type.GetProperty("UserId")?.SetValue(post, idProp?.GetValue(entity));
-                type.GetProperty("Title")?.SetValue(post, "Auto generated post");
-                type.GetProperty("Content")?.SetValue(post, "Created via workflow");
-                db.Add(post);
-                await db.SaveChangesAsync();
-                entity = post;
-            }
-            else if (step.Type.Equals("CreateComment", StringComparison.OrdinalIgnoreCase))
-            {
-                var type = dbContextService.GetModelType("Comment");
-                if (type == null) continue;
-                var db = dbContextService.GetDbContext();
-                var comment = Activator.CreateInstance(type)!;
-                var postIdProp = entity.GetType().GetProperty("Id");
-                type.GetProperty("PostId")?.SetValue(comment, postIdProp?.GetValue(entity));
-                type.GetProperty("Content")?.SetValue(comment, "Auto comment");
-                db.Add(comment);
-                await db.SaveChangesAsync();
-                entity = comment;
-            }
+            var executor = _executorRegistry.GetExecutor(step.Type);
+            if (executor == null) continue;
+            current = await executor.ExecuteAsync(current, step, dbContextService, serviceProvider);
         }
     }
 }

@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using System.Collections.Generic;
 
 namespace TheBackend.Tests;
 
@@ -51,7 +52,9 @@ public class GenericControllerTests
     {
         var config = new ConfigurationBuilder().Build();
         var history = new WorkflowHistoryService(config);
-        return new WorkflowService(config, history);
+        var executors = new List<IWorkflowStepExecutor> { new CreateEntityExecutor() };
+        var registry = new WorkflowStepExecutorRegistry(executors);
+        return new WorkflowService(config, history, registry);
     }
 
     [Fact]
