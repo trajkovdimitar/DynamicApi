@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { getWorkflows, getWorkflow, saveWorkflow } from '../services/workflows';
+import { getWorkflows, getWorkflow, saveWorkflow, rollbackWorkflow } from '../services/workflows';
 import type { WorkflowDefinition } from '../types/models';
 
 export default function WorkflowsPage() {
@@ -35,8 +35,13 @@ export default function WorkflowsPage() {
             <ul>
                 {items.map(w => (
                     <li key={w.workflowName} className="flex justify-between">
-                        <span>{w.workflowName}</span>
-                        <button onClick={() => setEditing(w.workflowName)} className="text-blue-600">Edit</button>
+                        <span>{w.workflowName} (v{w.version ?? 1})</span>
+                        <div className="space-x-2">
+                            <button onClick={() => setEditing(w.workflowName)} className="text-blue-600">Edit</button>
+                            {w.version && w.version > 1 && (
+                                <button onClick={() => rollbackWorkflow(w.workflowName, w.version! - 1)} className="text-red-600">Rollback</button>
+                            )}
+                        </div>
                     </li>
                 ))}
             </ul>

@@ -23,3 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change log entries stored when workflows are saved.
 ### Changed
 - `WorkflowService` now loads and saves workflows from the database in addition to JSON.
+
+## [0.3.0] - 2025-07-26
+### Added
+- Workflow versioning with ability to rollback definitions.
+### Changed
+- Admin UI displays version and supports rollback.

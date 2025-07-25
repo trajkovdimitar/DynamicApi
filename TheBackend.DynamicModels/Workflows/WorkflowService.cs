@@ -11,6 +11,7 @@ public class WorkflowDefinition
 {
     public string WorkflowName { get; set; } = string.Empty;
     public List<WorkflowStep> Steps { get; set; } = new();
+    public int Version { get; set; }
 }
 
 public class WorkflowStep
@@ -32,16 +33,13 @@ public class WorkflowService
         _workflows = historyService.LoadDefinitions(_file);
     }
 
-    private void Save()
+    private void Save(WorkflowDefinition def)
     {
         lock (_lock)
         {
             var json = JsonConvert.SerializeObject(_workflows, Formatting.Indented);
             File.WriteAllText(_file, json);
-            foreach (var wf in _workflows)
-            {
-                _historyService.SaveDefinition(wf);
-            }
+            def.Version = _historyService.SaveDefinition(def);
         }
     }
 
@@ -64,10 +62,28 @@ public class WorkflowService
             var existing = _workflows.FirstOrDefault(x => x.WorkflowName.Equals(def.WorkflowName, StringComparison.OrdinalIgnoreCase));
             if (existing != null) _workflows.Remove(existing);
             _workflows.Add(def);
-            Save();
+            Save(def);
             var hash = ComputeHash(JsonConvert.SerializeObject(def));
             var action = existing == null ? "Created" : "Updated";
-            _historyService.RecordChange(def, action, hash);
+            _historyService.RecordChange(def, action, hash, def.Version);
+        }
+    }
+
+    public bool RollbackWorkflow(string workflowName, int version)
+    {
+        lock (_lock)
+        {
+            var target = _historyService.GetVersion(workflowName, version);
+            if (target == null)
+                return false;
+
+            var existing = _workflows.FirstOrDefault(x => x.WorkflowName.Equals(workflowName, StringComparison.OrdinalIgnoreCase));
+            if (existing != null) _workflows.Remove(existing);
+            _workflows.Add(target);
+            Save(target);
+            var hash = ComputeHash(JsonConvert.SerializeObject(target));
+            _historyService.RecordChange(target, "RolledBack", hash, target.Version);
+            return true;
         }
     }
 

@@ -35,11 +35,13 @@ export interface Workflow {
 export interface WorkflowDefinition {
     workflowName: string;
     steps: { type: string }[];
+    version?: number;
 }
 
 export interface WorkflowDefinition {
     workflowName: string;
     steps: { type: string }[];
+    version?: number;
 }
 
 export interface ApiResponse<T> {
