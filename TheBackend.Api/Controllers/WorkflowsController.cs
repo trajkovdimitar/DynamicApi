@@ -36,4 +36,13 @@ public class WorkflowsController : ControllerBase
         _service.SaveWorkflow(def);
         return Ok(ApiResponse<object>.Ok(def));
     }
+
+    [HttpPost("{name}/rollback/{version}")]
+    public IActionResult Rollback(string name, int version)
+    {
+        var result = _service.RollbackWorkflow(name, version);
+        return result
+            ? Ok(ApiResponse<string>.Ok($"Rolled back to version {version}"))
+            : NotFound(ApiResponse<string>.Fail("Version not found"));
+    }
 }

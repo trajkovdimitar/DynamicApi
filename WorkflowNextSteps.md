@@ -1,6 +1,6 @@
 # Next Tasks
 
-1. Implement workflow versioning to allow rollback of definitions.
+1. ~~Implement workflow versioning to allow rollback of definitions.~~
 2. Extend admin UI to manage workflows stored in the database.
 3. Document database schema updates and migration strategy.
 

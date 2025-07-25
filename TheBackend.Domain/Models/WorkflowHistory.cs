@@ -8,5 +8,6 @@ namespace TheBackend.Domain.Models
         public string Definition { get; set; } = string.Empty;
         public string Hash { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; }
+        public int Version { get; set; }
     }
 }

@@ -15,3 +15,7 @@ export async function getWorkflow(name: string): Promise<WorkflowDefinition> {
 export async function saveWorkflow(def: WorkflowDefinition): Promise<void> {
     await api.post('/workflows', def);
 }
+
+export async function rollbackWorkflow(name: string, version: number): Promise<void> {
+    await api.post(`/workflows/${name}/rollback/${version}`);
+}
