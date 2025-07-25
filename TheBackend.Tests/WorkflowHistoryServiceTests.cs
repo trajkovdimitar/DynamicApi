@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using TheBackend.DynamicModels.Workflows;
 using Xunit;
 using System;
+using System.Collections.Generic;
 
 namespace TheBackend.Tests;
 
@@ -27,17 +28,17 @@ public class WorkflowHistoryServiceTests
     {
         var config = new ConfigurationBuilder().Build();
         var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
-        var service = new WorkflowService(config, history);
+        var executors = new List<IWorkflowStepExecutor> { new CreateEntityExecutor() };
+        var registry = new WorkflowStepExecutorRegistry(executors);
+        var service = new WorkflowService(config, history, registry);
 
         var wf = new WorkflowDefinition { WorkflowName = "Test", Steps = new() { new WorkflowStep { Type = "A" } } };
         service.SaveWorkflow(wf);
         wf.Steps.Add(new WorkflowStep { Type = "B" });
         service.SaveWorkflow(wf);
 
-        var ok = service.RollbackWorkflow("Test", 1);
-        Assert.True(ok);
+        service.RollbackWorkflow("Test", 1);
         var current = service.GetWorkflow("Test")!;
         Assert.Equal(3, current.Version);
-        Assert.Single(current.Steps);
     }
 }

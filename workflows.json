@@ -3,7 +3,15 @@
     "WorkflowName": "Order.AfterCreate",
     "Steps": [
       {
-        "Type": "CreateInvoice"
+        "Type": "CreateEntity",
+        "Parameters": {
+          "ModelName": "Invoice",
+          "Mappings": [
+            { "To": "OrderId", "From": "OrderId", "SourceType": "Property" },
+            { "To": "InvoiceDate", "Value": "UtcNow", "SourceType": "Function" },
+            { "To": "Total", "From": "Amount", "SourceType": "Property" }
+          ]
+        }
       }
     ]
   }

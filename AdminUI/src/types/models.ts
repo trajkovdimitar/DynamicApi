@@ -32,15 +32,14 @@ export interface Workflow {
     rules: Rule[];
 }
 
-export interface WorkflowDefinition {
-    workflowName: string;
-    steps: { type: string }[];
-    version?: number;
+export interface WorkflowStep {
+    type: string;
+    parameters?: Record<string, unknown>;
 }
 
 export interface WorkflowDefinition {
     workflowName: string;
-    steps: { type: string }[];
+    steps: WorkflowStep[];
     version?: number;
 }
 

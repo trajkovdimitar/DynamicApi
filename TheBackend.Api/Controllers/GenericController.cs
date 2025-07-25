@@ -117,7 +117,11 @@ namespace TheBackend.Api.Controllers
             var task = (Task)addMethod.Invoke(repo, new[] { entity });
             await task.ConfigureAwait(false);
 
-            await _workflowService.RunAsync($"{modelName}.AfterCreate", _dbContextService, entity);
+            await _workflowService.RunAsync(
+                $"{modelName}.AfterCreate",
+                _dbContextService,
+                entity,
+                HttpContext.RequestServices);
 
             return Ok(ApiResponse<object>.Ok(entity));
         }

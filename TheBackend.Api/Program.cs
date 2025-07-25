@@ -13,6 +13,8 @@ builder.Services.AddSingleton<RuleHistoryService>();
 builder.Services.AddSingleton<WorkflowHistoryService>();
 builder.Services.AddSingleton<BusinessRuleService>();
 builder.Services.AddSingleton<WorkflowService>();
+builder.Services.AddTransient<IWorkflowStepExecutor, CreateEntityExecutor>();
+builder.Services.AddSingleton<WorkflowStepExecutorRegistry>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
 builder.Services.AddCors(options =>
