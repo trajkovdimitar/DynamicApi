@@ -1,5 +1,9 @@
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
+using System.Security.Cryptography;
+using System.Text;
 using TheBackend.DynamicModels;
+using TheBackend.Domain.Models;
 
 namespace TheBackend.DynamicModels.Workflows;
 
@@ -19,18 +23,13 @@ public class WorkflowService
     private readonly string _file;
     private readonly List<WorkflowDefinition> _workflows;
     private readonly object _lock = new();
+    private readonly WorkflowHistoryService _historyService;
 
-    public WorkflowService(string? file = null)
+    public WorkflowService(IConfiguration config, WorkflowHistoryService historyService, string? file = null)
     {
         _file = file ?? "workflows.json";
-        _workflows = Load(_file);
-    }
-
-    private static List<WorkflowDefinition> Load(string file)
-    {
-        if (!File.Exists(file)) return new();
-        var json = File.ReadAllText(file);
-        return JsonConvert.DeserializeObject<List<WorkflowDefinition>>(json) ?? new();
+        _historyService = historyService;
+        _workflows = historyService.LoadDefinitions(_file);
     }
 
     private void Save()
@@ -39,6 +38,10 @@ public class WorkflowService
         {
             var json = JsonConvert.SerializeObject(_workflows, Formatting.Indented);
             File.WriteAllText(_file, json);
+            foreach (var wf in _workflows)
+            {
+                _historyService.SaveDefinition(wf);
+            }
         }
     }
 
@@ -62,7 +65,17 @@ public class WorkflowService
             if (existing != null) _workflows.Remove(existing);
             _workflows.Add(def);
             Save();
+            var hash = ComputeHash(JsonConvert.SerializeObject(def));
+            var action = existing == null ? "Created" : "Updated";
+            _historyService.RecordChange(def, action, hash);
         }
+    }
+
+    private static string ComputeHash(string content)
+    {
+        using var sha = SHA256.Create();
+        var bytes = Encoding.UTF8.GetBytes(content);
+        return Convert.ToHexString(sha.ComputeHash(bytes));
     }
 
     public async Task RunAsync(string workflowName, DynamicDbContextService dbContextService, object entity)

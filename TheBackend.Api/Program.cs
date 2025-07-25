@@ -10,6 +10,7 @@ builder.Services.AddSingleton<ModelDefinitionService>();
 builder.Services.AddSingleton<DynamicDbContextService>();
 builder.Services.AddSingleton<ModelHistoryService>();
 builder.Services.AddSingleton<RuleHistoryService>();
+builder.Services.AddSingleton<WorkflowHistoryService>();
 builder.Services.AddSingleton<BusinessRuleService>();
 builder.Services.AddSingleton<WorkflowService>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
