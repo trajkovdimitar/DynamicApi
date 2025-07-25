@@ -55,7 +55,7 @@ public class WorkflowHistoryService
         using var ctx = new ModelHistoryDbContext(_options);
         var json = JsonConvert.SerializeObject(def);
         var existing = ctx.WorkflowDefinitions
-            .FirstOrDefault(x => x.WorkflowName.Equals(def.WorkflowName, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(x => x.WorkflowName.ToLower() == def.WorkflowName.ToLower());
         var version = existing == null ? 1 : existing.Version + 1;
         if (existing == null)
             ctx.WorkflowDefinitions.Add(new WorkflowDefinitionRecord { WorkflowName = def.WorkflowName, Definition = json, Version = version });
