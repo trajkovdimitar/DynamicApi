@@ -47,12 +47,19 @@ public class GenericControllerTests
         return service;
     }
 
+    private static WorkflowService CreateWorkflowService()
+    {
+        var config = new ConfigurationBuilder().Build();
+        var history = new WorkflowHistoryService(config);
+        return new WorkflowService(config, history);
+    }
+
     [Fact]
     public async Task GetAll_ReturnsNotFound_ForUnknownModel()
     {
         using var dbService = CreateService();
         var ruleService = new BusinessRuleService(Path.GetTempFileName());
-        var wfService = new WorkflowService();
+        var wfService = CreateWorkflowService();
         var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance);
 
         var result = await controller.GetAll("UnknownModel");
@@ -67,7 +74,7 @@ public class GenericControllerTests
     {
         using var dbService = CreateService();
         var ruleService = new BusinessRuleService(Path.GetTempFileName());
-        var wfService = new WorkflowService();
+        var wfService = CreateWorkflowService();
         var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance);
 
         var result = await controller.GetById("UnknownModel", "1");
@@ -85,7 +92,7 @@ public class GenericControllerTests
         try
         {
             var ruleService = new BusinessRuleService(tempFile);
-            var wfService = new WorkflowService();
+            var wfService = CreateWorkflowService();
             var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance)
             {
                 ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
@@ -116,7 +123,7 @@ public class GenericControllerTests
         try
         {
             var ruleService = new BusinessRuleService(tempFile);
-            var wfService = new WorkflowService();
+            var wfService = CreateWorkflowService();
             var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance)
             {
                 ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
@@ -149,7 +156,7 @@ public class GenericControllerTests
         try
         {
             var ruleService = new BusinessRuleService(tempFile);
-            var wfService = new WorkflowService();
+            var wfService = CreateWorkflowService();
             var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance)
             {
                 ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }

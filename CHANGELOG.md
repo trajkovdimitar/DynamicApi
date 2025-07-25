@@ -16,3 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Nothing.
+
+## [0.2.0] - 2025-07-25
+### Added
+- Workflow definitions persisted to database via `WorkflowHistoryService`.
+- Change log entries stored when workflows are saved.
+### Changed
+- `WorkflowService` now loads and saves workflows from the database in addition to JSON.
