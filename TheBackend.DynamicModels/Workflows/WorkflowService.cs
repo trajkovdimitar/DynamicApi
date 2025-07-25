@@ -84,6 +84,34 @@ public class WorkflowService
                 type.GetProperty("Total")?.SetValue(invoice, amountProp?.GetValue(entity));
                 db.Add(invoice);
                 await db.SaveChangesAsync();
+                entity = invoice;
+            }
+            else if (step.Type.Equals("CreatePost", StringComparison.OrdinalIgnoreCase))
+            {
+                var type = dbContextService.GetModelType("Post");
+                if (type == null) continue;
+                var db = dbContextService.GetDbContext();
+                var post = Activator.CreateInstance(type)!;
+                var idProp = entity.GetType().GetProperty("Id");
+                type.GetProperty("UserId")?.SetValue(post, idProp?.GetValue(entity));
+                type.GetProperty("Title")?.SetValue(post, "Auto generated post");
+                type.GetProperty("Content")?.SetValue(post, "Created via workflow");
+                db.Add(post);
+                await db.SaveChangesAsync();
+                entity = post;
+            }
+            else if (step.Type.Equals("CreateComment", StringComparison.OrdinalIgnoreCase))
+            {
+                var type = dbContextService.GetModelType("Comment");
+                if (type == null) continue;
+                var db = dbContextService.GetDbContext();
+                var comment = Activator.CreateInstance(type)!;
+                var postIdProp = entity.GetType().GetProperty("Id");
+                type.GetProperty("PostId")?.SetValue(comment, postIdProp?.GetValue(entity));
+                type.GetProperty("Content")?.SetValue(comment, "Auto comment");
+                db.Add(comment);
+                await db.SaveChangesAsync();
+                entity = comment;
             }
         }
     }
