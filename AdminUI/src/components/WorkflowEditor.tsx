@@ -27,9 +27,17 @@ export function WorkflowEditor({ initialWorkflow, onSave }: Props) {
         onSave(def);
     };
 
-    const addTrigger = () => {
+    const addTrigger = async () => {
         if (!designerRef.current) return;
-        designerRef.current.addActivity({ type: 'HttpEndpoint', properties: { path: '/triggers/my-event', methods: ['POST'] } });
+
+        // Obtain the underlying flowchart element which exposes the addActivity API.
+        const chart = await designerRef.current.getFlowchart();
+        if (!chart) return;
+
+        await chart.addActivity({
+            type: 'HttpEndpoint',
+            properties: { path: '/triggers/my-event', methods: ['POST'] }
+        });
     };
 
     return (
