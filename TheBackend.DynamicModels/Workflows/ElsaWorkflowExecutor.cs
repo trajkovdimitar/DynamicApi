@@ -19,7 +19,8 @@ public class ElsaWorkflowExecutor : IWorkflowStepExecutor
         object? inputEntity,
         WorkflowStep step,
         DynamicDbContextService dbContextService,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        Dictionary<string, object> variables)
     {
         var runner = serviceProvider.GetRequiredService<IWorkflowRunner>();
         var defService = serviceProvider.GetRequiredService<IWorkflowDefinitionService>();

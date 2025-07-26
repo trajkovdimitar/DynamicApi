@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using TheBackend.DynamicModels.Workflows;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ public class WorkflowHistoryServiceTests
         var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
         var executors = new List<IWorkflowStepExecutor> { new CreateEntityExecutor() };
         var registry = new WorkflowStepExecutorRegistry(executors);
-        var service = new WorkflowService(config, history, registry);
+        var service = new WorkflowService(config, history, registry, NullLogger<WorkflowService>.Instance);
 
         var wf = new WorkflowDefinition { WorkflowName = "Test", Steps = new() { new WorkflowStep { Type = "A" } } };
         service.SaveWorkflow(wf);

@@ -54,7 +54,11 @@ public class GenericControllerTests
         var history = new WorkflowHistoryService(config);
         var executors = new List<IWorkflowStepExecutor> { new CreateEntityExecutor() };
         var registry = new WorkflowStepExecutorRegistry(executors);
-        return new WorkflowService(config, history, registry);
+        return new WorkflowService(
+            config,
+            history,
+            registry,
+            NullLogger<WorkflowService>.Instance);
     }
 
     [Fact]

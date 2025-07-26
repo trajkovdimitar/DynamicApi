@@ -9,7 +9,12 @@ public class CreateEntityExecutor : IWorkflowStepExecutor
 {
     public string SupportedType => "CreateEntity";
 
-    public async Task<object?> ExecuteAsync(object? inputEntity, WorkflowStep step, DynamicDbContextService dbContextService, IServiceProvider serviceProvider)
+    public async Task<object?> ExecuteAsync(
+        object? inputEntity,
+        WorkflowStep step,
+        DynamicDbContextService dbContextService,
+        IServiceProvider serviceProvider,
+        Dictionary<string, object> variables)
     {
         if (!step.Parameters.TryGetValue("ModelName", out var modelNameObj) || modelNameObj is not string modelName)
             throw new InvalidOperationException("Missing ModelName parameter.");
@@ -42,6 +47,11 @@ public class CreateEntityExecutor : IWorkflowStepExecutor
                     case "Function":
                         if (mapping.TryGetValue("Value", out var func) && func is string funcName)
                             value = EvaluateFunction(funcName);
+                        break;
+                    case "Variable":
+                        if (mapping.TryGetValue("From", out var varObj) && varObj is string varName &&
+                            variables.TryGetValue(varName, out var varVal))
+                            value = varVal;
                         break;
                     default:
                         if (mapping.TryGetValue("From", out var fromObj) && fromObj is string fromProp)
