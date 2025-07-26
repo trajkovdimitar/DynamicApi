@@ -53,3 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Elsa workflow engine packages, executors, and frontend integrations.
 ### Added
 - Documentation with strict development guidelines.
+
+## [0.9.0] - 2025-07-29
+### Added
+- Workflows now execute after entity updates and deletions.

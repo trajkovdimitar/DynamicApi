@@ -175,6 +175,12 @@ namespace TheBackend.Api.Controllers
             var task = (Task)updateMethod.Invoke(repo, new[] { entity });
             await task.ConfigureAwait(false);
 
+            await _workflowService.RunAsync(
+                $"{modelName}.AfterUpdate",
+                _dbContextService,
+                entity,
+                HttpContext.RequestServices);
+
             return Ok(ApiResponse<object>.Ok(entity));
         }
 
@@ -214,6 +220,12 @@ namespace TheBackend.Api.Controllers
             var deleteMethod = repoType.GetMethod("DeleteAsync");
             var task = (Task)deleteMethod.Invoke(repo, new[] { convertedId });
             await task.ConfigureAwait(false);
+
+            await _workflowService.RunAsync(
+                $"{modelName}.AfterDelete",
+                _dbContextService,
+                convertedId,
+                HttpContext.RequestServices);
 
             return Ok(ApiResponse<object>.Ok(null!, "Deleted"));
         }

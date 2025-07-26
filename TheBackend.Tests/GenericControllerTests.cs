@@ -49,7 +49,7 @@ public class GenericControllerTests
         return service;
     }
 
-    private static WorkflowService CreateWorkflowService()
+    private static WorkflowService CreateWorkflowService(params IWorkflowStepExecutor[] extras)
     {
         var config = new ConfigurationBuilder().Build();
         var history = new WorkflowHistoryService(config);
@@ -58,6 +58,7 @@ public class GenericControllerTests
             new CreateEntityExecutor<object, object>(),
             new UpdateEntityExecutor<object, object>(NullLogger<UpdateEntityExecutor<object, object>>.Instance)
         };
+        executors.AddRange(extras);
         var services = new ServiceCollection();
         foreach (var ex in executors)
             services.AddSingleton(ex.GetType(), ex);
@@ -206,6 +207,82 @@ public class GenericControllerTests
             File.Delete(tempFile);
         }
     }
+
+    [Fact]
+    public async Task Put_ExecutesAfterUpdateWorkflow()
+    {
+        using var dbService = CreateInMemoryService();
+        var tempFile = Path.GetTempFileName();
+        var executor = new CountingExecutor();
+        try
+        {
+            var ruleService = new BusinessRuleService(tempFile);
+            var wfService = CreateWorkflowService(executor);
+            var wf = new WorkflowDefinition
+            {
+                WorkflowName = $"{nameof(TestEntity)}.AfterUpdate",
+                Steps = new List<WorkflowStep> { new() { Type = executor.SupportedType } },
+                IsTransactional = false
+            };
+            wfService.SaveWorkflow(wf);
+            var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance)
+            {
+                ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+            };
+
+            var entity = new TestEntity { Id = 10, Name = "old" };
+            controller.ControllerContext.HttpContext.Request.Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(entity)));
+            await controller.Post(nameof(TestEntity));
+
+            var updated = new TestEntity { Id = 10, Name = "new" };
+            controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+            controller.ControllerContext.HttpContext.Request.Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(updated)));
+            await controller.Put(nameof(TestEntity), "10");
+
+            Assert.Equal(1, executor.Count);
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public async Task Delete_ExecutesAfterDeleteWorkflow()
+    {
+        using var dbService = CreateInMemoryService();
+        var tempFile = Path.GetTempFileName();
+        var executor = new CountingExecutor();
+        try
+        {
+            var ruleService = new BusinessRuleService(tempFile);
+            var wfService = CreateWorkflowService(executor);
+            var wf = new WorkflowDefinition
+            {
+                WorkflowName = $"{nameof(TestEntity)}.AfterDelete",
+                Steps = new List<WorkflowStep> { new() { Type = executor.SupportedType } },
+                IsTransactional = false
+            };
+            wfService.SaveWorkflow(wf);
+            var controller = new GenericController(dbService, ruleService, wfService, NullLogger<GenericController>.Instance)
+            {
+                ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+            };
+
+            var entity = new TestEntity { Id = 11, Name = "temp" };
+            controller.ControllerContext.HttpContext.Request.Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(entity)));
+            await controller.Post(nameof(TestEntity));
+
+            controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+            await controller.Delete(nameof(TestEntity), "11");
+
+            Assert.Equal(1, executor.Count);
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
 }
 
 public class TestEntity
@@ -218,4 +295,21 @@ public class TestDbContext : DbContext
 {
     public TestDbContext(DbContextOptions<TestDbContext> options) : base(options) { }
     public DbSet<TestEntity> TestEntities { get; set; } = null!;
+}
+
+public class CountingExecutor : IWorkflowStepExecutor<object, object>
+{
+    public string SupportedType => "Count";
+    public int Count { get; private set; }
+
+    public Task<object?> ExecuteAsync(
+        object? input,
+        WorkflowStep step,
+        DynamicDbContextService dbContextService,
+        IServiceProvider serviceProvider,
+        Dictionary<string, object> variables)
+    {
+        Count++;
+        return Task.FromResult(input);
+    }
 }
