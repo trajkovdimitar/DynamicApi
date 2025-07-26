@@ -277,6 +277,39 @@ namespace TheBackend.DynamicModels
             sb.AppendLine($"        public {fkType} {rel.ForeignKey} {{ get; set; }}");
         }
 
+        var inverseNavigations = allModels
+            .SelectMany(m => m.Relationships.Select(r => (Model: m, Rel: r)))
+            .Where(x =>
+                x.Rel.TargetModel == model.ModelName &&
+                !string.IsNullOrWhiteSpace(x.Rel.InverseNavigation))
+            .ToList();
+
+        foreach (var (sourceModel, rel) in inverseNavigations)
+        {
+            var inverseName = rel.InverseNavigation!;
+            if (model.Relationships.Any(r => r.NavigationName == inverseName) ||
+                model.Properties.Any(p => p.Name == inverseName))
+            {
+                continue;
+            }
+            var relationshipType = rel.RelationshipType switch
+            {
+                "ManyToOne" => "OneToMany",
+                "OneToMany" => "ManyToOne",
+                _ => rel.RelationshipType
+            };
+            var isCollection = relationshipType == "OneToMany" || relationshipType == "ManyToMany";
+            if (isCollection)
+            {
+                sb.AppendLine(
+                    $"        public ICollection<{sourceModel.ModelName}> {inverseName} {{ get; set; }} = new List<{sourceModel.ModelName}>();");
+            }
+            else
+            {
+                sb.AppendLine($"        public {sourceModel.ModelName}? {inverseName} {{ get; set; }}");
+            }
+        }
+
         foreach (var rel in model.Relationships)
         {
             var fkOnThis = rel.RelationshipType == "ManyToOne" || rel.RelationshipType == "OneToOne";
@@ -359,7 +392,7 @@ namespace TheBackend.DynamicModels
                         {
                             sb.AppendLine();
                             sb.AppendLine(
-                                $"                    .HasForeignKey<{rel.TargetModel}>(d => d.{rel.ForeignKey});");
+                                $"                    .HasForeignKey(d => d.{rel.ForeignKey});");
                         }
                         else
                         {
