@@ -11,8 +11,8 @@ using TheBackend.DynamicModels;
 namespace TheBackend.DynamicModels.Migrations
 {
     [DbContext(typeof(DynamicDbContext))]
-    [Migration("20250723231959_AutoMigration_20250723231955")]
-    partial class AutoMigration_20250723231955
+    [Migration("20250725223543_AutoMigration_20250725223537")]
+    partial class AutoMigration_20250725223537
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

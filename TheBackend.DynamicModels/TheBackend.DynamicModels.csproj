@@ -30,5 +30,8 @@
   <ItemGroup>
     <ProjectReference Include="..\TheBackend.Domain\TheBackend.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TheBackend\DynamicModels\" />
+  </ItemGroup>
 
 </Project>
