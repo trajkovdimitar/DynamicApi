@@ -19,7 +19,7 @@ export function FormFieldBuilder({ fields, values, onChange }: Props) {
                     <input
                         className="border rounded p-2 dark:bg-neutral-800"
                         type={f.type}
-                        value={values[f.name] ?? ''}
+                        value={values[f.name] as string || ''}
                         onChange={e => onChange(f.name, e.target.value)}
                     />
                 </div>

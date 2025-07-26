@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ElsaWorkflowDesigner } from '@elsa-workflows/elsa-workflows-designer';
+import { defineCustomElements } from '@elsa-workflows/elsa-workflows-studio/loader';
 import type { WorkflowDefinition } from '../types/models';
 import { elsaWorkflowSchema } from '../utils/workflowUtils';
 
@@ -13,6 +13,7 @@ export function WorkflowEditor({ initialWorkflow, onSave }: Props) {
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
+        defineCustomElements(window);
         if (designerRef.current && !loaded) {
             designerRef.current.workflow = initialWorkflow;
             setLoaded(true);
@@ -33,7 +34,7 @@ export function WorkflowEditor({ initialWorkflow, onSave }: Props) {
 
     return (
         <div style={{ height: '600px' }}>
-            <ElsaWorkflowDesigner ref={designerRef} serverUrl="/elsa/api" />
+            <elsa-workflow-definition-editor ref={designerRef} server-url="/elsa/api"></elsa-workflow-definition-editor>
             <div className="mt-2 space-x-2">
                 <button className="px-3 py-1 bg-green-600 text-white" onClick={addTrigger}>Add Event Trigger</button>
                 <button className="px-3 py-1 bg-blue-600 text-white" onClick={handleSave}>Save</button>

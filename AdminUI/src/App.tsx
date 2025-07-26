@@ -6,6 +6,7 @@ import DataBrowser from './pages/DataBrowser';
 import RecordEditor from './pages/RecordEditor';
 import RulesPage from './pages/RulesPage';
 import WorkflowsPage from './pages/WorkflowsPage';
+import ElsaDashboard from './pages/ElsaDashboard';
 import { Layout } from './layout/Layout';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
                     <Route path="/data/:name/:id" element={<RecordEditor />} />
                     <Route path="/rules" element={<RulesPage />} />
                     <Route path="/workflows" element={<WorkflowsPage />} />
+                    <Route path="/workflow-dashboard" element={<ElsaDashboard />} />
                 </Routes>
             </Layout>
         </BrowserRouter>
