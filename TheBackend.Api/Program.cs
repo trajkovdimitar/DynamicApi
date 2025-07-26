@@ -4,6 +4,8 @@ using TheBackend.DynamicModels;
 using TheBackend.DynamicModels.Workflows;
 using TheBackend.Domain.Models;
 using TheBackend.Api.Middleware;
+using TheBackend.Application.Services;
+using TheBackend.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<ModelDefinitionService>();
@@ -16,6 +18,11 @@ builder.Services.AddSingleton<WorkflowService>();
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new CreateEntityExecutor<object, object>());
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new UpdateEntityExecutor<object, object>(sp.GetRequiredService<ILogger<UpdateEntityExecutor<object, object>>>()));
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new ElsaWorkflowExecutor<object>());
+builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new QueryEntityExecutor<object, object>());
+builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new SendEmailExecutor<object>(sp.GetRequiredService<IEmailService>()));
+builder.Services.AddTransient(typeof(IWorkflowStepExecutor<,>), typeof(QueryEntityExecutor<,>));
+builder.Services.AddTransient(typeof(IWorkflowStepExecutor<,>), typeof(SendEmailExecutor<>));
+builder.Services.AddTransient<IEmailService, LoggingEmailService>();
 builder.Services.AddSingleton<WorkflowStepExecutorRegistry>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 

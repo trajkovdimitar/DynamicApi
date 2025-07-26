@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using TheBackend.DynamicModels.Workflows;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,11 @@ public class WorkflowHistoryServiceTests
         {
             new CreateEntityExecutor<object, object>()
         };
-        var registry = new WorkflowStepExecutorRegistry(executors);
+        var services = new ServiceCollection();
+        foreach (var ex in executors)
+            services.AddSingleton(ex.GetType(), ex);
+        var provider = services.BuildServiceProvider();
+        var registry = new WorkflowStepExecutorRegistry(executors, provider);
         var service = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
 
         var wf = new WorkflowDefinition { WorkflowName = "Test", Steps = new() { new WorkflowStep { Type = "A" } } };
