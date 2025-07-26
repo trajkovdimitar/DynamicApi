@@ -34,13 +34,50 @@ export interface Workflow {
 
 export interface WorkflowStep {
     type: string;
-    parameters?: Record<string, unknown>;
+    parameters?: Parameter[];
+    condition?: string;
+    onError?: string;
+    outputVariable?: string;
 }
 
 export interface WorkflowDefinition {
     workflowName: string;
     steps: WorkflowStep[];
     version?: number;
+    isTransactional: boolean;
+    globalVariables: Parameter[];
+}
+
+export interface WorkflowNodeData {
+    step: WorkflowStep;
+}
+
+export interface WorkflowEdge {
+    id: string;
+    source: string;
+    target: string;
+}
+
+export const stepTypes = [
+    'CreateEntity',
+    'UpdateEntity',
+    'QueryEntity',
+    'SendEmail',
+    'ElsaWorkflow',
+] as const;
+
+export const valueTypes = [
+    'string',
+    'int',
+    'bool',
+    'double',
+    'json',
+] as const;
+
+export interface Parameter {
+    key: string;
+    valueType: (typeof valueTypes)[number];
+    value: string;
 }
 
 export interface ApiResponse<T> {

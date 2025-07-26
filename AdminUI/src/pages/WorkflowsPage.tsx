@@ -1,43 +1,37 @@
-import { useEffect, useState, useRef } from 'react';
+import { useState } from 'react';
 import { getWorkflows, getWorkflow, saveWorkflow, rollbackWorkflow } from '../services/workflows';
 import type { WorkflowDefinition } from '../types/models';
+import { WorkflowEditor } from '../components/WorkflowEditor';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function WorkflowsPage() {
-    const [items, setItems] = useState<WorkflowDefinition[]>([]);
-    const [editing, setEditing] = useState<string | null>(null);
-    const designerRef = useRef<HTMLDivElement>(null);
+    const queryClient = useQueryClient();
+    const { data: items } = useQuery(['workflows'], getWorkflows);
+    const [editing, setEditing] = useState<WorkflowDefinition | null>(null);
 
-    useEffect(() => {
-        getWorkflows().then(setItems);
-    }, []);
+    const saveMutation = useMutation(saveWorkflow, {
+        onSuccess: () => queryClient.invalidateQueries(['workflows']),
+    });
 
-    useEffect(() => {
-        if (!editing || !designerRef.current) return;
-        (async () => {
-            const wf = await getWorkflow(editing);
-            const el = designerRef.current as any;
-            el.workflow = wf;
-        })();
-    }, [editing]);
+    const openEditor = async (name: string) => {
+        const wf = await getWorkflow(name);
+        setEditing(wf);
+    };
 
-    const save = async () => {
-        if (!designerRef.current) return;
-        const el = designerRef.current as any;
-        await saveWorkflow(el.workflow as WorkflowDefinition);
+    const save = async (def: WorkflowDefinition) => {
+        await saveMutation.mutateAsync(def);
         setEditing(null);
-        const data = await getWorkflows();
-        setItems(data);
     };
 
     return (
         <div className="p-4 space-y-2">
             <h2 className="text-xl font-semibold">Workflows</h2>
             <ul>
-                {items.map(w => (
+                {(items ?? []).map(w => (
                     <li key={w.workflowName} className="flex justify-between">
                         <span>{w.workflowName} (v{w.version ?? 1})</span>
                         <div className="space-x-2">
-                            <button onClick={() => setEditing(w.workflowName)} className="text-blue-600">Edit</button>
+                            <button onClick={() => openEditor(w.workflowName)} className="text-blue-600">Edit</button>
                             {w.version && w.version > 1 && (
                                 <button onClick={() => rollbackWorkflow(w.workflowName, w.version! - 1)} className="text-red-600">Rollback</button>
                             )}
@@ -47,10 +41,9 @@ export default function WorkflowsPage() {
             </ul>
             {editing && (
                 <div className="space-y-2">
-                    <div ref={designerRef} className="border h-[600px]" data-theme="light"></div>
+                    <WorkflowEditor initialWorkflow={editing} onSave={save} />
                     <div className="space-x-2">
                         <button onClick={() => setEditing(null)} className="px-4 py-1 bg-gray-300">Cancel</button>
-                        <button onClick={save} className="px-4 py-1 bg-blue-600 text-white">Save</button>
                     </div>
                 </div>
             )}
