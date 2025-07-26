@@ -6,30 +6,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
-    const { data: items } = useQuery<WorkflowDefinition[]>({
-        queryKey: ['workflows'],
-        queryFn: getWorkflows
-    });
+    const { data: items } = useQuery(['workflows'], getWorkflows);
     const [editing, setEditing] = useState<WorkflowDefinition | null>(null);
 
-    const saveMutation = useMutation<void, Error, WorkflowDefinition>({
-        mutationFn: saveWorkflow,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['workflows'] })
+    const saveMutation = useMutation(saveWorkflow, {
+        onSuccess: () => queryClient.invalidateQueries(['workflows']),
     });
 
-    const openEditor = async (name: string) => {
-        const wf = await getWorkflow(name);
-        setEditing(wf);
-    };
-
-    const createNew = () => {
-        setEditing({
-            workflowName: '',
-            steps: [],
-            version: 1,
-            isTransactional: true,
-            globalVariables: []
-        });
+    const openEditor = async (name: string | null) => {
+        if (name) {
+            const wf = await getWorkflow(name);
+            setEditing(wf);
+        } else {
+            setEditing({ workflowName: '', steps: [], isTransactional: false, globalVariables: [] });
+        }
     };
 
     const save = async (def: WorkflowDefinition) => {
@@ -39,12 +29,12 @@ export default function WorkflowsPage() {
 
     return (
         <div className="p-4 space-y-2">
-            <div className="flex justify-between">
-                <h2 className="text-xl font-semibold">Workflows</h2>
-                <button onClick={createNew} className="px-4 py-1 bg-blue-600 text-white">Create New</button>
+            <h2 className="text-xl font-semibold">Workflows</h2>
+            <div className="space-y-2">
+                <button className="px-4 py-1 bg-blue-600 text-white" onClick={() => openEditor(null)}>New Workflow</button>
             </div>
             <ul>
-                {(items ?? []).map((w: WorkflowDefinition) => (
+                {(items ?? []).map(w => (
                     <li key={w.workflowName} className="flex justify-between">
                         <span>{w.workflowName} (v{w.version ?? 1})</span>
                         <div className="space-x-2">
