@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace TheBackend.DynamicModels.Workflows;
 
 public class WorkflowDefinition
@@ -19,6 +22,8 @@ public class GlobalVariable
     {
         "int" => int.TryParse(Value, out var i) ? i : Value,
         "bool" => bool.TryParse(Value, out var b) ? b : Value,
+        "double" => double.TryParse(Value, out var d) ? d : Value,
+        "json" => JsonSerializer.Deserialize<object>(Value),
         _ => Value,
     };
 }
@@ -26,6 +31,7 @@ public class GlobalVariable
 public class WorkflowStep
 {
     public string Type { get; set; } = string.Empty;
+    [JsonConverter(typeof(ParameterListJsonConverter))]
     public List<Parameter> Parameters { get; set; } = new();
     public string? Condition { get; set; }
     public string? OnError { get; set; }
@@ -42,6 +48,8 @@ public class Parameter
     {
         "int" => int.TryParse(Value, out var i) ? i : Value,
         "bool" => bool.TryParse(Value, out var b) ? b : Value,
+        "double" => double.TryParse(Value, out var d) ? d : Value,
+        "json" => JsonSerializer.Deserialize<object>(Value),
         _ => Value,
     };
 }
