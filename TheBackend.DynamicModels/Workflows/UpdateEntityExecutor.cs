@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace TheBackend.DynamicModels.Workflows;
 
@@ -59,9 +60,22 @@ public class UpdateEntityExecutor<TInput, TOutput> : IWorkflowStepExecutor<TInpu
         if (entity == null)
             throw new KeyNotFoundException("Entity not found");
 
-        var mappings = paramDict.TryGetValue("Mappings", out var mapObj) && mapObj is IEnumerable<object> list
-            ? list.OfType<Dictionary<string, object>>()
-            : Enumerable.Empty<Dictionary<string, object>>();
+        IEnumerable<Dictionary<string, object>> mappings = Enumerable.Empty<Dictionary<string, object>>();
+        if (paramDict.TryGetValue("Mappings", out var mapObj))
+        {
+            if (mapObj is IEnumerable<object> list)
+            {
+                mappings = list.OfType<Dictionary<string, object>>();
+            }
+            else if (mapObj is System.Text.Json.JsonElement elem && elem.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                mappings = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(elem.GetRawText()) ?? new();
+            }
+            else if (mapObj is string str)
+            {
+                mappings = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(str) ?? new();
+            }
+        }
 
         var entityType = entity.GetType();
         var inputType = inputEntity?.GetType();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace TheBackend.DynamicModels.Workflows;
@@ -26,9 +27,22 @@ public class CreateEntityExecutor<TInput, TOutput> : IWorkflowStepExecutor<TInpu
         var newEntity = Activator.CreateInstance(modelType)!;
         var inputType = inputEntity?.GetType();
 
-        var mappings = paramDict.TryGetValue("Mappings", out var mappingsObj) && mappingsObj is IEnumerable<object> list
-            ? list.OfType<Dictionary<string, object>>()
-            : Enumerable.Empty<Dictionary<string, object>>();
+        IEnumerable<Dictionary<string, object>> mappings = Enumerable.Empty<Dictionary<string, object>>();
+        if (paramDict.TryGetValue("Mappings", out var mappingsObj))
+        {
+            if (mappingsObj is IEnumerable<object> list)
+            {
+                mappings = list.OfType<Dictionary<string, object>>();
+            }
+            else if (mappingsObj is System.Text.Json.JsonElement elem && elem.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                mappings = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(elem.GetRawText()) ?? new();
+            }
+            else if (mappingsObj is string str)
+            {
+                mappings = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(str) ?? new();
+            }
+        }
 
         foreach (var mapping in mappings)
         {
