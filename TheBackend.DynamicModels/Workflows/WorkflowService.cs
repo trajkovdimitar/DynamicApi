@@ -5,6 +5,9 @@ using TheBackend.DynamicModels;
 using TheBackend.Domain.Models;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using Polly;
 
 namespace TheBackend.DynamicModels.Workflows;
 
@@ -109,7 +112,8 @@ public class WorkflowService
         {
             foreach (var step in wf.Steps)
             {
-                if (!string.IsNullOrEmpty(step.Condition) && !EvaluateCondition(step.Condition, current, variables))
+                if (!string.IsNullOrEmpty(step.Condition) &&
+                    !await EvaluateConditionAsync(step.Condition, current, variables))
                 {
                     _logger.LogInformation("Skipping step {Type} due to condition", step.Type);
                     continue;
@@ -122,7 +126,15 @@ public class WorkflowService
                     continue;
                 }
 
-                current = await ((dynamic)executor).ExecuteAsync((dynamic)current, step, dbContextService, serviceProvider, variables);
+                current = await HandleStepError(
+                    () => ((dynamic)executor).ExecuteAsync(
+                        (dynamic)current,
+                        step,
+                        dbContextService,
+                        serviceProvider,
+                        variables),
+                    step,
+                    current);
                 if (!string.IsNullOrEmpty(step.OutputVariable))
                     variables[step.OutputVariable] = current!;
             }
@@ -141,9 +153,66 @@ public class WorkflowService
         }
     }
 
-    private static bool EvaluateCondition(string condition, object? current, Dictionary<string, object> variables)
+    private async Task<bool> EvaluateConditionAsync(
+        string condition,
+        object? current,
+        Dictionary<string, object> variables)
     {
-        // TODO: implement real evaluation
-        return true;
+        if (string.IsNullOrEmpty(condition))
+            return true;
+
+        var globals = new { Input = current, Vars = variables };
+        try
+        {
+            return await CSharpScript.EvaluateAsync<bool>(condition, ScriptOptions.Default, globals);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Condition eval failed: {Condition}", condition);
+            return false;
+        }
+    }
+
+    private async Task<object?> HandleStepError(Func<Task<object?>> action, WorkflowStep step, object? current)
+    {
+        if (string.IsNullOrWhiteSpace(step.OnError))
+            return await action();
+
+        var parts = step.OnError.Split(
+            ':',
+            2,
+            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var policy = parts[0];
+
+        if (policy.Equals("Retry", StringComparison.OrdinalIgnoreCase))
+        {
+            var retries = parts.Length > 1 && int.TryParse(parts[1], out var r) ? r : 1;
+            var polly = Policy
+                .Handle<Exception>()
+                .RetryAsync(
+                    retries,
+                    (ex, attempt) =>
+                        _logger.LogWarning(
+                            ex,
+                            "Retry {Attempt} for step {Type}",
+                            attempt,
+                            step.Type));
+            return await polly.ExecuteAsync(action);
+        }
+
+        if (policy.Equals("Skip", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                return await action();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Step {Type} failed but skipping", step.Type);
+                return current;
+            }
+        }
+
+        return await action();
     }
 }
