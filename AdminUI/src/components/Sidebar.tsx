@@ -8,6 +8,7 @@ export function Sidebar() {
                 <NavLink className="block p-2 rounded hover:bg-gray-300 dark:hover:bg-neutral-700" to="/models">Models</NavLink>
                 <NavLink className="block p-2 rounded hover:bg-gray-300 dark:hover:bg-neutral-700" to="/rules">Rules</NavLink>
                 <NavLink className="block p-2 rounded hover:bg-gray-300 dark:hover:bg-neutral-700" to="/workflows">Workflows</NavLink>
+                <NavLink className="block p-2 rounded hover:bg-gray-300 dark:hover:bg-neutral-700" to="/workflow-dashboard">Workflow Studio</NavLink>
             </nav>
         </aside>
     );

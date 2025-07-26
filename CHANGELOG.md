@@ -43,3 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - React-based workflow editor using React Flow and React Query.
 - Admin UI no longer loads Blazor designer script.
+
+## [0.7.0] - 2025-07-27
+### Added
+- Elsa Workflow Studio page using the <elsa-studio-dashboard> web component.
