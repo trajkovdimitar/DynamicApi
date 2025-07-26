@@ -31,6 +31,13 @@ public class DynamicDbContextService : IDisposable
     private string DbContextFile => Path.Combine(ProjectDir, "DynamicDbContext.cs");
     private string DesignTimeFactoryFile => Path.Combine(ProjectDir, "DesignTimeFactory.cs");
 
+    public ModelDefinition? GetModelDefinition(string modelName)
+    {
+        return _modelService
+            .LoadModels()
+            .FirstOrDefault(m => m.ModelName.Equals(modelName, StringComparison.OrdinalIgnoreCase));
+    }
+
     public DynamicDbContextService(ModelDefinitionService modelService, IConfiguration config, ModelHistoryService historyService)
     {
         _modelService = modelService;

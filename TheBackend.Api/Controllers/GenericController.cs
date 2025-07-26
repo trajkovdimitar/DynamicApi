@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.OData.Query;
 using System.Linq;
 using TheBackend.Api;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace TheBackend.Api.Controllers
 {
@@ -93,7 +95,15 @@ namespace TheBackend.Api.Controllers
                 body = await reader.ReadToEndAsync();
             }
 
-            var entity = JsonConvert.DeserializeObject(body, modelType)!;
+            var definition = _dbContextService.GetModelDefinition(modelName);
+            var jObj = JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(body) ?? new();
+            var missing = definition?.Properties
+                .Where(p => p.IsRequired && !jObj.ContainsKey(p.Name))
+                .Select(p => new ValidationError { Field = p.Name, Error = "Field is required" })
+                .ToList() ?? new List<ValidationError>();
+            if (missing.Any()) return BadRequest(ApiResponse<object>.Fail("Validation failed", missing));
+
+            var entity = jObj.ToObject(modelType)!;
 
             var workflowName = $"{modelName}.Create";
             if (_ruleService.HasWorkflow(workflowName))
