@@ -7,4 +7,12 @@ export default defineConfig({
   plugins: [react(),
     tailwindcss()
   ],
+  server: {
+    proxy: {
+      '/elsa': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
+  },
 })

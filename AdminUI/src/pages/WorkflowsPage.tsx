@@ -13,9 +13,13 @@ export default function WorkflowsPage() {
         onSuccess: () => queryClient.invalidateQueries(['workflows']),
     });
 
-    const openEditor = async (name: string) => {
-        const wf = await getWorkflow(name);
-        setEditing(wf);
+    const openEditor = async (name: string | null) => {
+        if (name) {
+            const wf = await getWorkflow(name);
+            setEditing(wf);
+        } else {
+            setEditing({ workflowName: '', steps: [], isTransactional: false, globalVariables: [] });
+        }
     };
 
     const save = async (def: WorkflowDefinition) => {
@@ -26,6 +30,9 @@ export default function WorkflowsPage() {
     return (
         <div className="p-4 space-y-2">
             <h2 className="text-xl font-semibold">Workflows</h2>
+            <div className="space-y-2">
+                <button className="px-4 py-1 bg-blue-600 text-white" onClick={() => openEditor(null)}>New Workflow</button>
+            </div>
             <ul>
                 {(items ?? []).map(w => (
                     <li key={w.workflowName} className="flex justify-between">

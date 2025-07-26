@@ -80,6 +80,17 @@ export interface Parameter {
     value: string;
 }
 
+export interface ElsaActivity {
+    type: string;
+    properties: Record<string, any>;
+}
+
+export interface ElsaWorkflowDefinition extends WorkflowDefinition {
+    activities: ElsaActivity[];
+    connections: any[];
+    triggers?: ElsaActivity[];
+}
+
 export interface ApiResponse<T> {
     success: boolean;
     message: string;
