@@ -40,7 +40,10 @@ public class WorkflowServiceTests
     {
         var config = new ConfigurationBuilder().Build();
         var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
-        var registry = new WorkflowStepExecutorRegistry(new[] { executor });
+        var services = new ServiceCollection();
+        services.AddSingleton(executor.GetType(), executor);
+        var provider = services.BuildServiceProvider();
+        var registry = new WorkflowStepExecutorRegistry(new[] { executor }, provider);
         return new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
     }
 

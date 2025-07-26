@@ -8,6 +8,7 @@ using TheBackend.DynamicModels.Workflows;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using System.Collections.Generic;
 
@@ -57,7 +58,11 @@ public class GenericControllerTests
             new CreateEntityExecutor<object, object>(),
             new UpdateEntityExecutor<object, object>(NullLogger<UpdateEntityExecutor<object, object>>.Instance)
         };
-        var registry = new WorkflowStepExecutorRegistry(executors);
+        var services = new ServiceCollection();
+        foreach (var ex in executors)
+            services.AddSingleton(ex.GetType(), ex);
+        var provider = services.BuildServiceProvider();
+        var registry = new WorkflowStepExecutorRegistry(executors, provider);
         return new WorkflowService(
             history,
             registry,

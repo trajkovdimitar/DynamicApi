@@ -30,9 +30,11 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="Elsa.Workflows.Runtime" Version="3.4.2" />
     <PackageReference Include="Elsa.Workflows.Management" Version="3.4.2" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TheBackend.Domain\TheBackend.Domain.csproj" />
+    <ProjectReference Include="..\TheBackend.Application\TheBackend.Application.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="TheBackend\DynamicModels\" />
