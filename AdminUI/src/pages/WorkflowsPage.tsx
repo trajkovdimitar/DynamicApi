@@ -6,16 +6,30 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
-    const { data: items } = useQuery(['workflows'], getWorkflows);
+    const { data: items } = useQuery<WorkflowDefinition[]>({
+        queryKey: ['workflows'],
+        queryFn: getWorkflows
+    });
     const [editing, setEditing] = useState<WorkflowDefinition | null>(null);
 
-    const saveMutation = useMutation(saveWorkflow, {
-        onSuccess: () => queryClient.invalidateQueries(['workflows']),
+    const saveMutation = useMutation<void, Error, WorkflowDefinition>({
+        mutationFn: saveWorkflow,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['workflows'] })
     });
 
     const openEditor = async (name: string) => {
         const wf = await getWorkflow(name);
         setEditing(wf);
+    };
+
+    const createNew = () => {
+        setEditing({
+            workflowName: '',
+            steps: [],
+            version: 1,
+            isTransactional: true,
+            globalVariables: []
+        });
     };
 
     const save = async (def: WorkflowDefinition) => {
@@ -25,9 +39,12 @@ export default function WorkflowsPage() {
 
     return (
         <div className="p-4 space-y-2">
-            <h2 className="text-xl font-semibold">Workflows</h2>
+            <div className="flex justify-between">
+                <h2 className="text-xl font-semibold">Workflows</h2>
+                <button onClick={createNew} className="px-4 py-1 bg-blue-600 text-white">Create New</button>
+            </div>
             <ul>
-                {(items ?? []).map(w => (
+                {(items ?? []).map((w: WorkflowDefinition) => (
                     <li key={w.workflowName} className="flex justify-between">
                         <span>{w.workflowName} (v{w.version ?? 1})</span>
                         <div className="space-x-2">
