@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using TheBackend.Domain.Models;
 
 namespace TheBackend.DynamicModels.Workflows;
@@ -30,13 +29,9 @@ public class WorkflowHistoryService
     {
         using var ctx = new ModelHistoryDbContext(_options);
         return ctx.WorkflowDefinitions
-            .AsEnumerable()
-            .Select(d =>
-            {
-                var def = JsonConvert.DeserializeObject<WorkflowDefinition>(d.Definition)!;
-                def.Version = d.Version;
-                return def;
-            })
+            .Include(d => d.GlobalVariables)
+            .Include(d => d.Steps).ThenInclude(s => s.Parameters)
+            .Select(MapToDomain)
             .ToList();
     }
 
@@ -44,32 +39,26 @@ public class WorkflowHistoryService
     {
         using var db = new ModelHistoryDbContext(_options);
         return db.WorkflowDefinitions
+            .Include(d => d.GlobalVariables)
+            .Include(d => d.Steps).ThenInclude(s => s.Parameters)
+            .AsEnumerable()
             .GroupBy(w => w.WorkflowName)
             .Select(g => g.OrderByDescending(w => w.Version).First())
-            .AsEnumerable()
-            .Select(r =>
-            {
-                var def = JsonConvert.DeserializeObject<WorkflowDefinition>(r.Definition)!;
-                def.Version = r.Version;
-                return def;
-            })
+            .Select(MapToDomain)
             .ToList();
     }
 
     public int SaveDefinition(WorkflowDefinition def)
     {
         using var ctx = new ModelHistoryDbContext(_options);
-        var json = JsonConvert.SerializeObject(def);
-        var existing = ctx.WorkflowDefinitions
-            .FirstOrDefault(x => x.WorkflowName.ToLower() == def.WorkflowName.ToLower());
-        var version = existing == null ? 1 : existing.Version + 1;
-        if (existing == null)
-            ctx.WorkflowDefinitions.Add(new WorkflowDefinitionRecord { WorkflowName = def.WorkflowName, Definition = json, Version = version });
-        else
-        {
-            existing.Definition = json;
-            existing.Version = version;
-        }
+        var existingVersions = ctx.WorkflowDefinitions
+            .Where(d => d.WorkflowName == def.WorkflowName)
+            .Select(d => d.Version)
+            .ToList();
+        var version = existingVersions.Any() ? existingVersions.Max() + 1 : 1;
+
+        var record = MapToRecord(def, version);
+        ctx.WorkflowDefinitions.Add(record);
         ctx.SaveChanges();
         return version;
     }
@@ -77,11 +66,10 @@ public class WorkflowHistoryService
     public void RecordChange(WorkflowDefinition def, string action, string hash, int version)
     {
         using var ctx = new ModelHistoryDbContext(_options);
-        var entry = new WorkflowHistory
+        var entry = new WorkflowHistoryRecord
         {
             WorkflowName = def.WorkflowName,
             Action = action,
-            Definition = JsonConvert.SerializeObject(def),
             Hash = hash,
             Timestamp = DateTime.UtcNow,
             Version = version
@@ -93,15 +81,11 @@ public class WorkflowHistoryService
     public WorkflowDefinition? GetVersion(string workflowName, int version)
     {
         using var ctx = new ModelHistoryDbContext(_options);
-        var entry = ctx.WorkflowHistories
-            .Where(h => h.WorkflowName == workflowName && h.Version == version)
-            .OrderByDescending(h => h.Timestamp)
-            .FirstOrDefault();
-        if (entry == null)
-            return null;
-        var def = JsonConvert.DeserializeObject<WorkflowDefinition>(entry.Definition)!;
-        def.Version = entry.Version;
-        return def;
+        var record = ctx.WorkflowDefinitions
+            .Include(d => d.GlobalVariables)
+            .Include(d => d.Steps).ThenInclude(s => s.Parameters)
+            .FirstOrDefault(d => d.WorkflowName == workflowName && d.Version == version);
+        return record == null ? null : MapToDomain(record);
     }
 
     public string? GetLastHash()
@@ -111,5 +95,68 @@ public class WorkflowHistoryService
             .OrderByDescending(h => h.Timestamp)
             .Select(h => h.Hash)
             .FirstOrDefault();
+    }
+
+    private static WorkflowDefinition MapToDomain(WorkflowDefinitionRecord record)
+    {
+        return new WorkflowDefinition
+        {
+            WorkflowName = record.WorkflowName,
+            Version = record.Version,
+            IsTransactional = record.IsTransactional,
+            GlobalVariables = record.GlobalVariables.Select(v => new GlobalVariable
+            {
+                Key = v.Key,
+                ValueType = v.ValueType,
+                Value = v.Value
+            }).ToList(),
+            Steps = record.Steps.Select(MapStep).ToList()
+        };
+    }
+
+    private static WorkflowStep MapStep(WorkflowStepRecord record)
+    {
+        return new WorkflowStep
+        {
+            Type = record.Type,
+            Condition = record.Condition,
+            OnError = record.OnError,
+            OutputVariable = record.OutputVariable,
+            Parameters = record.Parameters.Select(p => new Parameter
+            {
+                Key = p.Key,
+                ValueType = p.ValueType,
+                Value = p.Value
+            }).ToList()
+        };
+    }
+
+    private static WorkflowDefinitionRecord MapToRecord(WorkflowDefinition def, int version)
+    {
+        return new WorkflowDefinitionRecord
+        {
+            WorkflowName = def.WorkflowName,
+            Version = version,
+            IsTransactional = def.IsTransactional,
+            GlobalVariables = def.GlobalVariables.Select(v => new GlobalVariableRecord
+            {
+                Key = v.Key,
+                ValueType = v.ValueType,
+                Value = v.Value
+            }).ToList(),
+            Steps = def.Steps.Select(s => new WorkflowStepRecord
+            {
+                Type = s.Type,
+                Condition = s.Condition,
+                OnError = s.OnError,
+                OutputVariable = s.OutputVariable,
+                Parameters = s.Parameters.Select(p => new ParameterRecord
+                {
+                    Key = p.Key,
+                    ValueType = p.ValueType,
+                    Value = p.Value
+                }).ToList()
+            }).ToList()
+        };
     }
 }

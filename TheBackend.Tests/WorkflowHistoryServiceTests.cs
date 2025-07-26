@@ -20,7 +20,10 @@ public class WorkflowHistoryServiceTests
         var version2 = service.SaveDefinition(wf);
         Assert.Equal(2, version2);
         var loaded = service.LoadDefinitions(null);
-        var loadedDef = Assert.Single(loaded, d => d.WorkflowName == "Test");
+        var loadedDef = loaded
+            .Where(d => d.WorkflowName == "Test")
+            .OrderByDescending(d => d.Version)
+            .First();
         Assert.Equal(2, loadedDef.Version);
     }
 

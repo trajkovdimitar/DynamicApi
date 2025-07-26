@@ -27,11 +27,13 @@ public class ElsaWorkflowExecutor<TInput> : IWorkflowStepExecutor<TInput, TInput
 
         Elsa.Workflows.Management.Entities.WorkflowDefinition? definition = null;
 
-        if (step.Parameters.TryGetValue("Definition", out var jsonObj) && jsonObj is string json)
+        var paramDict = step.Parameters.ToDictionary(p => p.Key, p => p.GetTypedValue());
+
+        if (paramDict.TryGetValue("Definition", out var jsonObj) && jsonObj is string json)
         {
             definition = JsonConvert.DeserializeObject<Elsa.Workflows.Management.Entities.WorkflowDefinition>(json);
         }
-        else if (step.Parameters.TryGetValue("DefinitionId", out var idObj) && idObj is string defId)
+        else if (paramDict.TryGetValue("DefinitionId", out var idObj) && idObj is string defId)
         {
             definition = await defService.FindWorkflowDefinitionAsync(defId, VersionOptions.Published, CancellationToken.None);
         }
