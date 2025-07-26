@@ -18,7 +18,6 @@ builder.Services.AddSingleton(_ => new BusinessRuleService(rulesPath));
 builder.Services.AddSingleton<WorkflowService>();
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new CreateEntityExecutor<object, object>());
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new UpdateEntityExecutor<object, object>(sp.GetRequiredService<ILogger<UpdateEntityExecutor<object, object>>>()));
-builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new ElsaWorkflowExecutor<object>());
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new QueryEntityExecutor<object, object>());
 builder.Services.AddTransient<IWorkflowStepExecutor<object, bool>>(sp => new SendEmailExecutor<object>(sp.GetRequiredService<IEmailService>()));
 builder.Services.AddTransient(typeof(IWorkflowStepExecutor<,>), typeof(QueryEntityExecutor<,>));

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { getWorkflows, getWorkflow, saveWorkflow, rollbackWorkflow } from '../services/workflows';
 import type { WorkflowDefinition } from '../types/models';
-import { WorkflowEditor } from '../components/WorkflowEditor';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function WorkflowsPage() {
@@ -49,9 +48,9 @@ export default function WorkflowsPage() {
             </ul>
             {editing && (
                 <div className="space-y-2">
-                    <WorkflowEditor initialWorkflow={editing} onSave={save} />
+                    <p>Editing workflows is currently unavailable.</p>
                     <div className="space-x-2">
-                        <button onClick={() => setEditing(null)} className="px-4 py-1 bg-gray-300">Cancel</button>
+                        <button onClick={() => setEditing(null)} className="px-4 py-1 bg-gray-300">Close</button>
                     </div>
                 </div>
             )}

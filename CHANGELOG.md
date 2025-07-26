@@ -47,3 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.0] - 2025-07-27
 ### Added
 - Elsa Workflow Studio page using the <elsa-studio-dashboard> web component.
+
+## [0.8.0] - 2025-07-28
+### Removed
+- Elsa workflow engine packages, executors, and frontend integrations.
+### Added
+- Documentation with strict development guidelines.
