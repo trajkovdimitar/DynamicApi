@@ -26,10 +26,12 @@ public class UpdateEntityExecutor<TInput, TOutput> : IWorkflowStepExecutor<TInpu
         IServiceProvider serviceProvider,
         Dictionary<string, object> variables)
     {
-        if (!step.Parameters.TryGetValue("ModelName", out var modelNameObj) || modelNameObj is not string modelName)
+        var paramDict = step.Parameters.ToDictionary(p => p.Key, p => p.GetTypedValue());
+
+        if (!paramDict.TryGetValue("ModelName", out var modelNameObj) || modelNameObj is not string modelName)
             throw new InvalidOperationException("Missing ModelName");
 
-        if (!step.Parameters.TryGetValue("Id", out var idObj))
+        if (!paramDict.TryGetValue("Id", out var idObj))
             throw new InvalidOperationException("Missing Id parameter");
 
         var modelType = dbContextService.GetModelType(modelName) ?? throw new InvalidOperationException($"Model not found: {modelName}");
@@ -57,7 +59,7 @@ public class UpdateEntityExecutor<TInput, TOutput> : IWorkflowStepExecutor<TInpu
         if (entity == null)
             throw new KeyNotFoundException("Entity not found");
 
-        var mappings = step.Parameters.TryGetValue("Mappings", out var mapObj) && mapObj is IEnumerable<object> list
+        var mappings = paramDict.TryGetValue("Mappings", out var mapObj) && mapObj is IEnumerable<object> list
             ? list.OfType<Dictionary<string, object>>()
             : Enumerable.Empty<Dictionary<string, object>>();
 

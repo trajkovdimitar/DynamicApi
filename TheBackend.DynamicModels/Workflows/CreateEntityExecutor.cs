@@ -17,14 +17,16 @@ public class CreateEntityExecutor<TInput, TOutput> : IWorkflowStepExecutor<TInpu
         IServiceProvider serviceProvider,
         Dictionary<string, object> variables)
     {
-        if (!step.Parameters.TryGetValue("ModelName", out var modelNameObj) || modelNameObj is not string modelName)
+        var paramDict = step.Parameters.ToDictionary(p => p.Key, p => p.GetTypedValue());
+
+        if (!paramDict.TryGetValue("ModelName", out var modelNameObj) || modelNameObj is not string modelName)
             throw new InvalidOperationException("Missing ModelName parameter.");
 
         var modelType = dbContextService.GetModelType(modelName) ?? throw new InvalidOperationException($"Model {modelName} not found.");
         var newEntity = Activator.CreateInstance(modelType)!;
         var inputType = inputEntity?.GetType();
 
-        var mappings = step.Parameters.TryGetValue("Mappings", out var mappingsObj) && mappingsObj is IEnumerable<object> list
+        var mappings = paramDict.TryGetValue("Mappings", out var mappingsObj) && mappingsObj is IEnumerable<object> list
             ? list.OfType<Dictionary<string, object>>()
             : Enumerable.Empty<Dictionary<string, object>>();
 

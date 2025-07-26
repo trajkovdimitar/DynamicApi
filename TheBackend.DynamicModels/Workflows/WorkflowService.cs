@@ -8,23 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace TheBackend.DynamicModels.Workflows;
 
-public class WorkflowDefinition
-{
-    public string WorkflowName { get; set; } = string.Empty;
-    public List<WorkflowStep> Steps { get; set; } = new();
-    public int Version { get; set; }
-    public bool IsTransactional { get; set; } = true;
-    public Dictionary<string, object> GlobalVariables { get; set; } = new();
-}
 
-public class WorkflowStep
-{
-    public string Type { get; set; } = string.Empty;
-    public Dictionary<string, object> Parameters { get; set; } = new();
-    public string? Condition { get; set; }
-    public string? OnError { get; set; }
-    public string? OutputVariable { get; set; }
-}
 
 public class WorkflowService
 {
@@ -116,7 +100,7 @@ public class WorkflowService
         _logger.LogInformation("Starting workflow {Name} v{Version}", workflowName, wf.Version);
 
         object? current = entity;
-        var variables = wf.GlobalVariables.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        var variables = wf.GlobalVariables.ToDictionary(v => v.Key, v => v.GetTypedValue()!);
 
         var db = dbContextService.GetDbContext();
         using var transaction = wf.IsTransactional ? await db.Database.BeginTransactionAsync() : null;
