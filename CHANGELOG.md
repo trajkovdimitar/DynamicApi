@@ -38,3 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Conditional step evaluation using Roslyn scripting.
 - Error handling policies with retry and skip support.
+
+## [0.6.0] - 2025-07-27
+### Added
+- React-based workflow editor using React Flow and React Query.
+- Admin UI no longer loads Blazor designer script.
