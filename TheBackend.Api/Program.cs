@@ -17,9 +17,17 @@ var rulesPath = Path.Combine(AppContext.BaseDirectory, "rules.json");
 builder.Services.AddSingleton(_ => new BusinessRuleService(rulesPath));
 builder.Services.AddSingleton<WorkflowService>();
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new CreateEntityExecutor<object, object>());
+builder.Services.AddTransient(typeof(CreateEntityExecutor<,>), typeof(CreateEntityExecutor<,>));
+
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new UpdateEntityExecutor<object, object>(sp.GetRequiredService<ILogger<UpdateEntityExecutor<object, object>>>()));
+builder.Services.AddTransient(typeof(UpdateEntityExecutor<,>), typeof(UpdateEntityExecutor<,>));
+
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new QueryEntityExecutor<object, object>());
+builder.Services.AddTransient(typeof(QueryEntityExecutor<,>), typeof(QueryEntityExecutor<,>));
+
 builder.Services.AddTransient<IWorkflowStepExecutor<object, bool>>(sp => new SendEmailExecutor<object>(sp.GetRequiredService<IEmailService>()));
+builder.Services.AddTransient(typeof(SendEmailExecutor<>), typeof(SendEmailExecutor<>));
+
 builder.Services.AddTransient(typeof(IWorkflowStepExecutor<,>), typeof(QueryEntityExecutor<,>));
 builder.Services.AddTransient<IEmailService, LoggingEmailService>();
 builder.Services.AddSingleton<WorkflowStepExecutorRegistry>();
