@@ -28,8 +28,6 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="RulesEngine" Version="6.0.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-    <PackageReference Include="Elsa.Workflows.Runtime" Version="3.4.2" />
-    <PackageReference Include="Elsa.Workflows.Management" Version="3.4.2" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.0.2" />
   </ItemGroup>
   <ItemGroup>
