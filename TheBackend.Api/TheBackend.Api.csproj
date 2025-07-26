@@ -11,6 +11,11 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="rules.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\TheBackend.DynamicModels\TheBackend.DynamicModels.csproj" />
     <ProjectReference Include="..\TheBackend.Application\TheBackend.Application.csproj" />
     <ProjectReference Include="..\TheBackend.Infrastructure\TheBackend.Infrastructure.csproj" />
