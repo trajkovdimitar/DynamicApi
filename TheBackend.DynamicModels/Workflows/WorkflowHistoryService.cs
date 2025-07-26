@@ -29,7 +29,7 @@ public class WorkflowHistoryService
     public List<WorkflowDefinition> LoadDefinitions(string? file)
     {
         using var ctx = new ModelHistoryDbContext(_options);
-        var defs = ctx.WorkflowDefinitions
+        return ctx.WorkflowDefinitions
             .AsEnumerable()
             .Select(d =>
             {
@@ -38,16 +38,22 @@ public class WorkflowHistoryService
                 return def;
             })
             .ToList();
-        if (defs.Count == 0 && file != null && File.Exists(file))
-        {
-            var json = File.ReadAllText(file);
-            defs = JsonConvert.DeserializeObject<List<WorkflowDefinition>>(json) ?? new();
-            foreach (var def in defs)
+    }
+
+    public List<WorkflowDefinition> LoadAllCurrentDefinitions()
+    {
+        using var db = new ModelHistoryDbContext(_options);
+        return db.WorkflowDefinitions
+            .GroupBy(w => w.WorkflowName)
+            .Select(g => g.OrderByDescending(w => w.Version).First())
+            .AsEnumerable()
+            .Select(r =>
             {
-                def.Version = SaveDefinition(def);
-            }
-        }
-        return defs;
+                var def = JsonConvert.DeserializeObject<WorkflowDefinition>(r.Definition)!;
+                def.Version = r.Version;
+                return def;
+            })
+            .ToList();
     }
 
     public int SaveDefinition(WorkflowDefinition def)

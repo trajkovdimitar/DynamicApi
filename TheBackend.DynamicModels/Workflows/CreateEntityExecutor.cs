@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 
 namespace TheBackend.DynamicModels.Workflows;
 
-public class CreateEntityExecutor : IWorkflowStepExecutor
+public class CreateEntityExecutor<TInput, TOutput> : IWorkflowStepExecutor<TInput, TOutput>
+    where TOutput : class
 {
     public string SupportedType => "CreateEntity";
 
-    public async Task<object?> ExecuteAsync(
-        object? inputEntity,
+    public async Task<TOutput?> ExecuteAsync(
+        TInput? inputEntity,
         WorkflowStep step,
         DynamicDbContextService dbContextService,
         IServiceProvider serviceProvider,
@@ -70,7 +71,7 @@ public class CreateEntityExecutor : IWorkflowStepExecutor
         var db = dbContextService.GetDbContext();
         db.Add(newEntity);
         await db.SaveChangesAsync();
-        return newEntity;
+        return (TOutput)newEntity;
     }
 
     private static object? EvaluateFunction(string funcName)

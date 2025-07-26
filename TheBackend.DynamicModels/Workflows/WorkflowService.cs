@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 using TheBackend.DynamicModels;
@@ -29,7 +28,6 @@ public class WorkflowStep
 
 public class WorkflowService
 {
-    private readonly string _file;
     private readonly List<WorkflowDefinition> _workflows;
     private readonly object _lock = new();
     private readonly WorkflowHistoryService _historyService;
@@ -37,25 +35,20 @@ public class WorkflowService
     private readonly ILogger<WorkflowService> _logger;
 
     public WorkflowService(
-        IConfiguration config,
         WorkflowHistoryService historyService,
         WorkflowStepExecutorRegistry executorRegistry,
-        ILogger<WorkflowService> logger,
-        string? file = null)
+        ILogger<WorkflowService> logger)
     {
-        _file = file ?? "workflows.json";
         _historyService = historyService;
         _executorRegistry = executorRegistry;
         _logger = logger;
-        _workflows = historyService.LoadDefinitions(_file);
+        _workflows = historyService.LoadAllCurrentDefinitions();
     }
 
     private void Save(WorkflowDefinition def)
     {
         lock (_lock)
         {
-            var json = JsonConvert.SerializeObject(_workflows, Formatting.Indented);
-            File.WriteAllText(_file, json);
             def.Version = _historyService.SaveDefinition(def);
         }
     }
@@ -145,7 +138,7 @@ public class WorkflowService
                     continue;
                 }
 
-                current = await executor.ExecuteAsync(current, step, dbContextService, serviceProvider, variables);
+                current = await ((dynamic)executor).ExecuteAsync((dynamic)current, step, dbContextService, serviceProvider, variables);
                 if (!string.IsNullOrEmpty(step.OutputVariable))
                     variables[step.OutputVariable] = current!;
             }

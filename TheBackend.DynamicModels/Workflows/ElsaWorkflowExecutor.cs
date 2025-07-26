@@ -11,12 +11,12 @@ using Newtonsoft.Json;
 
 namespace TheBackend.DynamicModels.Workflows;
 
-public class ElsaWorkflowExecutor : IWorkflowStepExecutor
+public class ElsaWorkflowExecutor<TInput> : IWorkflowStepExecutor<TInput, TInput>
 {
     public string SupportedType => "ElsaWorkflow";
 
-    public async Task<object?> ExecuteAsync(
-        object? inputEntity,
+    public async Task<TInput?> ExecuteAsync(
+        TInput? inputEntity,
         WorkflowStep step,
         DynamicDbContextService dbContextService,
         IServiceProvider serviceProvider,

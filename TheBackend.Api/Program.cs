@@ -13,9 +13,9 @@ builder.Services.AddSingleton<RuleHistoryService>();
 builder.Services.AddSingleton<WorkflowHistoryService>();
 builder.Services.AddSingleton<BusinessRuleService>();
 builder.Services.AddSingleton<WorkflowService>();
-builder.Services.AddTransient<IWorkflowStepExecutor, CreateEntityExecutor>();
-builder.Services.AddTransient<IWorkflowStepExecutor, UpdateEntityExecutor>();
-builder.Services.AddTransient<IWorkflowStepExecutor, ElsaWorkflowExecutor>();
+builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new CreateEntityExecutor<object, object>());
+builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new UpdateEntityExecutor<object, object>(sp.GetRequiredService<ILogger<UpdateEntityExecutor<object, object>>>()));
+builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new ElsaWorkflowExecutor<object>());
 builder.Services.AddSingleton<WorkflowStepExecutorRegistry>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
