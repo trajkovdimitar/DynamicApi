@@ -6,11 +6,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
-    const { data: items } = useQuery(['workflows'], getWorkflows);
+    const { data: items } = useQuery<WorkflowDefinition[]>({
+        queryKey: ['workflows'],
+        queryFn: getWorkflows,
+    });
     const [editing, setEditing] = useState<WorkflowDefinition | null>(null);
 
-    const saveMutation = useMutation(saveWorkflow, {
-        onSuccess: () => queryClient.invalidateQueries(['workflows']),
+    const saveMutation = useMutation<void, Error, WorkflowDefinition>({
+        mutationFn: saveWorkflow,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['workflows'] }),
     });
 
     const openEditor = async (name: string | null) => {
