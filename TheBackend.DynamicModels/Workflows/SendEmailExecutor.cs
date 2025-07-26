@@ -5,7 +5,7 @@ using TheBackend.Application.Services;
 
 namespace TheBackend.DynamicModels.Workflows;
 
-public class SendEmailExecutor : IWorkflowStepExecutor<object, bool>
+public class SendEmailExecutor<TInput> : IWorkflowStepExecutor<TInput, bool>
 {
     private readonly IEmailService _emailService;
 
@@ -17,7 +17,7 @@ public class SendEmailExecutor : IWorkflowStepExecutor<object, bool>
     public string SupportedType => "SendEmail";
 
     public async Task<bool> ExecuteAsync(
-        object? input,
+        TInput? input,
         WorkflowStep step,
         DynamicDbContextService dbContextService,
         IServiceProvider serviceProvider,
