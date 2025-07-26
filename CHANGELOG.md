@@ -29,3 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workflow versioning with ability to rollback definitions.
 ### Changed
 - Admin UI displays version and supports rollback.
+
+## [0.4.0] - 2025-07-27
+### Added
+- Generic Elsa workflow executor to run workflow definitions from steps.
