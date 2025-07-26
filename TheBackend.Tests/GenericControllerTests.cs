@@ -52,10 +52,13 @@ public class GenericControllerTests
     {
         var config = new ConfigurationBuilder().Build();
         var history = new WorkflowHistoryService(config);
-        var executors = new List<IWorkflowStepExecutor> { new CreateEntityExecutor() };
+        var executors = new List<IWorkflowStepExecutor>
+        {
+            new CreateEntityExecutor<object, object>(),
+            new UpdateEntityExecutor<object, object>(NullLogger<UpdateEntityExecutor<object, object>>.Instance)
+        };
         var registry = new WorkflowStepExecutorRegistry(executors);
         return new WorkflowService(
-            config,
             history,
             registry,
             NullLogger<WorkflowService>.Instance);

@@ -7,19 +7,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TheBackend.DynamicModels.Workflows;
 
-public class UpdateEntityExecutor : IWorkflowStepExecutor
+public class UpdateEntityExecutor<TInput, TOutput> : IWorkflowStepExecutor<TInput, TOutput>
+    where TOutput : class
 {
-    private readonly ILogger<UpdateEntityExecutor> _logger;
+    private readonly ILogger<UpdateEntityExecutor<TInput, TOutput>> _logger;
 
-    public UpdateEntityExecutor(ILogger<UpdateEntityExecutor> logger)
+    public UpdateEntityExecutor(ILogger<UpdateEntityExecutor<TInput, TOutput>> logger)
     {
         _logger = logger;
     }
 
     public string SupportedType => "UpdateEntity";
 
-    public async Task<object?> ExecuteAsync(
-        object? inputEntity,
+    public async Task<TOutput?> ExecuteAsync(
+        TInput? inputEntity,
         WorkflowStep step,
         DynamicDbContextService dbContextService,
         IServiceProvider serviceProvider,
@@ -100,6 +101,6 @@ public class UpdateEntityExecutor : IWorkflowStepExecutor
         db.Update(entity);
         await db.SaveChangesAsync();
         _logger.LogInformation("Updated {Model} with id {Id}", modelName, idValue);
-        return entity;
+        return (TOutput)entity;
     }
 }

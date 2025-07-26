@@ -6,9 +6,12 @@ namespace TheBackend.DynamicModels.Workflows;
 public interface IWorkflowStepExecutor
 {
     string SupportedType { get; }
+}
 
-    Task<object?> ExecuteAsync(
-        object? inputEntity,
+public interface IWorkflowStepExecutor<TInput, TOutput> : IWorkflowStepExecutor
+{
+    Task<TOutput?> ExecuteAsync(
+        TInput? input,
         WorkflowStep step,
         DynamicDbContextService dbContextService,
         IServiceProvider serviceProvider,

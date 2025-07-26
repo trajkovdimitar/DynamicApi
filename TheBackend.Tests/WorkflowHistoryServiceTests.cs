@@ -29,9 +29,12 @@ public class WorkflowHistoryServiceTests
     {
         var config = new ConfigurationBuilder().Build();
         var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
-        var executors = new List<IWorkflowStepExecutor> { new CreateEntityExecutor() };
+        var executors = new List<IWorkflowStepExecutor>
+        {
+            new CreateEntityExecutor<object, object>()
+        };
         var registry = new WorkflowStepExecutorRegistry(executors);
-        var service = new WorkflowService(config, history, registry, NullLogger<WorkflowService>.Instance);
+        var service = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
 
         var wf = new WorkflowDefinition { WorkflowName = "Test", Steps = new() { new WorkflowStep { Type = "A" } } };
         service.SaveWorkflow(wf);
