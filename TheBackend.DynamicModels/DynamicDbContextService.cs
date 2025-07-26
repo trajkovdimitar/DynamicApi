@@ -366,6 +366,9 @@ namespace TheBackend.DynamicModels
             }
             foreach (var rel in model.Relationships)
             {
+                if (!models.Any(m => m.ModelName == rel.TargetModel))
+                    continue;
+
                 var hasFk = !string.IsNullOrWhiteSpace(rel.ForeignKey);
                 var inverse = string.IsNullOrWhiteSpace(rel.InverseNavigation) ? null : rel.InverseNavigation;
                 switch (rel.RelationshipType)
