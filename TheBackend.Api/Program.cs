@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.ModelBuilder;
+using System.Text.Json.Serialization;
 using TheBackend.DynamicModels;
 using TheBackend.DynamicModels.Workflows;
 using TheBackend.Domain.Models;
@@ -62,7 +63,12 @@ tempDbService.Dispose();
 builder.Services.AddControllers()
     .AddOData(options =>
         options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null)
-               .AddRouteComponents("odata", model));
+               .AddRouteComponents("odata", model))
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.MaxDepth = 0;
+    });
 
 var app = builder.Build();
 var dbService = app.Services.GetRequiredService<DynamicDbContextService>();
