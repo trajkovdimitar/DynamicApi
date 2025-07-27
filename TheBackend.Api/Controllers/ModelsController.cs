@@ -78,6 +78,12 @@ namespace TheBackend.Api.Controllers
 
             foreach (var model in models)
             {
+                if (model.IgnoreMissingRelationships)
+                {
+                    _logger.LogInformation("Skipping relationship validation for model {Model}", model.ModelName);
+                    continue;
+                }
+
                 foreach (var rel in model.Relationships)
                 {
                     if (!modelNames.Contains(rel.TargetModel))
