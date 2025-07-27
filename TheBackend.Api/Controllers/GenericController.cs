@@ -155,12 +155,11 @@ namespace TheBackend.Api.Controllers
 
                                     var findMethod = entitySet.GetType()
                                         .GetMethod(nameof(DbSet<object>.FindAsync), new[] { typeof(object[]) })!;
-                                    var findTask = (ValueTask)findMethod.Invoke(entitySet, new object[] { new[] { convertedFkValue } })!;
+                                    var findTaskObj = findMethod.Invoke(entitySet, new object[] { new[] { convertedFkValue } })!;
+                                    await ((dynamic)findTaskObj).ConfigureAwait(false);
 
-                                    await findTask.ConfigureAwait(false);
-
-                                    var resultProperty = findTask.GetType().GetProperty("Result")!;
-                                    var result = resultProperty.GetValue(findTask);
+                                    var resultProperty = findTaskObj.GetType().GetProperty("Result")!;
+                                    var result = resultProperty.GetValue(findTaskObj);
 
                                     var exists = result != null;
                                     if (!exists)
@@ -200,8 +199,8 @@ namespace TheBackend.Api.Controllers
             var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
 
             var addMethod = repoType.GetMethod("AddAsync");
-            var task = (ValueTask)addMethod.Invoke(repo, new[] { entity });
-            await task.ConfigureAwait(false);
+            var addTask = (Task)addMethod.Invoke(repo, new[] { entity });
+            await addTask.ConfigureAwait(false);
 
             await _workflowService.RunAsync(
                 $"{modelName}.AfterCreate",

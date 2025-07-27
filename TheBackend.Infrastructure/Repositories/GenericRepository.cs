@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TheBackend.Application.Repositories;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TheBackend.Infrastructure.Repositories;
 
@@ -30,7 +32,19 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
     public async Task UpdateAsync(T entity)
     {
-        _dbSet.Update(entity);
+        var entry = _dbContext.Entry(entity);
+        var key = entry.Metadata.FindPrimaryKey();
+        var keyValues = key.Properties
+            .Select(p => entry.Property(p.Name).CurrentValue)
+            .ToArray();
+
+        var existing = await _dbSet.FindAsync(keyValues);
+        if (existing == null)
+        {
+            throw new KeyNotFoundException("Entity not found for update");
+        }
+
+        _dbContext.Entry(existing).CurrentValues.SetValues(entity);
         await _dbContext.SaveChangesAsync();
     }
 
