@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { stepTypes, valueTypes, workflowEvents } from '../types/models';
 import { getModels } from '../services/models';
 import type { WorkflowDefinition, WorkflowStep, Parameter } from '../types/models';
+import { Button } from './Button';
 
 const stepDescriptions: Record<string, string> = {
     CreateEntity: 'Create a new record for the selected model.',
@@ -319,13 +320,13 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                     </div>
                 ))}
                 <div className="flex gap-2">
-                    <button onClick={addStep} className="px-3 py-1 rounded bg-gray-300 dark:bg-neutral-700">Add Step</button>
-                    <button
+                    <Button variant="secondary" onClick={addStep}>Add Step</Button>
+                    <Button
+                        variant="secondary"
                         onClick={() => navigator.clipboard.writeText(JSON.stringify(workflow, null, 2))}
-                        className="px-3 py-1 rounded bg-gray-300 dark:bg-neutral-700"
                     >
                         Copy JSON
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

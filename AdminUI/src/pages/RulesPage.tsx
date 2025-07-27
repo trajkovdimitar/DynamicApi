@@ -3,6 +3,7 @@ import { getWorkflows, saveWorkflow } from '../services/rules';
 import { getModels } from '../services/models';
 import type { Workflow } from '../types/models';
 import { RuleEditorForm } from '../components/RuleEditorForm';
+import { Button } from '../components/Button';
 
 export default function RulesPage() {
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -82,9 +83,7 @@ export default function RulesPage() {
         <div className="space-y-4 p-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Rules</h2>
-                <button onClick={() => startEdit()} className="px-3 py-1 rounded bg-blue-600 text-white">
-                    New
-                </button>
+                <Button onClick={() => startEdit()}>New</Button>
             </div>
             <ul className="space-y-1">
                 {/* Now, workflows is guaranteed to be an array, so .length and .map are safe */}
@@ -107,20 +106,19 @@ export default function RulesPage() {
                     <h3 className="text-lg font-semibold">{editing.workflowName ? `Editing: ${editing.workflowName}` : 'New Workflow'}</h3>
                     <RuleEditorForm workflow={editing} onChange={setEditing} suggestions={suggestions} />
                     <div className="flex justify-end space-x-2">
-                        <button
+                        <Button
+                            variant="secondary"
                             onClick={() => setEditing(null)}
-                            className="px-4 py-2 rounded bg-gray-300 text-gray-800 hover:bg-gray-400"
                             disabled={isSaving}
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={save}
-                            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
                             disabled={isSaving}
                         >
                             {isSaving ? 'Saving...' : 'Save'}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

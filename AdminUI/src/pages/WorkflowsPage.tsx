@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import WorkflowEditorForm, { defaultParams } from '../components/WorkflowEditorForm';
 import { DataTable } from '../components/DataTable';
 import { Modal } from '../components/Modal';
+import { Button } from '../components/Button';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
@@ -123,15 +124,8 @@ export default function WorkflowsPage() {
                     onChange={e => setFilter(e.target.value)}
                 />
                 <div className="flex gap-2">
-                    <button
-                        className="px-4 py-1 bg-blue-600 text-white"
-                        onClick={() => setNewModalOpen(true)}
-                    >
-                        New Workflow
-                    </button>
-                    <button className="px-4 py-1 bg-gray-300 dark:bg-neutral-600" onClick={() => refetch()}>
-                        Refresh
-                    </button>
+                    <Button onClick={() => setNewModalOpen(true)}>New Workflow</Button>
+                    <Button variant="secondary" onClick={() => refetch()}>Refresh</Button>
                 </div>
             </div>
             <DataTable
@@ -189,17 +183,13 @@ export default function WorkflowsPage() {
                     )}
                     <WorkflowEditorForm workflow={editing} onChange={setEditing} />
                     <div className="flex justify-end space-x-2">
-                        <button onClick={reset} className="px-4 py-2 rounded bg-gray-300 dark:bg-neutral-600">Reset</button>
-                        <button onClick={cancelEdit} className="px-4 py-2 rounded bg-gray-300 dark:bg-neutral-600">
+                        <Button variant="secondary" onClick={reset}>Reset</Button>
+                        <Button variant="secondary" onClick={cancelEdit} disabled={saveMutation.isPending}>
                             Cancel
-                        </button>
-                        <button
-                            onClick={() => editing && save(editing)}
-                            className="px-4 py-2 rounded bg-blue-600 text-white"
-                            disabled={saveMutation.isPending}
-                        >
+                        </Button>
+                        <Button onClick={() => editing && save(editing)} disabled={saveMutation.isPending}>
                             {saveMutation.isPending ? 'Saving...' : 'Save'}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}
@@ -232,15 +222,11 @@ export default function WorkflowsPage() {
                     ))}
                 </select>
                 <div className="flex justify-end gap-2">
-                    <button
-                        className="px-3 py-1 bg-gray-300 dark:bg-neutral-600 rounded"
-                        onClick={() => setNewModalOpen(false)}
-                    >
+                    <Button variant="secondary" onClick={() => setNewModalOpen(false)}>
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         disabled={!selectedModel}
-                        className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
                         onClick={() => {
                             if (!selectedModel) return;
                             startNewWorkflow(`${selectedModel}.${selectedEvent}`);
@@ -248,7 +234,7 @@ export default function WorkflowsPage() {
                         }}
                     >
                         Create
-                    </button>
+                    </Button>
                 </div>
             </div>
         </Modal>
