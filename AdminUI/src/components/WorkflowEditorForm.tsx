@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { stepTypes, valueTypes } from '../types/models';
+import { stepTypes, valueTypes, workflowEvents } from '../types/models';
 import { getModels } from '../services/models';
 import type { WorkflowDefinition, WorkflowStep, Parameter } from '../types/models';
 
@@ -39,6 +39,13 @@ interface Props {
 export default function WorkflowEditorForm({ workflow, onChange }: Props) {
     const [expanded, setExpanded] = useState<number[]>(workflow.steps.map((_, i) => i));
     const [models, setModels] = useState<string[]>([]);
+    const eventInfo = (() => {
+        const parts = workflow.workflowName.split('.');
+        if (parts.length === 2 && (workflowEvents as readonly string[]).includes(parts[1])) {
+            return `Runs ${parts[1]} on ${parts[0]}`;
+        }
+        return '';
+    })();
 
     useEffect(() => {
         getModels().then(list => setModels(list.map(m => m.modelName))).catch(console.error);
@@ -163,6 +170,9 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                     value={workflow.workflowName}
                     onChange={e => onChange({ ...workflow, workflowName: e.target.value })}
                 />
+                {eventInfo && (
+                    <p className="text-xs text-neutral-500 mt-1">{eventInfo}</p>
+                )}
             </div>
             <label className="flex items-center gap-2">
                 <input
