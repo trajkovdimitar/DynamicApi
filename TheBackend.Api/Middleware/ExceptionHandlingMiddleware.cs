@@ -32,6 +32,15 @@ public class ExceptionHandlingMiddleware : IMiddleware
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await context.Response.WriteAsJsonAsync(response);
         }
+        catch (KeyNotFoundException nfEx)
+        {
+            _logger.LogWarning(nfEx, "Entity not found");
+            var response = ApiResponse<object>.Fail(nfEx.Message);
+            response.Meta.TraceId = context.TraceIdentifier;
+            response.Meta.StatusCode = StatusCodes.Status404NotFound;
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsJsonAsync(response);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception");
