@@ -6,6 +6,7 @@ using TheBackend.DynamicModels.Workflows;
 using Xunit;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 namespace TheBackend.Tests;
 
@@ -44,12 +45,13 @@ public class WorkflowServiceTests
         services.AddSingleton(executor.GetType(), executor);
         var provider = services.BuildServiceProvider();
         var registry = new WorkflowStepExecutorRegistry(new[] { executor }, provider);
-        return new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
+        var modelService = new ModelDefinitionService();
+        return new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance, modelService);
     }
 
     public class CountingExecutor : IWorkflowStepExecutor<object, object>
     {
-        public string SupportedType => "Count";
+        public string SupportedType => "CreateEntity";
         public int Count { get; private set; }
 
         public Task<object?> ExecuteAsync(
@@ -80,7 +82,15 @@ public class WorkflowServiceTests
             },
             Steps = new List<WorkflowStep>
             {
-                new() { Type = executor.SupportedType, Condition = "Vars.Amount > 100" }
+                new()
+                {
+                    Type = executor.SupportedType,
+                    Condition = "Vars.Amount > 100",
+                    Parameters = new List<Parameter>
+                    {
+                        new() { Key = "ModelName", ValueType = "string", Value = "TestEntity" }
+                    }
+                }
             }
         };
         wfService.SaveWorkflow(wf);
@@ -92,7 +102,7 @@ public class WorkflowServiceTests
     {
         private readonly int _failures;
         private int _attempts;
-        public string SupportedType => "Failing";
+        public string SupportedType => "CreateEntity";
         public int Attempts => _attempts;
 
         public FailingExecutor(int failures)
@@ -126,7 +136,15 @@ public class WorkflowServiceTests
             IsTransactional = false,
             Steps = new List<WorkflowStep>
             {
-                new() { Type = executor.SupportedType, OnError = "Retry:3" }
+                new()
+                {
+                    Type = executor.SupportedType,
+                    OnError = "Retry:3",
+                    Parameters = new List<Parameter>
+                    {
+                        new() { Key = "ModelName", ValueType = "string", Value = "TestEntity" }
+                    }
+                }
             }
         };
         wfService.SaveWorkflow(wf);
@@ -140,7 +158,7 @@ public class WorkflowServiceTests
         var config = new ConfigurationBuilder().Build();
         var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
         var registry = new WorkflowStepExecutorRegistry(new List<IWorkflowStepExecutor>(), new ServiceCollection().BuildServiceProvider());
-        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
+        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance, new ModelDefinitionService());
         var wf = new WorkflowDefinition
         {
             WorkflowName = "Bad",
@@ -158,11 +176,105 @@ public class WorkflowServiceTests
         var services = new ServiceCollection();
         services.AddSingleton(executor.GetType(), executor);
         var registry = new WorkflowStepExecutorRegistry(new[] { executor }, services.BuildServiceProvider());
-        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
+        var modelsPath = Path.GetTempFileName();
+        File.WriteAllText(modelsPath, "[{\"ModelName\":\"TestEntity\",\"Properties\":[]}]");
+        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance, new ModelDefinitionService(modelsPath));
         var wf = new WorkflowDefinition
         {
             WorkflowName = "Bad",
             Steps = new List<WorkflowStep> { new() { Type = executor.SupportedType } }
+        };
+        Assert.Throws<ArgumentException>(() => wfService.SaveWorkflow(wf));
+        File.Delete(modelsPath);
+    }
+
+    [Fact]
+    public void SaveWorkflow_Throws_ForInvalidModelName()
+    {
+        var config = new ConfigurationBuilder().Build();
+        var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
+        var executor = new CreateEntityExecutor<object, object>();
+        var services = new ServiceCollection();
+        services.AddSingleton(executor.GetType(), executor);
+        var registry = new WorkflowStepExecutorRegistry(new[] { executor }, services.BuildServiceProvider());
+        var modelsPath = Path.GetTempFileName();
+        File.WriteAllText(modelsPath, "[{\"ModelName\":\"TestEntity\",\"Properties\":[]}]");
+        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance, new ModelDefinitionService(modelsPath));
+        var wf = new WorkflowDefinition
+        {
+            WorkflowName = "Bad",
+            Steps = new List<WorkflowStep>
+            {
+                new()
+                {
+                    Type = executor.SupportedType,
+                    Parameters = new List<Parameter>
+                    {
+                        new() { Key = "ModelName", ValueType = "string", Value = "NoSuchModel" }
+                    }
+                }
+            }
+        };
+        Assert.Throws<ArgumentException>(() => wfService.SaveWorkflow(wf));
+    }
+
+    [Fact]
+    public void SaveWorkflow_Throws_ForInvalidValueType()
+    {
+        var config = new ConfigurationBuilder().Build();
+        var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
+        var executor = new CreateEntityExecutor<object, object>();
+        var services = new ServiceCollection();
+        services.AddSingleton(executor.GetType(), executor);
+        var registry = new WorkflowStepExecutorRegistry(new[] { executor }, services.BuildServiceProvider());
+        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance, new ModelDefinitionService());
+        var wf = new WorkflowDefinition
+        {
+            WorkflowName = "Bad",
+            Steps = new List<WorkflowStep>
+            {
+                new()
+                {
+                    Type = executor.SupportedType,
+                    Parameters = new List<Parameter>
+                    {
+                        new() { Key = "ModelName", ValueType = "unknown", Value = "User" }
+                    }
+                }
+            }
+        };
+        Assert.Throws<ArgumentException>(() => wfService.SaveWorkflow(wf));
+    }
+
+    [Fact]
+    public void SaveWorkflow_Throws_ForDuplicateGlobalVariable()
+    {
+        var config = new ConfigurationBuilder().Build();
+        var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
+        var executor = new CreateEntityExecutor<object, object>();
+        var services = new ServiceCollection();
+        services.AddSingleton(executor.GetType(), executor);
+        var registry = new WorkflowStepExecutorRegistry(new[] { executor }, services.BuildServiceProvider());
+        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance, new ModelDefinitionService());
+        var wf = new WorkflowDefinition
+        {
+            WorkflowName = "Bad",
+            GlobalVariables = new List<GlobalVariable>
+            {
+                new() { Key = "Var", ValueType = "string", Value = "1" },
+                new() { Key = "Var", ValueType = "string", Value = "2" }
+            },
+            Steps = new List<WorkflowStep>
+            {
+                new()
+                {
+                    Type = executor.SupportedType,
+                    Parameters = new List<Parameter>
+                    {
+                        new() { Key = "ModelName", ValueType = "string", Value = "User" }
+                    }
+                }
+            }
         };
         Assert.Throws<ArgumentException>(() => wfService.SaveWorkflow(wf));
     }
