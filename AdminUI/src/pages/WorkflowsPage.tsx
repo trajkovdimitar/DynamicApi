@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { getWorkflows, getWorkflow, saveWorkflow, rollbackWorkflow } from '../services/workflows';
 import type { WorkflowDefinition } from '../types/models';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import WorkflowEditorForm from '../components/WorkflowEditorForm';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
@@ -47,10 +48,19 @@ export default function WorkflowsPage() {
                 ))}
             </ul>
             {editing && (
-                <div className="space-y-2">
-                    <p>Editing workflows is currently unavailable.</p>
-                    <div className="space-x-2">
-                        <button onClick={() => setEditing(null)} className="px-4 py-1 bg-gray-300">Close</button>
+                <div className="space-y-4 mt-4 p-4 border rounded shadow-md dark:bg-neutral-700">
+                    <WorkflowEditorForm workflow={editing} onChange={setEditing} />
+                    <div className="flex justify-end space-x-2">
+                        <button onClick={() => setEditing(null)} className="px-4 py-2 rounded bg-gray-300 dark:bg-neutral-600">
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => editing && save(editing)}
+                            className="px-4 py-2 rounded bg-blue-600 text-white"
+                            disabled={saveMutation.isPending}
+                        >
+                            {saveMutation.isPending ? 'Saving...' : 'Save'}
+                        </button>
                     </div>
                 </div>
             )}

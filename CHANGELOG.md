@@ -57,3 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.0] - 2025-07-29
 ### Added
 - Workflows now execute after entity updates and deletions.
+
+## [0.10.0] - 2025-07-30
+### Added
+- Workflow editor UI supports creating and editing workflow definitions.
