@@ -72,3 +72,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Button to copy workflow JSON to clipboard.
 - Toast notifications for save success or failure.
 - Improved error handling when saving workflows.
+
+## [0.12.0] - 2025-07-31
+### Added
+- Step descriptions and default parameters when selecting a step type.
+- Model dropdown for entity-related steps clarifies which entity is created.
+- Placeholder text on workflow name and other fields.
+- Warning banner for unsaved changes.
+- Confirmation prompts when deleting steps or variables.
+- `Mappings` parameter edited via multiline text area.
+- Message shown when no steps exist.
+- Step headers display the step type.
