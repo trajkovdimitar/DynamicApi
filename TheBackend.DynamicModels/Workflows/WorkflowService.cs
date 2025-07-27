@@ -3,7 +3,9 @@ using System.Security.Cryptography;
 using System.Text;
 using TheBackend.DynamicModels;
 using TheBackend.Domain.Models;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -40,6 +42,81 @@ public class WorkflowService
         }
     }
 
+    private void ValidateWorkflow(WorkflowDefinition def)
+    {
+        if (string.IsNullOrWhiteSpace(def.WorkflowName))
+            throw new ArgumentException("WorkflowName is required");
+        if (def.Steps == null || def.Steps.Count == 0)
+            throw new ArgumentException("Workflow must contain at least one step");
+
+        foreach (var variable in def.GlobalVariables)
+        {
+            _ = variable.GetTypedValue();
+        }
+
+        foreach (var step in def.Steps)
+        {
+            if (string.IsNullOrWhiteSpace(step.Type))
+                throw new ArgumentException("Step type is required");
+            if (_executorRegistry.GetExecutor(step.Type) == null)
+                throw new ArgumentException($"Unsupported step type: {step.Type}");
+
+            foreach (var p in step.Parameters)
+            {
+                _ = p.GetTypedValue();
+            }
+
+            if (!string.IsNullOrEmpty(step.Condition))
+            {
+                try
+                {
+                    CSharpScript.Create<bool>(step.Condition, ScriptOptions.Default).Compile();
+                }
+                catch (Exception ex)
+                {
+                    throw new ArgumentException($"Invalid condition on step {step.Type}: {ex.Message}");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(step.OnError))
+            {
+                var parts = step.OnError.Split(':', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                var policy = parts[0];
+                if (!policy.Equals("Retry", StringComparison.OrdinalIgnoreCase) &&
+                    !policy.Equals("Skip", StringComparison.OrdinalIgnoreCase))
+                    throw new ArgumentException($"Invalid OnError policy: {step.OnError}");
+                if (policy.Equals("Retry", StringComparison.OrdinalIgnoreCase) && parts.Length > 1 && !int.TryParse(parts[1], out _))
+                    throw new ArgumentException($"Invalid OnError retry count: {step.OnError}");
+            }
+
+            void Require(string name)
+            {
+                if (!step.Parameters.Any(p => p.Key.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                    throw new ArgumentException($"Step {step.Type} missing parameter {name}");
+            }
+
+            switch (step.Type)
+            {
+                case "CreateEntity":
+                    Require("ModelName");
+                    break;
+                case "UpdateEntity":
+                    Require("ModelName");
+                    Require("Id");
+                    break;
+                case "QueryEntity":
+                    Require("ModelName");
+                    break;
+                case "SendEmail":
+                    Require("To");
+                    break;
+                case "LogEvent":
+                    Require("Message");
+                    break;
+            }
+        }
+    }
+
     public IEnumerable<WorkflowDefinition> GetWorkflows()
     {
         lock (_lock)
@@ -56,6 +133,7 @@ public class WorkflowService
     {
         lock (_lock)
         {
+            ValidateWorkflow(def);
             var existing = _workflows.FirstOrDefault(x => x.WorkflowName.Equals(def.WorkflowName, StringComparison.OrdinalIgnoreCase));
             if (existing != null) _workflows.Remove(existing);
             _workflows.Add(def);
