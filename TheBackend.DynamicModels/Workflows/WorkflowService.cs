@@ -127,7 +127,7 @@ public class WorkflowService
                 }
 
                 current = await HandleStepError(
-                    () => ((dynamic)executor).ExecuteAsync(
+                    async () => (object?)await ((dynamic)executor).ExecuteAsync(
                         (dynamic)current,
                         step,
                         dbContextService,
