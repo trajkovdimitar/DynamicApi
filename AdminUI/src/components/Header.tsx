@@ -16,14 +16,11 @@ export function Header() {
     };
 
     return (
-        <header className="h-12 flex items-center justify-between px-4 border-b border-gray-200 dark:border-neutral-700">
-            <h1 className="text-lg font-semibold">AdminUI</h1>
-            <div className="flex items-center gap-3">
-                <button onClick={toggle} className="px-2 py-1 rounded bg-gray-200 dark:bg-neutral-700">
-                    {dark ? 'Light' : 'Dark'}
-                </button>
-                <div className="w-8 h-8 rounded-full bg-gray-400" />
-            </div>
+        <header className="bg-white dark:bg-gray-800 shadow-md p-4 flex justify-between items-center">
+            <h1 className="text-xl font-bold text-primary-500">Your CMS Admin</h1>
+            <button onClick={toggle} className="btn btn-secondary">
+                {dark ? 'Light Mode' : 'Dark Mode'}
+            </button>
         </header>
     );
 }
