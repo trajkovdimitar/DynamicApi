@@ -44,9 +44,30 @@ public class WorkflowHistoryServiceTests
         var registry = new WorkflowStepExecutorRegistry(executors, provider);
         var service = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
 
-        var wf = new WorkflowDefinition { WorkflowName = "Test", Steps = new() { new WorkflowStep { Type = "A" } } };
+        var wf = new WorkflowDefinition
+        {
+            WorkflowName = "Test",
+            Steps = new()
+            {
+                new WorkflowStep
+                {
+                    Type = "CreateEntity",
+                    Parameters = new List<Parameter>
+                    {
+                        new() { Key = "ModelName", ValueType = "string", Value = "X" }
+                    }
+                }
+            }
+        };
         service.SaveWorkflow(wf);
-        wf.Steps.Add(new WorkflowStep { Type = "B" });
+        wf.Steps.Add(new WorkflowStep
+        {
+            Type = "CreateEntity",
+            Parameters = new List<Parameter>
+            {
+                new() { Key = "ModelName", ValueType = "string", Value = "X" }
+            }
+        });
         service.SaveWorkflow(wf);
 
         service.RollbackWorkflow("Test", 1);

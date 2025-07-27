@@ -133,4 +133,37 @@ public class WorkflowServiceTests
         await wfService.RunAsync("RetryTest", dbService, new object(), new ServiceCollection().BuildServiceProvider());
         Assert.Equal(3, executor.Attempts);
     }
+
+    [Fact]
+    public void SaveWorkflow_Throws_ForUnknownStepType()
+    {
+        var config = new ConfigurationBuilder().Build();
+        var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
+        var registry = new WorkflowStepExecutorRegistry(new List<IWorkflowStepExecutor>(), new ServiceCollection().BuildServiceProvider());
+        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
+        var wf = new WorkflowDefinition
+        {
+            WorkflowName = "Bad",
+            Steps = new List<WorkflowStep> { new() { Type = "Unknown" } }
+        };
+        Assert.Throws<ArgumentException>(() => wfService.SaveWorkflow(wf));
+    }
+
+    [Fact]
+    public void SaveWorkflow_Throws_WhenRequiredParameterMissing()
+    {
+        var config = new ConfigurationBuilder().Build();
+        var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
+        var executor = new CreateEntityExecutor<object, object>();
+        var services = new ServiceCollection();
+        services.AddSingleton(executor.GetType(), executor);
+        var registry = new WorkflowStepExecutorRegistry(new[] { executor }, services.BuildServiceProvider());
+        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
+        var wf = new WorkflowDefinition
+        {
+            WorkflowName = "Bad",
+            Steps = new List<WorkflowStep> { new() { Type = executor.SupportedType } }
+        };
+        Assert.Throws<ArgumentException>(() => wfService.SaveWorkflow(wf));
+    }
 }

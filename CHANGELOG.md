@@ -83,3 +83,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Mappings` parameter edited via multiline text area.
 - Message shown when no steps exist.
 - Step headers display the step type.
+
+## [0.13.0] - 2025-08-01
+### Added
+- Workflow validation prevents invalid steps and parameters.
+### Changed
+- Tests updated for new validation logic.
+
