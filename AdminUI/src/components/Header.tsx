@@ -16,9 +16,12 @@ export function Header() {
     };
 
     return (
-        <header className="bg-white dark:bg-gray-800 shadow-md p-4 flex justify-between items-center">
-            <h1 className="text-xl font-bold text-primary-500">Your CMS Admin</h1>
-            <button onClick={toggle} className="btn btn-secondary">
+        <header className="bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-md p-4 flex justify-between items-center">
+            <h1 className="text-xl font-bold">Your CMS Admin</h1>
+            <button
+                onClick={toggle}
+                className="btn bg-white text-primary-700 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+            >
                 {dark ? 'Light Mode' : 'Dark Mode'}
             </button>
         </header>

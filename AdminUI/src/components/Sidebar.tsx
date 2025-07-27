@@ -2,14 +2,14 @@ import { NavLink } from 'react-router-dom';
 
 export function Sidebar() {
     return (
-        <aside className="w-20 md:w-64 bg-gray-100 dark:bg-gray-800 p-4 flex flex-col">
+        <aside className="w-20 md:w-64 bg-primary-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 flex flex-col">
             <nav className="flex-1 space-y-2">
                 <NavLink
                     to="/"
                     className={({ isActive }) =>
                         isActive
-                            ? 'block px-4 py-2 rounded-xl bg-primary-500 text-white'
-                            : 'block px-4 py-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'block px-4 py-2 rounded-xl bg-accent-500 text-white'
+                            : 'block px-4 py-2 rounded-xl hover:bg-primary-200 dark:hover:bg-gray-700'
                     }
                 >
                     Dashboard
@@ -18,8 +18,8 @@ export function Sidebar() {
                     to="/models"
                     className={({ isActive }) =>
                         isActive
-                            ? 'block px-4 py-2 rounded-xl bg-primary-500 text-white'
-                            : 'block px-4 py-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'block px-4 py-2 rounded-xl bg-accent-500 text-white'
+                            : 'block px-4 py-2 rounded-xl hover:bg-primary-200 dark:hover:bg-gray-700'
                     }
                 >
                     Models
@@ -28,8 +28,8 @@ export function Sidebar() {
                     to="/rules"
                     className={({ isActive }) =>
                         isActive
-                            ? 'block px-4 py-2 rounded-xl bg-primary-500 text-white'
-                            : 'block px-4 py-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'block px-4 py-2 rounded-xl bg-accent-500 text-white'
+                            : 'block px-4 py-2 rounded-xl hover:bg-primary-200 dark:hover:bg-gray-700'
                     }
                 >
                     Rules
@@ -38,8 +38,8 @@ export function Sidebar() {
                     to="/workflows"
                     className={({ isActive }) =>
                         isActive
-                            ? 'block px-4 py-2 rounded-xl bg-primary-500 text-white'
-                            : 'block px-4 py-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'block px-4 py-2 rounded-xl bg-accent-500 text-white'
+                            : 'block px-4 py-2 rounded-xl hover:bg-primary-200 dark:hover:bg-gray-700'
                     }
                 >
                     Workflows
@@ -48,8 +48,8 @@ export function Sidebar() {
                     to="/workflow-dashboard"
                     className={({ isActive }) =>
                         isActive
-                            ? 'block px-4 py-2 rounded-xl bg-primary-500 text-white'
-                            : 'block px-4 py-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'block px-4 py-2 rounded-xl bg-accent-500 text-white'
+                            : 'block px-4 py-2 rounded-xl hover:bg-primary-200 dark:hover:bg-gray-700'
                     }
                 >
                     Workflow Studio

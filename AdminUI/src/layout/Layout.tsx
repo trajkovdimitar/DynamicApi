@@ -8,7 +8,7 @@ interface Props {
 
 export function Layout({ children }: Props) {
     return (
-        <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <div className="flex h-screen bg-primary-50 dark:bg-gray-900 transition-colors duration-300">
             <Sidebar />
             <div className="flex flex-col flex-1">
                 <Header />
