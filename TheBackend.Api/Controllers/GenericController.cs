@@ -1,16 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using RulesEngine.Models;
+using System.Collections.Generic;
+using System.Linq;
+using TheBackend.Api;
 using TheBackend.Application.Repositories;
+using TheBackend.Domain.Models;
 using TheBackend.DynamicModels;
 using TheBackend.DynamicModels.Workflows;
 using TheBackend.Infrastructure.Repositories;
-using RulesEngine.Models;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.OData.Query;
-using System.Linq;
-using TheBackend.Api;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace TheBackend.Api.Controllers
 {
@@ -98,10 +100,84 @@ namespace TheBackend.Api.Controllers
             var definition = _dbContextService.GetModelDefinition(modelName);
             var jObj = JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(body) ?? new();
             var missing = definition?.Properties
-                .Where(p => p.IsRequired && !jObj.ContainsKey(p.Name))
+                .Where(p => p.IsRequired && !p.IsKey && !jObj.ContainsKey(p.Name))
                 .Select(p => new ValidationError { Field = p.Name, Error = "Field is required" })
                 .ToList() ?? new List<ValidationError>();
             if (missing.Any()) return BadRequest(ApiResponse<object>.Fail("Validation failed", missing));
+
+            // Validate FK relationships
+            var fkErrors = new List<ValidationError>();
+            foreach (var rel in definition?.Relationships ?? new List<RelationshipDefinition>())
+            {
+                if (rel.RelationshipType == "ManyToOne" || rel.RelationshipType == "OneToOne") // FKs on this side
+                {
+                    var fkName = rel.ForeignKey;
+                    if (!string.IsNullOrEmpty(fkName) && jObj.ContainsKey(fkName))
+                    {
+                        var fkValueObj = jObj[fkName]?.ToObject<object>();
+                        if (fkValueObj != null)
+                        {
+                            var targetModelType = _dbContextService.GetModelType(rel.TargetModel);
+                            // Inside the FK validation loop in Post method
+                            targetModelType = _dbContextService.GetModelType(rel.TargetModel);
+                            if (targetModelType != null && jObj.ContainsKey(fkName))
+                            {
+                                fkValueObj = jObj[fkName]?.ToObject<object>();
+                                if (fkValueObj != null)
+                                {
+                                    // Get target PK type
+                                    var targetEntityType = dbContext.Model.FindEntityType(targetModelType);
+                                    var targetKey = targetEntityType.FindPrimaryKey();
+                                    if (targetKey == null || targetKey.Properties.Count != 1)
+                                    {
+                                        fkErrors.Add(new ValidationError { Field = fkName, Error = "Unsupported key in target model." });
+                                        continue;
+                                    }
+                                    var keyType = targetKey.Properties[0].ClrType;
+
+                                    // Convert to exact key type
+                                    object convertedFkValue;
+                                    try
+                                    {
+                                        convertedFkValue = Convert.ChangeType(fkValueObj, keyType);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        fkErrors.Add(new ValidationError { Field = fkName, Error = $"Invalid FK type: {ex.Message}" });
+                                        continue;
+                                    }
+
+                                    // Reflection for Set<T> and FindAsync
+                                    var setMethod = typeof(DbContext)
+                                        .GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!
+                                        .MakeGenericMethod(targetModelType);
+                                    var entitySet = setMethod.Invoke(dbContext, null);
+
+                                    var findMethod = entitySet.GetType()
+                                        .GetMethod(nameof(DbSet<object>.FindAsync), new[] { typeof(object[]) })!;
+                                    var findTask = (ValueTask)findMethod.Invoke(entitySet, new object[] { new[] { convertedFkValue } })!;
+
+                                    await findTask.ConfigureAwait(false);
+
+                                    var resultProperty = findTask.GetType().GetProperty("Result")!;
+                                    var result = resultProperty.GetValue(findTask);
+
+                                    var exists = result != null;
+                                    if (!exists)
+                                    {
+                                        fkErrors.Add(new ValidationError { Field = fkName, Error = $"Referenced {rel.TargetModel} with ID {fkValueObj} does not exist." });
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                fkErrors.Add(new ValidationError { Field = fkName, Error = $"Target model {rel.TargetModel} not found." });
+                            }
+                        }
+                    }
+                }
+            }
+            if (fkErrors.Any()) return BadRequest(ApiResponse<object>.Fail("Foreign key validation failed", fkErrors));
 
             var entity = jObj.ToObject(modelType)!;
 
@@ -124,7 +200,7 @@ namespace TheBackend.Api.Controllers
             var repo = Activator.CreateInstance(typeof(GenericRepository<>).MakeGenericType(modelType), dbContext);
 
             var addMethod = repoType.GetMethod("AddAsync");
-            var task = (Task)addMethod.Invoke(repo, new[] { entity });
+            var task = (ValueTask)addMethod.Invoke(repo, new[] { entity });
             await task.ConfigureAwait(false);
 
             await _workflowService.RunAsync(
