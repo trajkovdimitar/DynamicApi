@@ -4,18 +4,36 @@
 
 @layer base {
   body {
-    @apply font-sans text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-neutral-900;
+    @apply font-sans text-neutral-800 dark:text-neutral-100 bg-neutral-50 dark:bg-neutral-900 antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-semibold text-primary dark:text-primary-light;
   }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center px-3 py-1 rounded-md text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50;
+    @apply inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-primary text-white hover:bg-primary-light disabled:bg-primary-dark;
+    @apply btn bg-primary text-white hover:bg-primary-light active:bg-primary-dark focus:ring-primary;
   }
   .btn-secondary {
-    @apply btn bg-gray-300 text-gray-800 hover:bg-gray-400 dark:bg-neutral-700 dark:text-white;
+    @apply btn bg-neutral-200 text-neutral-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-600;
+  }
+  .btn-accent {
+    @apply btn bg-accent text-white hover:bg-accent-light active:bg-accent-dark focus:ring-accent;
+  }
+  .card {
+    @apply bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6 border border-neutral-200 dark:border-neutral-700;
+  }
+  .table {
+    @apply w-full border-collapse;
+  }
+  .table th {
+    @apply bg-neutral-100 dark:bg-neutral-800 text-left px-4 py-2 font-medium text-neutral-600 dark:text-neutral-300;
+  }
+  .table td {
+    @apply border-t border-neutral-200 dark:border-neutral-700 px-4 py-2;
   }
 }

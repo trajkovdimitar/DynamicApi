@@ -1,14 +1,38 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+interface Props {
+    collapsible?: boolean;
+}
 
-export function Sidebar() {
+export function Sidebar({ collapsible = false }: Props) {
+    const [collapsed, setCollapsed] = useState(false);
     return (
-        <aside className="w-16 md:w-48 bg-gray-200 dark:bg-neutral-800 h-full flex flex-col">
-            <nav className="flex-1 p-2 space-y-2">
-                <NavLink className="block p-2 rounded hover:bg-gray-300 dark:hover:bg-neutral-700" to="/">Dashboard</NavLink>
-                <NavLink className="block p-2 rounded hover:bg-gray-300 dark:hover:bg-neutral-700" to="/models">Models</NavLink>
-                <NavLink className="block p-2 rounded hover:bg-gray-300 dark:hover:bg-neutral-700" to="/rules">Rules</NavLink>
-                <NavLink className="block p-2 rounded hover:bg-gray-300 dark:hover:bg-neutral-700" to="/workflows">Workflows</NavLink>
-                <NavLink className="block p-2 rounded hover:bg-gray-300 dark:hover:bg-neutral-700" to="/workflow-dashboard">Workflow Studio</NavLink>
+        <aside
+            className={`bg-neutral-800 dark:bg-neutral-900 text-white transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} flex-shrink-0`}
+        >
+            {collapsible && (
+                <button onClick={() => setCollapsed(!collapsed)} className="p-4">
+                    Toggle
+                </button>
+            )}
+            <nav className="p-4">
+                <ul>
+                    <li className="py-2 hover:bg-neutral-700 rounded">
+                        <NavLink to="/">Dashboard</NavLink>
+                    </li>
+                    <li className="py-2 hover:bg-neutral-700 rounded">
+                        <NavLink to="/models">Models</NavLink>
+                    </li>
+                    <li className="py-2 hover:bg-neutral-700 rounded">
+                        <NavLink to="/rules">Rules</NavLink>
+                    </li>
+                    <li className="py-2 hover:bg-neutral-700 rounded">
+                        <NavLink to="/workflows">Workflows</NavLink>
+                    </li>
+                    <li className="py-2 hover:bg-neutral-700 rounded">
+                        <NavLink to="/workflow-dashboard">Workflow Studio</NavLink>
+                    </li>
+                </ul>
             </nav>
         </aside>
     );

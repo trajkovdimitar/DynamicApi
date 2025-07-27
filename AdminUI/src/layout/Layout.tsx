@@ -8,11 +8,11 @@ interface Props {
 
 export function Layout({ children }: Props) {
     return (
-        <div className="flex h-screen bg-gray-100 dark:bg-neutral-900">
-            <Sidebar />
+        <div className="flex h-screen bg-neutral-50 dark:bg-neutral-900">
+            <Sidebar collapsible={true} />
             <div className="flex flex-col flex-1">
                 <Header />
-                <main className="flex-1 overflow-auto p-4">{children}</main>
+                <main className="flex-1 overflow-auto p-6 bg-white dark:bg-neutral-800">{children}</main>
             </div>
         </div>
     );
