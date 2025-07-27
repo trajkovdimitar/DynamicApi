@@ -5,12 +5,14 @@ import {
     saveWorkflow,
     rollbackWorkflow,
 } from '../services/workflows';
-import type { WorkflowDefinition } from '../types/models';
-import { stepTypes } from '../types/models';
+import { getModels } from '../services/models';
+import type { WorkflowDefinition, ModelDefinition } from '../types/models';
+import { stepTypes, workflowEvents } from '../types/models';
 import Toast from '../components/Toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import WorkflowEditorForm, { defaultParams } from '../components/WorkflowEditorForm';
 import { DataTable } from '../components/DataTable';
+import { Modal } from '../components/Modal';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
@@ -25,6 +27,14 @@ export default function WorkflowsPage() {
     const [toast, setToast] = useState('');
     const [sortField, setSortField] = useState<'name' | 'version'>('name');
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+    const [newModalOpen, setNewModalOpen] = useState(false);
+    const [selectedModel, setSelectedModel] = useState('');
+    const [selectedEvent, setSelectedEvent] = useState<(typeof workflowEvents)[number]>(workflowEvents[0]);
+
+    const { data: models } = useQuery<ModelDefinition[]>({
+        queryKey: ['models'],
+        queryFn: getModels,
+    });
 
     const saveMutation = useMutation<void, Error, WorkflowDefinition>({
         mutationFn: saveWorkflow,
@@ -35,29 +45,30 @@ export default function WorkflowsPage() {
         onError: () => setToast('Failed to save workflow'),
     });
 
+    const startNewWorkflow = (name: string) => {
+        const def: WorkflowDefinition = {
+            workflowName: name,
+            steps: [
+                {
+                    type: stepTypes[0],
+                    parameters: JSON.parse(JSON.stringify(defaultParams[stepTypes[0]])),
+                    condition: '',
+                    onError: '',
+                    outputVariable: '',
+                },
+            ],
+            isTransactional: false,
+            globalVariables: [],
+        };
+        setOriginal(def);
+        setEditing(def);
+    };
+
     const openEditor = async (name: string | null) => {
-        if (name) {
-            const wf = await getWorkflow(name);
-            setOriginal(wf);
-            setEditing(JSON.parse(JSON.stringify(wf)));
-        } else {
-            const def: WorkflowDefinition = {
-                workflowName: '',
-                steps: [
-                    {
-                        type: stepTypes[0],
-                        parameters: JSON.parse(JSON.stringify(defaultParams[stepTypes[0]])),
-                        condition: '',
-                        onError: '',
-                        outputVariable: '',
-                    },
-                ],
-                isTransactional: false,
-                globalVariables: [],
-            };
-            setOriginal(def);
-            setEditing(def);
-        }
+        if (!name) return;
+        const wf = await getWorkflow(name);
+        setOriginal(wf);
+        setEditing(JSON.parse(JSON.stringify(wf)));
     };
 
     const save = async (def: WorkflowDefinition) => {
@@ -112,8 +123,15 @@ export default function WorkflowsPage() {
                     onChange={e => setFilter(e.target.value)}
                 />
                 <div className="flex gap-2">
-                    <button className="px-4 py-1 bg-blue-600 text-white" onClick={() => openEditor(null)}>New Workflow</button>
-                    <button className="px-4 py-1 bg-gray-300 dark:bg-neutral-600" onClick={() => refetch()}>Refresh</button>
+                    <button
+                        className="px-4 py-1 bg-blue-600 text-white"
+                        onClick={() => setNewModalOpen(true)}
+                    >
+                        New Workflow
+                    </button>
+                    <button className="px-4 py-1 bg-gray-300 dark:bg-neutral-600" onClick={() => refetch()}>
+                        Refresh
+                    </button>
                 </div>
             </div>
             <DataTable
@@ -187,6 +205,53 @@ export default function WorkflowsPage() {
             )}
         </div>
         <Toast message={toast} onClose={() => setToast('')} />
+        <Modal open={newModalOpen} onClose={() => setNewModalOpen(false)}>
+            <div className="space-y-2 w-64">
+                <h3 className="text-lg font-semibold">New Workflow</h3>
+                <select
+                    className="border rounded p-2 w-full dark:bg-neutral-800"
+                    value={selectedModel}
+                    onChange={e => setSelectedModel(e.target.value)}
+                >
+                    <option value="">Select model</option>
+                    {models?.map(m => (
+                        <option key={m.modelName} value={m.modelName}>
+                            {m.modelName}
+                        </option>
+                    ))}
+                </select>
+                <select
+                    className="border rounded p-2 w-full dark:bg-neutral-800"
+                    value={selectedEvent}
+                    onChange={e => setSelectedEvent(e.target.value as any)}
+                >
+                    {workflowEvents.map(ev => (
+                        <option key={ev} value={ev}>
+                            {ev}
+                        </option>
+                    ))}
+                </select>
+                <div className="flex justify-end gap-2">
+                    <button
+                        className="px-3 py-1 bg-gray-300 dark:bg-neutral-600 rounded"
+                        onClick={() => setNewModalOpen(false)}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        disabled={!selectedModel}
+                        className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
+                        onClick={() => {
+                            if (!selectedModel) return;
+                            startNewWorkflow(`${selectedModel}.${selectedEvent}`);
+                            setNewModalOpen(false);
+                        }}
+                    >
+                        Create
+                    </button>
+                </div>
+            </div>
+        </Modal>
         </>
     );
 }

@@ -65,6 +65,12 @@ export const stepTypes = [
     'SendEmail',
 ] as const;
 
+export const workflowEvents = [
+    'AfterCreate',
+    'AfterUpdate',
+    'AfterDelete',
+] as const;
+
 export const valueTypes = [
     'string',
     'int',
