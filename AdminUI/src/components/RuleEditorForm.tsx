@@ -69,10 +69,7 @@ export function RuleEditorForm({ workflow, onChange, suggestions }: Props) {
                     <option key={s} value={`entity.${s}`} />
                 ))}
             </datalist>
-            <button
-                onClick={addRule}
-                className="px-2 py-1 rounded bg-gray-300 dark:bg-neutral-700"
-            >
+            <button onClick={addRule} className="btn btn-secondary">
                 Add Rule
             </button>
         </div>

@@ -210,7 +210,7 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                         <button className="text-red-600" onClick={() => removeGlobalVariable(idx)}>Delete</button>
                     </div>
                 ))}
-                <button onClick={addGlobalVariable} className="px-3 py-1 rounded bg-gray-300 dark:bg-neutral-700">
+                <button onClick={addGlobalVariable} className="btn btn-secondary">
                     Add Variable
                 </button>
             </div>
@@ -310,7 +310,7 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                                             <button className="text-red-600" onClick={() => removeParameter(idx, pIdx)}>Delete</button>
                                         </div>
                                     ))}
-                                    <button onClick={() => addParameter(idx)} className="px-3 py-1 rounded bg-gray-300 dark:bg-neutral-700">
+                                    <button onClick={() => addParameter(idx)} className="btn btn-secondary">
                                         Add Parameter
                                     </button>
                                 </div>
@@ -319,10 +319,10 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                     </div>
                 ))}
                 <div className="flex gap-2">
-                    <button onClick={addStep} className="px-3 py-1 rounded bg-gray-300 dark:bg-neutral-700">Add Step</button>
+                    <button onClick={addStep} className="btn btn-secondary">Add Step</button>
                     <button
                         onClick={() => navigator.clipboard.writeText(JSON.stringify(workflow, null, 2))}
-                        className="px-3 py-1 rounded bg-gray-300 dark:bg-neutral-700"
+                        className="btn btn-secondary"
                     >
                         Copy JSON
                     </button>

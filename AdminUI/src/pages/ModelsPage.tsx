@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getModels } from '../services/models';
 import type { ModelDefinition } from '../types/models';
+import { DataTable } from '../components/DataTable';
 
 export default function ModelsPage() {
     const [models, setModels] = useState<ModelDefinition[]>([]);
@@ -29,26 +30,28 @@ export default function ModelsPage() {
         return <div className="text-center text-red-600">{error}</div>;
     }
 
+    const columns = [
+        {
+            header: 'Name',
+            accessor: (row: ModelDefinition) => (
+                <Link className="text-blue-600 hover:underline" to={`/models/${row.modelName}`}>{row.modelName}</Link>
+            ),
+        },
+        {
+            header: 'Fields',
+            accessor: (row: ModelDefinition) => row.properties.length,
+        },
+    ];
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Models</h2>
-                <Link className="px-3 py-1 rounded bg-blue-600 text-white" to="/models/new">
+                <Link className="btn btn-primary" to="/models/new">
                     New Model
                 </Link>
             </div>
-            <ul className="space-y-1">
-                {/* Add a check here just in case, though the above solutions should prevent it */}
-                {Array.isArray(models) && models.length > 0 ? (
-                    models.map(m => (
-                        <li key={m.modelName}>
-                            <Link className="text-blue-600" to={`/models/${m.modelName}`}>{m.modelName}</Link>
-                        </li>
-                    ))
-                ) : (
-                    <li>No models found.</li> // Message if models array is empty
-                )}
-            </ul>
+            <DataTable columns={columns} data={models} />
         </div>
     );
 }

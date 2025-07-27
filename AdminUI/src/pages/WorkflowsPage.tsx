@@ -123,13 +123,10 @@ export default function WorkflowsPage() {
                     onChange={e => setFilter(e.target.value)}
                 />
                 <div className="flex gap-2">
-                    <button
-                        className="px-4 py-1 bg-blue-600 text-white"
-                        onClick={() => setNewModalOpen(true)}
-                    >
+                    <button className="btn btn-primary" onClick={() => setNewModalOpen(true)}>
                         New Workflow
                     </button>
-                    <button className="px-4 py-1 bg-gray-300 dark:bg-neutral-600" onClick={() => refetch()}>
+                    <button className="btn btn-secondary" onClick={() => refetch()}>
                         Refresh
                     </button>
                 </div>
@@ -189,13 +186,11 @@ export default function WorkflowsPage() {
                     )}
                     <WorkflowEditorForm workflow={editing} onChange={setEditing} />
                     <div className="flex justify-end space-x-2">
-                        <button onClick={reset} className="px-4 py-2 rounded bg-gray-300 dark:bg-neutral-600">Reset</button>
-                        <button onClick={cancelEdit} className="px-4 py-2 rounded bg-gray-300 dark:bg-neutral-600">
-                            Cancel
-                        </button>
+                        <button onClick={reset} className="btn btn-secondary">Reset</button>
+                        <button onClick={cancelEdit} className="btn btn-secondary">Cancel</button>
                         <button
                             onClick={() => editing && save(editing)}
-                            className="px-4 py-2 rounded bg-blue-600 text-white"
+                            className="btn btn-primary"
                             disabled={saveMutation.isPending}
                         >
                             {saveMutation.isPending ? 'Saving...' : 'Save'}
@@ -232,15 +227,12 @@ export default function WorkflowsPage() {
                     ))}
                 </select>
                 <div className="flex justify-end gap-2">
-                    <button
-                        className="px-3 py-1 bg-gray-300 dark:bg-neutral-600 rounded"
-                        onClick={() => setNewModalOpen(false)}
-                    >
+                    <button className="btn btn-secondary" onClick={() => setNewModalOpen(false)}>
                         Cancel
                     </button>
                     <button
                         disabled={!selectedModel}
-                        className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
+                        className="btn btn-primary disabled:opacity-50"
                         onClick={() => {
                             if (!selectedModel) return;
                             startNewWorkflow(`${selectedModel}.${selectedEvent}`);
