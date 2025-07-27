@@ -3,6 +3,7 @@ import { getWorkflows, saveWorkflow } from '../services/rules';
 import { getModels } from '../services/models';
 import type { Workflow } from '../types/models';
 import { RuleEditorForm } from '../components/RuleEditorForm';
+import { DataTable } from '../components/DataTable';
 
 export default function RulesPage() {
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -78,47 +79,44 @@ export default function RulesPage() {
         return <div className="text-center p-4 text-red-600">Error: {error}</div>;
     }
 
+    const columns = [
+        {
+            header: 'Name',
+            accessor: (row: Workflow) => row.workflowName,
+        },
+        {
+            header: 'Rules',
+            accessor: (row: Workflow) => row.rules.length,
+        },
+        {
+            header: 'Actions',
+            accessor: (row: Workflow) => (
+                <button className="text-blue-600 hover:underline" onClick={() => startEdit(row)}>
+                    Edit
+                </button>
+            ),
+        },
+    ];
+
     return (
         <div className="space-y-4 p-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Rules</h2>
-                <button onClick={() => startEdit()} className="px-3 py-1 rounded bg-blue-600 text-white">
+                <button onClick={() => startEdit()} className="btn btn-primary">
                     New
                 </button>
             </div>
-            <ul className="space-y-1">
-                {/* Now, workflows is guaranteed to be an array, so .length and .map are safe */}
-                {workflows.length > 0 ? (
-                    workflows.map(w => (
-                        <li key={w.workflowName} className="flex justify-between items-center py-1">
-                            <span>{w.workflowName}</span>
-                            <button className="text-blue-600 hover:underline" onClick={() => startEdit(w)}>
-                                Edit
-                            </button>
-                        </li>
-                    ))
-                ) : (
-                    <li className="text-gray-500">No rules found.</li>
-                )}
-            </ul>
+            <DataTable columns={columns} data={workflows} />
 
             {editing && (
                 <div className="space-y-2 mt-4 p-4 border rounded shadow-md dark:bg-neutral-700">
                     <h3 className="text-lg font-semibold">{editing.workflowName ? `Editing: ${editing.workflowName}` : 'New Workflow'}</h3>
                     <RuleEditorForm workflow={editing} onChange={setEditing} suggestions={suggestions} />
                     <div className="flex justify-end space-x-2">
-                        <button
-                            onClick={() => setEditing(null)}
-                            className="px-4 py-2 rounded bg-gray-300 text-gray-800 hover:bg-gray-400"
-                            disabled={isSaving}
-                        >
+                        <button onClick={() => setEditing(null)} className="btn btn-secondary" disabled={isSaving}>
                             Cancel
                         </button>
-                        <button
-                            onClick={save}
-                            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-                            disabled={isSaving}
-                        >
+                        <button onClick={save} className="btn btn-primary" disabled={isSaving}>
                             {isSaving ? 'Saving...' : 'Save'}
                         </button>
                     </div>

@@ -42,7 +42,7 @@ export default function RecordEditor() {
         <div className="space-y-4">
             <h2 className="text-xl font-semibold">{id === 'new' ? 'New' : 'Edit'} {name}</h2>
             <FormFieldBuilder fields={fields} values={values} onChange={(n, v) => setValues({ ...values, [n]: v })} />
-            <button onClick={save} className="px-3 py-1 rounded bg-blue-600 text-white">
+            <button onClick={save} className="btn btn-primary">
                 Save
             </button>
         </div>

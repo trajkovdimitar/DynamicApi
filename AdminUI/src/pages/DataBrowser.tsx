@@ -68,7 +68,7 @@ export default function DataBrowser() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">{name}</h2>
-                <button className="px-3 py-1 rounded bg-blue-600 text-white" onClick={openCreate}>
+                <button className="btn btn-primary" onClick={openCreate}>
                     New Record
                 </button>
             </div>
@@ -78,7 +78,7 @@ export default function DataBrowser() {
                     <div className="p-4 space-y-4">
                         <h3 className="text-lg font-semibold mb-2">New {name}</h3>
                         <FormFieldBuilder fields={fields} values={formValues} onChange={(n, v) => setFormValues({ ...formValues, [n]: v })} />
-                        <button className="px-3 py-1 rounded bg-blue-600 text-white" onClick={create}>
+                        <button className="btn btn-primary" onClick={create}>
                             Create
                         </button>
                     </div>

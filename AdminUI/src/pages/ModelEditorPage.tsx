@@ -121,7 +121,7 @@ export default function ModelEditorPage() {
                         />
                     </div>
                 ))}
-                <button onClick={addField} className="px-3 py-1 rounded bg-gray-300 dark:bg-neutral-700">
+                <button onClick={addField} className="btn btn-secondary">
                     Add Field
                 </button>
             </div>
@@ -161,11 +161,11 @@ export default function ModelEditorPage() {
                         />
                     </div>
                 ))}
-                <button onClick={addRelationship} className="px-3 py-1 rounded bg-gray-300 dark:bg-neutral-700">
+                <button onClick={addRelationship} className="btn btn-secondary">
                     Add Relationship
                 </button>
             </div>
-            <button onClick={save} className="px-3 py-1 rounded bg-blue-600 text-white">
+            <button onClick={save} className="btn btn-primary">
                 Save
             </button>
         </div>
