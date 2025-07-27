@@ -1,18 +1,30 @@
 import { useState } from 'react';
-import { getWorkflows, getWorkflow, saveWorkflow, rollbackWorkflow } from '../services/workflows';
+import {
+    getWorkflows,
+    getWorkflow,
+    saveWorkflow,
+    rollbackWorkflow,
+} from '../services/workflows';
 import type { WorkflowDefinition } from '../types/models';
 import { stepTypes } from '../types/models';
 import Toast from '../components/Toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import WorkflowEditorForm, { defaultParams } from '../components/WorkflowEditorForm';
+import { DataTable } from '../components/DataTable';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
-    const { data: items } = useQuery<WorkflowDefinition[]>({ queryKey: ['workflows'], queryFn: getWorkflows });
+    const {
+        data: items,
+        isLoading,
+        refetch,
+    } = useQuery<WorkflowDefinition[]>({ queryKey: ['workflows'], queryFn: getWorkflows });
     const [editing, setEditing] = useState<WorkflowDefinition | null>(null);
     const [original, setOriginal] = useState<WorkflowDefinition | null>(null);
     const [filter, setFilter] = useState('');
     const [toast, setToast] = useState('');
+    const [sortField, setSortField] = useState<'name' | 'version'>('name');
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
     const saveMutation = useMutation<void, Error, WorkflowDefinition>({
         mutationFn: saveWorkflow,
@@ -65,9 +77,28 @@ export default function WorkflowsPage() {
         if (original) setEditing(JSON.parse(JSON.stringify(original)));
     };
 
-    const filtered = (items ?? []).filter(w =>
+    let filtered = (items ?? []).filter(w =>
         w.workflowName.toLowerCase().includes(filter.toLowerCase()),
     );
+
+    filtered = filtered.sort((a, b) => {
+        const dir = sortDir === 'asc' ? 1 : -1;
+        if (sortField === 'name') {
+            return a.workflowName.localeCompare(b.workflowName) * dir;
+        }
+        return ((a.version ?? 1) - (b.version ?? 1)) * dir;
+    });
+
+    const data = filtered.map((w, idx) => ({ ...w, idx }));
+
+    const toggleSort = (field: 'name' | 'version') => {
+        if (sortField === field) {
+            setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+        } else {
+            setSortField(field);
+            setSortDir('asc');
+        }
+    };
 
     return (
         <>
@@ -80,21 +111,59 @@ export default function WorkflowsPage() {
                     value={filter}
                     onChange={e => setFilter(e.target.value)}
                 />
-                <button className="px-4 py-1 bg-blue-600 text-white" onClick={() => openEditor(null)}>New Workflow</button>
+                <div className="flex gap-2">
+                    <button className="px-4 py-1 bg-blue-600 text-white" onClick={() => openEditor(null)}>New Workflow</button>
+                    <button className="px-4 py-1 bg-gray-300 dark:bg-neutral-600" onClick={() => refetch()}>Refresh</button>
+                </div>
             </div>
-            <ul>
-                {filtered.map(w => (
-                    <li key={w.workflowName} className="flex justify-between">
-                        <span>{w.workflowName} (v{w.version ?? 1})</span>
-                        <div className="space-x-2">
-                            <button onClick={() => openEditor(w.workflowName)} className="text-blue-600">Edit</button>
-                            {w.version && w.version > 1 && (
-                                <button onClick={() => rollbackWorkflow(w.workflowName, w.version! - 1)} className="text-red-600">Rollback</button>
-                            )}
-                        </div>
-                    </li>
-                ))}
-            </ul>
+            <DataTable
+                columns={[
+                    {
+                        header: '#',
+                        accessor: (row: typeof data[number]) => row.idx + 1,
+                    },
+                    {
+                        header: `Name${sortField === 'name' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}`,
+                        accessor: (row: typeof data[number]) => row.workflowName,
+                        onHeaderClick: () => toggleSort('name'),
+                    },
+                    {
+                        header: `Version${sortField === 'version' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}`,
+                        accessor: (row: typeof data[number]) => row.version ?? 1,
+                        onHeaderClick: () => toggleSort('version'),
+                    },
+                    {
+                        header: 'Steps',
+                        accessor: (row: typeof data[number]) => row.steps.length,
+                    },
+                    {
+                        header: 'Actions',
+                        accessor: (row: typeof data[number]) => (
+                            <div className="space-x-2">
+                                <button onClick={() => openEditor(row.workflowName)} className="text-blue-600">Edit</button>
+                                {row.version && row.version > 1 && (
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('Rollback to previous version?'))
+                                                rollbackWorkflow(row.workflowName, row.version! - 1).then(() => refetch());
+                                        }}
+                                        className="text-red-600"
+                                    >
+                                        Rollback
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => navigator.clipboard.writeText(JSON.stringify(row, null, 2))}
+                                    className="text-green-700"
+                                >
+                                    Copy JSON
+                                </button>
+                            </div>
+                        ),
+                    },
+                ]}
+                data={data}
+            />
             {editing && (
                 <div className="space-y-4 mt-4 p-4 border rounded shadow-md dark:bg-neutral-700">
                     {hasChanges && (

@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 interface Column<T> {
     header: string;
     accessor: (row: T) => ReactNode;
+    onHeaderClick?: () => void;
+    headerClassName?: string;
 }
 
 interface Props<T> {
@@ -17,7 +19,11 @@ export function DataTable<T>({ columns, data, onRowClick }: Props<T>) {
             <thead className="bg-gray-50 dark:bg-neutral-800">
                 <tr>
                     {columns.map((col, idx) => (
-                        <th key={idx} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th
+                            key={idx}
+                            className={`px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${col.onHeaderClick ? 'cursor-pointer select-none' : ''} ${col.headerClassName ?? ''}`.trim()}
+                            onClick={col.onHeaderClick}
+                        >
                             {col.header}
                         </th>
                     ))}
