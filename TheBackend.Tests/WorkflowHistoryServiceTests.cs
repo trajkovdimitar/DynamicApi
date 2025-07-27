@@ -42,7 +42,7 @@ public class WorkflowHistoryServiceTests
             services.AddSingleton(ex.GetType(), ex);
         var provider = services.BuildServiceProvider();
         var registry = new WorkflowStepExecutorRegistry(executors, provider);
-        var service = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance);
+        var service = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance, new ModelDefinitionService());
 
         var wf = new WorkflowDefinition
         {
@@ -54,7 +54,7 @@ public class WorkflowHistoryServiceTests
                     Type = "CreateEntity",
                     Parameters = new List<Parameter>
                     {
-                        new() { Key = "ModelName", ValueType = "string", Value = "X" }
+                        new() { Key = "ModelName", ValueType = "string", Value = "User" }
                     }
                 }
             }
@@ -65,7 +65,7 @@ public class WorkflowHistoryServiceTests
             Type = "CreateEntity",
             Parameters = new List<Parameter>
             {
-                new() { Key = "ModelName", ValueType = "string", Value = "X" }
+                new() { Key = "ModelName", ValueType = "string", Value = "User" }
             }
         });
         service.SaveWorkflow(wf);

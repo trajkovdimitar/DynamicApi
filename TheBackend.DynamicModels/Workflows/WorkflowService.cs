@@ -22,15 +22,33 @@ public class WorkflowService
     private readonly WorkflowHistoryService _historyService;
     private readonly WorkflowStepExecutorRegistry _executorRegistry;
     private readonly ILogger<WorkflowService> _logger;
+    private readonly ModelDefinitionService _modelService;
+    private static readonly HashSet<string> AllowedStepTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "CreateEntity",
+        "UpdateEntity",
+        "QueryEntity",
+        "SendEmail"
+    };
+    private static readonly HashSet<string> AllowedValueTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "string",
+        "int",
+        "bool",
+        "double",
+        "json"
+    };
 
     public WorkflowService(
         WorkflowHistoryService historyService,
         WorkflowStepExecutorRegistry executorRegistry,
-        ILogger<WorkflowService> logger)
+        ILogger<WorkflowService> logger,
+        ModelDefinitionService modelService)
     {
         _historyService = historyService;
         _executorRegistry = executorRegistry;
         _logger = logger;
+        _modelService = modelService;
         _workflows = historyService.LoadAllCurrentDefinitions();
     }
 
@@ -49,8 +67,15 @@ public class WorkflowService
         if (def.Steps == null || def.Steps.Count == 0)
             throw new ArgumentException("Workflow must contain at least one step");
 
+        var variableKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var variable in def.GlobalVariables)
         {
+            if (string.IsNullOrWhiteSpace(variable.Key))
+                throw new ArgumentException("Global variable key is required");
+            if (!AllowedValueTypes.Contains(variable.ValueType))
+                throw new ArgumentException($"Invalid value type {variable.ValueType} on variable {variable.Key}");
+            if (!variableKeys.Add(variable.Key))
+                throw new ArgumentException($"Duplicate global variable key: {variable.Key}");
             _ = variable.GetTypedValue();
         }
 
@@ -58,12 +83,26 @@ public class WorkflowService
         {
             if (string.IsNullOrWhiteSpace(step.Type))
                 throw new ArgumentException("Step type is required");
-            if (_executorRegistry.GetExecutor(step.Type) == null)
+            if (!AllowedStepTypes.Contains(step.Type) || _executorRegistry.GetExecutor(step.Type) == null)
                 throw new ArgumentException($"Unsupported step type: {step.Type}");
 
+            var paramKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var p in step.Parameters)
             {
+                if (string.IsNullOrWhiteSpace(p.Key))
+                    throw new ArgumentException($"Step {step.Type} has parameter with empty key");
+                if (!AllowedValueTypes.Contains(p.ValueType))
+                    throw new ArgumentException($"Invalid value type {p.ValueType} on parameter {p.Key} in step {step.Type}");
+                if (!paramKeys.Add(p.Key))
+                    throw new ArgumentException($"Duplicate parameter {p.Key} in step {step.Type}");
                 _ = p.GetTypedValue();
+                if (p.Key.Equals("ModelName", StringComparison.OrdinalIgnoreCase) &&
+                    p.GetTypedValue() is string mn)
+                {
+                    var models = _modelService.LoadModels();
+                    if (models.Any() && models.All(m => !m.ModelName.Equals(mn, StringComparison.OrdinalIgnoreCase)))
+                        throw new ArgumentException($"Unknown model: {mn}");
+                }
             }
 
             if (!string.IsNullOrEmpty(step.Condition))
@@ -85,8 +124,15 @@ public class WorkflowService
                 if (!policy.Equals("Retry", StringComparison.OrdinalIgnoreCase) &&
                     !policy.Equals("Skip", StringComparison.OrdinalIgnoreCase))
                     throw new ArgumentException($"Invalid OnError policy: {step.OnError}");
-                if (policy.Equals("Retry", StringComparison.OrdinalIgnoreCase) && parts.Length > 1 && !int.TryParse(parts[1], out _))
-                    throw new ArgumentException($"Invalid OnError retry count: {step.OnError}");
+                if (policy.Equals("Retry", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (parts.Length > 1 && (!int.TryParse(parts[1], out var r) || r < 1))
+                        throw new ArgumentException($"Invalid OnError retry count: {step.OnError}");
+                }
+                else if (parts.Length > 1)
+                {
+                    throw new ArgumentException($"Invalid OnError format: {step.OnError}");
+                }
             }
 
             void Require(string name)
@@ -114,6 +160,9 @@ public class WorkflowService
                     Require("Message");
                     break;
             }
+
+            if (step.OutputVariable != null && string.IsNullOrWhiteSpace(step.OutputVariable))
+                throw new ArgumentException("OutputVariable cannot be empty");
         }
     }
 

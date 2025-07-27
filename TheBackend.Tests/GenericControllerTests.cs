@@ -67,7 +67,8 @@ public class GenericControllerTests
         return new WorkflowService(
             history,
             registry,
-            NullLogger<WorkflowService>.Instance);
+            NullLogger<WorkflowService>.Instance,
+            new ModelDefinitionService());
     }
 
     [Fact]
@@ -221,7 +222,17 @@ public class GenericControllerTests
             var wf = new WorkflowDefinition
             {
                 WorkflowName = $"{nameof(TestEntity)}.AfterUpdate",
-                Steps = new List<WorkflowStep> { new() { Type = executor.SupportedType } },
+                Steps = new List<WorkflowStep>
+                {
+                    new()
+                    {
+                        Type = executor.SupportedType,
+                        Parameters = new List<Parameter>
+                        {
+                            new() { Key = "ModelName", ValueType = "string", Value = "TestEntity" }
+                        }
+                    }
+                },
                 IsTransactional = false
             };
             wfService.SaveWorkflow(wf);
@@ -260,7 +271,17 @@ public class GenericControllerTests
             var wf = new WorkflowDefinition
             {
                 WorkflowName = $"{nameof(TestEntity)}.AfterDelete",
-                Steps = new List<WorkflowStep> { new() { Type = executor.SupportedType } },
+                Steps = new List<WorkflowStep>
+                {
+                    new()
+                    {
+                        Type = executor.SupportedType,
+                        Parameters = new List<Parameter>
+                        {
+                            new() { Key = "ModelName", ValueType = "string", Value = "TestEntity" }
+                        }
+                    }
+                },
                 IsTransactional = false
             };
             wfService.SaveWorkflow(wf);
@@ -299,7 +320,7 @@ public class TestDbContext : DbContext
 
 public class CountingExecutor : IWorkflowStepExecutor<object, object>
 {
-    public string SupportedType => "Count";
+    public string SupportedType => "CreateEntity";
     public int Count { get; private set; }
 
     public Task<object?> ExecuteAsync(
