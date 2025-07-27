@@ -61,3 +61,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.10.0] - 2025-07-30
 ### Added
 - Workflow editor UI supports creating and editing workflow definitions.
+
+## [0.11.0] - 2025-07-31
+### Added
+- Search box for filtering workflows.
+- Default step added when creating new workflows.
+- Unsaved change detection with cancel confirmation.
+- Reset button restores original workflow state.
+- Step duplication, reordering, and collapsing controls.
+- Button to copy workflow JSON to clipboard.
+- Toast notifications for save success or failure.
+- Improved error handling when saving workflows.
