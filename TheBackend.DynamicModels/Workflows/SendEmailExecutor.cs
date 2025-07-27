@@ -23,9 +23,10 @@ public class SendEmailExecutor<TInput> : IWorkflowStepExecutor<TInput, bool>
         IServiceProvider serviceProvider,
         Dictionary<string, object> variables)
     {
-        var to = step.GetParameterValue<string>("To") ?? throw new InvalidOperationException("To parameter missing");
-        var subject = step.GetParameterValue<string>("Subject") ?? string.Empty;
-        var body = step.GetParameterValue<string>("Body") ?? string.Empty;
+        var to = step.GetResolvedString("To", input, variables)
+                 ?? throw new InvalidOperationException("To parameter missing");
+        var subject = step.GetResolvedString("Subject", input, variables) ?? string.Empty;
+        var body = step.GetResolvedString("Body", input, variables) ?? string.Empty;
         await _emailService.SendEmailAsync(to, subject, body);
         return true;
     }
