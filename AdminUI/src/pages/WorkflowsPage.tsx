@@ -4,7 +4,7 @@ import type { WorkflowDefinition } from '../types/models';
 import { stepTypes } from '../types/models';
 import Toast from '../components/Toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import WorkflowEditorForm from '../components/WorkflowEditorForm';
+import WorkflowEditorForm, { defaultParams } from '../components/WorkflowEditorForm';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
@@ -32,7 +32,13 @@ export default function WorkflowsPage() {
             const def: WorkflowDefinition = {
                 workflowName: '',
                 steps: [
-                    { type: stepTypes[0], parameters: [], condition: '', onError: '', outputVariable: '' },
+                    {
+                        type: stepTypes[0],
+                        parameters: JSON.parse(JSON.stringify(defaultParams[stepTypes[0]])),
+                        condition: '',
+                        onError: '',
+                        outputVariable: '',
+                    },
                 ],
                 isTransactional: false,
                 globalVariables: [],
@@ -91,6 +97,9 @@ export default function WorkflowsPage() {
             </ul>
             {editing && (
                 <div className="space-y-4 mt-4 p-4 border rounded shadow-md dark:bg-neutral-700">
+                    {hasChanges && (
+                        <p className="text-sm text-orange-600">You have unsaved changes.</p>
+                    )}
                     <WorkflowEditorForm workflow={editing} onChange={setEditing} />
                     <div className="flex justify-end space-x-2">
                         <button onClick={reset} className="px-4 py-2 rounded bg-gray-300 dark:bg-neutral-600">Reset</button>

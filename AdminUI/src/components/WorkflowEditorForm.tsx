@@ -1,6 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { stepTypes, valueTypes } from '../types/models';
+import { getModels } from '../services/models';
 import type { WorkflowDefinition, WorkflowStep, Parameter } from '../types/models';
+
+const stepDescriptions: Record<string, string> = {
+    CreateEntity: 'Create a new record for the selected model.',
+    UpdateEntity: 'Update an existing record by id.',
+    QueryEntity: 'Query records using a filter expression.',
+    SendEmail: 'Send an email using the configured provider.',
+};
+
+export const defaultParams: Record<string, Parameter[]> = {
+    CreateEntity: [
+        { key: 'ModelName', valueType: 'string', value: '' },
+        { key: 'Mappings', valueType: 'json', value: '[]' },
+    ],
+    UpdateEntity: [
+        { key: 'ModelName', valueType: 'string', value: '' },
+        { key: 'Id', valueType: 'string', value: '' },
+        { key: 'Mappings', valueType: 'json', value: '[]' },
+    ],
+    QueryEntity: [
+        { key: 'ModelName', valueType: 'string', value: '' },
+        { key: 'Filter', valueType: 'string', value: '' },
+    ],
+    SendEmail: [
+        { key: 'To', valueType: 'string', value: '' },
+        { key: 'Subject', valueType: 'string', value: '' },
+        { key: 'Body', valueType: 'string', value: '' },
+    ],
+};
 
 interface Props {
     workflow: WorkflowDefinition;
@@ -9,9 +38,19 @@ interface Props {
 
 export default function WorkflowEditorForm({ workflow, onChange }: Props) {
     const [expanded, setExpanded] = useState<number[]>(workflow.steps.map((_, i) => i));
+    const [models, setModels] = useState<string[]>([]);
+
+    useEffect(() => {
+        getModels().then(list => setModels(list.map(m => m.modelName))).catch(console.error);
+    }, []);
     const updateStep = (index: number, partial: Partial<WorkflowStep>) => {
         const steps = [...workflow.steps];
-        steps[index] = { ...steps[index], ...partial } as WorkflowStep;
+        const current = { ...steps[index] } as WorkflowStep;
+        const next = { ...current, ...partial } as WorkflowStep;
+        if (partial.type && partial.type !== current.type) {
+            next.parameters = JSON.parse(JSON.stringify(defaultParams[partial.type] || []));
+        }
+        steps[index] = next;
         onChange({ ...workflow, steps });
     };
 
@@ -20,7 +59,13 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
             ...workflow,
             steps: [
                 ...workflow.steps,
-                { type: stepTypes[0], parameters: [], condition: '', onError: '', outputVariable: '' },
+                {
+                    type: stepTypes[0],
+                    parameters: JSON.parse(JSON.stringify(defaultParams[stepTypes[0]])),
+                    condition: '',
+                    onError: '',
+                    outputVariable: '',
+                },
             ],
         });
     };
@@ -48,6 +93,7 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
     };
 
     const removeStep = (index: number) => {
+        if (!confirm('Delete this step?')) return;
         const steps = workflow.steps.filter((_, i) => i !== index);
         onChange({ ...workflow, steps });
     };
@@ -102,6 +148,7 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
     };
 
     const removeGlobalVariable = (index: number) => {
+        if (!confirm('Delete variable?')) return;
         const list = workflow.globalVariables.filter((_, i) => i !== index);
         onChange({ ...workflow, globalVariables: list });
     };
@@ -112,6 +159,7 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                 <label className="mb-1 text-sm">Workflow Name</label>
                 <input
                     className="border rounded p-2 dark:bg-neutral-800"
+                    placeholder="e.g. OrderProcessing"
                     value={workflow.workflowName}
                     onChange={e => onChange({ ...workflow, workflowName: e.target.value })}
                 />
@@ -158,11 +206,14 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
             </div>
             <div className="space-y-2">
                 <h3 className="font-semibold">Steps</h3>
+                {workflow.steps.length === 0 && (
+                    <p className="text-sm text-neutral-500">No steps added.</p>
+                )}
                 {workflow.steps.map((s, idx) => (
                     <div key={idx} className="border p-2 rounded space-y-2">
                         <div className="flex justify-between items-center">
                             <span className="font-medium cursor-pointer" onClick={() => toggleStep(idx)}>
-                                {expanded.includes(idx) ? '▼' : '►'} Step {idx + 1}
+                                {expanded.includes(idx) ? '▼' : '►'} Step {idx + 1} - {s.type}
                             </span>
                             <div className="space-x-2">
                                 <button className="text-xs" onClick={() => moveStep(idx, -1)}>Up</button>
@@ -182,21 +233,22 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                                 <option key={t} value={t}>{t}</option>
                             ))}
                         </select>
+                        <p className="text-xs text-neutral-500">{stepDescriptions[s.type]}</p>
                         <input
                             className="border rounded p-2 dark:bg-neutral-800"
-                            placeholder="Condition"
+                            placeholder="Condition (optional)"
                             value={s.condition ?? ''}
                             onChange={e => updateStep(idx, { condition: e.target.value })}
                         />
                         <input
                             className="border rounded p-2 dark:bg-neutral-800"
-                            placeholder="On Error"
+                            placeholder="On Error policy"
                             value={s.onError ?? ''}
                             onChange={e => updateStep(idx, { onError: e.target.value })}
                         />
                         <input
                             className="border rounded p-2 dark:bg-neutral-800"
-                            placeholder="Output Variable"
+                            placeholder="Output Variable name"
                             value={s.outputVariable ?? ''}
                             onChange={e => updateStep(idx, { outputVariable: e.target.value })}
                         />
@@ -219,12 +271,32 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                                                     <option key={v} value={v}>{v}</option>
                                                 ))}
                                             </select>
-                                            <input
-                                                className="border rounded p-2 dark:bg-neutral-800"
-                                                placeholder="Value"
-                                                value={p.value}
-                                                onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
-                                            />
+                                            {p.key === 'ModelName' ? (
+                                                <select
+                                                    className="border rounded p-2 dark:bg-neutral-800"
+                                                    value={p.value}
+                                                    onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
+                                                >
+                                                    <option value="">Select model</option>
+                                                    {models.map(m => (
+                                                        <option key={m} value={m}>{m}</option>
+                                                    ))}
+                                                </select>
+                                            ) : p.key === 'Mappings' ? (
+                                                <textarea
+                                                    className="border rounded p-2 dark:bg-neutral-800 h-24"
+                                                    placeholder="JSON"
+                                                    value={p.value}
+                                                    onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
+                                                />
+                                            ) : (
+                                                <input
+                                                    className="border rounded p-2 dark:bg-neutral-800"
+                                                    placeholder="Value"
+                                                    value={p.value}
+                                                    onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
+                                                />
+                                            )}
                                             <button className="text-red-600" onClick={() => removeParameter(idx, pIdx)}>Delete</button>
                                         </div>
                                     ))}
