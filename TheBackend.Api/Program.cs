@@ -25,11 +25,15 @@ builder.Services.AddTransient(typeof(UpdateEntityExecutor<,>), typeof(UpdateEnti
 builder.Services.AddTransient<IWorkflowStepExecutor>(sp => new QueryEntityExecutor<object, object>());
 builder.Services.AddTransient(typeof(QueryEntityExecutor<,>), typeof(QueryEntityExecutor<,>));
 
-builder.Services.AddTransient<IWorkflowStepExecutor<object, bool>>(sp => new SendEmailExecutor<object>(sp.GetRequiredService<IEmailService>()));
+builder.Services.AddTransient<IWorkflowStepExecutor>(sp =>
+    new SendEmailExecutor<object>(sp.GetRequiredService<IEmailService>()));
 builder.Services.AddTransient(typeof(SendEmailExecutor<>), typeof(SendEmailExecutor<>));
+builder.Services.AddTransient<IWorkflowStepExecutor>(sp =>
+    new LogEventExecutor<object>(sp.GetRequiredService<ILogger<LogEventExecutor<object>>>()));
+builder.Services.AddTransient(typeof(LogEventExecutor<>), typeof(LogEventExecutor<>));
 
 builder.Services.AddTransient(typeof(IWorkflowStepExecutor<,>), typeof(QueryEntityExecutor<,>));
-builder.Services.AddTransient<IEmailService, LoggingEmailService>();
+builder.Services.AddTransient<IEmailService, GmailEmailService>();
 builder.Services.AddSingleton<WorkflowStepExecutorRegistry>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
