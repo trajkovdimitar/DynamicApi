@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { stepTypes, valueTypes, workflowEvents } from '../types/models';
 import { getModels } from '../services/models';
 import type { WorkflowDefinition, WorkflowStep, Parameter } from '../types/models';
+import { Input } from './common/Input';
+import { Button } from './common/Button';
 
 const stepDescriptions: Record<string, string> = {
     CreateEntity: 'Create a new record for the selected model.',
@@ -164,8 +166,7 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
         <div className="space-y-4">
             <div className="flex flex-col">
                 <label className="mb-1 text-sm">Workflow Name</label>
-                <input
-                    className="border rounded p-2 dark:bg-neutral-800"
+                <Input
                     placeholder="e.g. OrderProcessing"
                     value={workflow.workflowName}
                     onChange={e => onChange({ ...workflow, workflowName: e.target.value })}
@@ -207,12 +208,12 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                             value={p.value}
                             onChange={e => updateGlobalVariable(idx, { value: e.target.value })}
                         />
-                        <button className="text-red-600" onClick={() => removeGlobalVariable(idx)}>Delete</button>
+                        <Button variant="danger" onClick={() => removeGlobalVariable(idx)}>
+                            Delete
+                        </Button>
                     </div>
                 ))}
-                <button onClick={addGlobalVariable} className="btn btn-secondary">
-                    Add Variable
-                </button>
+                <Button variant="secondary" onClick={addGlobalVariable}>Add Variable</Button>
             </div>
             <div className="space-y-2">
                 <h3 className="font-semibold">Steps</h3>
@@ -229,7 +230,7 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                                 <button className="text-xs" onClick={() => moveStep(idx, -1)}>Up</button>
                                 <button className="text-xs" onClick={() => moveStep(idx, 1)}>Down</button>
                                 <button className="text-xs" onClick={() => duplicateStep(idx)}>Copy</button>
-                                <button className="text-red-600" onClick={() => removeStep(idx)}>Delete</button>
+                                <Button variant="danger" onClick={() => removeStep(idx)}>Delete</Button>
                             </div>
                         </div>
                         {expanded.includes(idx) && (
@@ -307,25 +308,24 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                                                     onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
                                                 />
                                             )}
-                                            <button className="text-red-600" onClick={() => removeParameter(idx, pIdx)}>Delete</button>
+                                            <Button variant="danger" onClick={() => removeParameter(idx, pIdx)}>
+                                                Delete
+                                            </Button>
                                         </div>
                                     ))}
-                                    <button onClick={() => addParameter(idx)} className="btn btn-secondary">
+                                    <Button variant="secondary" onClick={() => addParameter(idx)}>
                                         Add Parameter
-                                    </button>
+                                    </Button>
                                 </div>
                             </>
                         )}
                     </div>
                 ))}
                 <div className="flex gap-2">
-                    <button onClick={addStep} className="btn btn-secondary">Add Step</button>
-                    <button
-                        onClick={() => navigator.clipboard.writeText(JSON.stringify(workflow, null, 2))}
-                        className="btn btn-secondary"
-                    >
+                    <Button variant="secondary" onClick={addStep}>Add Step</Button>
+                    <Button variant="secondary" onClick={() => navigator.clipboard.writeText(JSON.stringify(workflow, null, 2))}>
                         Copy JSON
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

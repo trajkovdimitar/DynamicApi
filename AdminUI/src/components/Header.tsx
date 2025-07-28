@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { useTheme } from '../ThemeContext';
+import { Button } from './common/Button';
 
 const HeaderWrapper = styled.header`
     height: 3rem;
@@ -10,13 +11,6 @@ const HeaderWrapper = styled.header`
     border-bottom: 1px solid ${({ theme }) => theme.colors.primaryLight};
 `;
 
-const ToggleButton = styled.button`
-    padding: ${({ theme }) => theme.spacing.sm};
-    border-radius: 4px;
-    background: ${({ theme }) => theme.colors.accent};
-    color: #fff;
-    cursor: pointer;
-`;
 
 const Avatar = styled.div`
     width: 2rem;
@@ -38,7 +32,9 @@ export function Header() {
         <HeaderWrapper>
             <h1>AdminUI</h1>
             <Right>
-                <ToggleButton onClick={toggle}>{dark ? 'Light' : 'Dark'}</ToggleButton>
+                <Button variant="secondary" onClick={toggle} aria-label="Toggle dark mode">
+                    {dark ? 'Light' : 'Dark'}
+                </Button>
                 <Avatar />
             </Right>
         </HeaderWrapper>

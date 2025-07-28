@@ -6,6 +6,7 @@ import type { ModelDefinition } from '../types/models';
 import { DataTable } from '../components/DataTable';
 import { Drawer } from '../components/Drawer';
 import { FormFieldBuilder } from '../components/FormFieldBuilder';
+import { Button } from '../components/common/Button';
 
 export default function DataBrowser() {
     const { name } = useParams();
@@ -68,9 +69,7 @@ export default function DataBrowser() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">{name}</h2>
-                <button className="btn btn-primary" onClick={openCreate}>
-                    New Record
-                </button>
+                <Button onClick={openCreate}>New Record</Button>
             </div>
             <DataTable columns={columns} data={records} onRowClick={r => { setSelected(r); setIsCreating(false); setDrawerOpen(true); }} />
             <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
@@ -78,9 +77,7 @@ export default function DataBrowser() {
                     <div className="p-4 space-y-4">
                         <h3 className="text-lg font-semibold mb-2">New {name}</h3>
                         <FormFieldBuilder fields={fields} values={formValues} onChange={(n, v) => setFormValues({ ...formValues, [n]: v })} />
-                        <button className="btn btn-primary" onClick={create}>
-                            Create
-                        </button>
+                        <Button onClick={create}>Create</Button>
                     </div>
                 ) : selected ? (
                     <div className="p-4 space-y-2">

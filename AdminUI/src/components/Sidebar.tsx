@@ -27,6 +27,11 @@ const LinkItem = styled(NavLink)`
         background: ${({ theme }) => theme.colors.primaryLight};
         color: #fff;
     }
+
+    &.active {
+        background: ${({ theme }) => theme.colors.primary};
+        color: #fff;
+    }
 `;
 
 export function Sidebar() {

@@ -13,6 +13,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import WorkflowEditorForm, { defaultParams } from '../components/WorkflowEditorForm';
 import { DataTable } from '../components/DataTable';
 import { Modal } from '../components/Modal';
+import { Button } from '../components/common/Button';
+import { Input } from '../components/common/Input';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
@@ -116,19 +118,14 @@ export default function WorkflowsPage() {
         <div className="p-4 space-y-2">
             <h2 className="text-xl font-semibold">Workflows</h2>
             <div className="space-y-2">
-                <input
-                    className="border rounded p-2 dark:bg-neutral-800"
+                <Input
                     placeholder="Search workflows"
                     value={filter}
                     onChange={e => setFilter(e.target.value)}
                 />
                 <div className="flex gap-2">
-                    <button className="btn btn-primary" onClick={() => setNewModalOpen(true)}>
-                        New Workflow
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => refetch()}>
-                        Refresh
-                    </button>
+                    <Button onClick={() => setNewModalOpen(true)}>New Workflow</Button>
+                    <Button variant="secondary" onClick={() => refetch()}>Refresh</Button>
                 </div>
             </div>
             <DataTable
@@ -186,15 +183,11 @@ export default function WorkflowsPage() {
                     )}
                     <WorkflowEditorForm workflow={editing} onChange={setEditing} />
                     <div className="flex justify-end space-x-2">
-                        <button onClick={reset} className="btn btn-secondary">Reset</button>
-                        <button onClick={cancelEdit} className="btn btn-secondary">Cancel</button>
-                        <button
-                            onClick={() => editing && save(editing)}
-                            className="btn btn-primary"
-                            disabled={saveMutation.isPending}
-                        >
+                        <Button variant="secondary" onClick={reset}>Reset</Button>
+                        <Button variant="secondary" onClick={cancelEdit}>Cancel</Button>
+                        <Button onClick={() => editing && save(editing)} disabled={saveMutation.isPending}>
                             {saveMutation.isPending ? 'Saving...' : 'Save'}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}
@@ -227,12 +220,11 @@ export default function WorkflowsPage() {
                     ))}
                 </select>
                 <div className="flex justify-end gap-2">
-                    <button className="btn btn-secondary" onClick={() => setNewModalOpen(false)}>
+                    <Button variant="secondary" onClick={() => setNewModalOpen(false)}>
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         disabled={!selectedModel}
-                        className="btn btn-primary disabled:opacity-50"
                         onClick={() => {
                             if (!selectedModel) return;
                             startNewWorkflow(`${selectedModel}.${selectedEvent}`);
@@ -240,7 +232,7 @@ export default function WorkflowsPage() {
                         }}
                     >
                         Create
-                    </button>
+                    </Button>
                 </div>
             </div>
         </Modal>

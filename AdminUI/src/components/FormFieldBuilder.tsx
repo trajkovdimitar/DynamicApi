@@ -1,3 +1,5 @@
+import { Input } from './common/Input';
+
 interface Field {
     name: string;
     label: string;
@@ -16,10 +18,9 @@ export function FormFieldBuilder({ fields, values, onChange }: Props) {
             {fields.map(f => (
                 <div key={f.name} className="flex flex-col">
                     <label className="mb-1 text-sm">{f.label}</label>
-                    <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                    <Input
                         type={f.type}
-                        value={values[f.name] as string || ''}
+                        value={(values[f.name] as string) || ''}
                         onChange={e => onChange(f.name, e.target.value)}
                     />
                 </div>

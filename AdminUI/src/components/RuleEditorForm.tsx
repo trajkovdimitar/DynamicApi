@@ -1,4 +1,6 @@
 import { Rule, Workflow } from '../types/models';
+import { Input } from './common/Input';
+import { Button } from './common/Button';
 
 interface Props {
     workflow: Workflow;
@@ -29,39 +31,32 @@ export function RuleEditorForm({ workflow, onChange, suggestions }: Props) {
         <div className="space-y-3">
             <div className="flex flex-col">
                 <label className="mb-1 text-sm">Workflow Name</label>
-                <input
-                    className="border rounded p-2 dark:bg-neutral-800"
+                <Input
                     value={workflow.workflowName}
                     onChange={e => onChange({ ...workflow, workflowName: e.target.value })}
                 />
             </div>
             {workflow.rules.map((r, idx) => (
                 <div key={idx} className="grid grid-cols-4 gap-2 items-end">
-                    <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                    <Input
                         placeholder="Rule Name"
                         value={r.ruleName}
                         onChange={e => updateRule(idx, { ruleName: e.target.value })}
                     />
-                    <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                    <Input
                         placeholder="Expression"
                         list="exprSuggestions"
                         value={r.expression ?? ''}
                         onChange={e => updateRule(idx, { expression: e.target.value })}
                     />
-                    <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                    <Input
                         placeholder="Error Message"
                         value={r.errorMessage ?? ''}
                         onChange={e => updateRule(idx, { errorMessage: e.target.value })}
                     />
-                    <button
-                        className="text-red-600"
-                        onClick={() => removeRule(idx)}
-                    >
+                    <Button variant="danger" onClick={() => removeRule(idx)}>
                         Delete
-                    </button>
+                    </Button>
                 </div>
             ))}
             <datalist id="exprSuggestions">
@@ -69,9 +64,7 @@ export function RuleEditorForm({ workflow, onChange, suggestions }: Props) {
                     <option key={s} value={`entity.${s}`} />
                 ))}
             </datalist>
-            <button onClick={addRule} className="btn btn-secondary">
-                Add Rule
-            </button>
+            <Button variant="secondary" onClick={addRule}>Add Rule</Button>
         </div>
     );
 }
