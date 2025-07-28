@@ -12,6 +12,7 @@ declare module 'styled-components' {
       border: string;
       success: string;
       warning: string;
+      info: string;
     };
     spacing: {
       sm: string;

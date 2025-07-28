@@ -22,12 +22,16 @@ const Wrapper = styled.div`
 
 const Table = styled.table`
     width: 100%;
+    min-width: 100%;
     border-collapse: collapse;
 `;
 
 const Thead = styled.thead`
     background: ${({ theme }) => theme.colors.primary};
     color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 `;
 
 const Th = styled.th<{ clickable: boolean }>`
@@ -53,7 +57,22 @@ const Tr = styled.tr<{ interactive: boolean; even: boolean }>`
 const Td = styled.td`
     padding: ${({ theme }) => theme.spacing.sm};
     white-space: nowrap;
+    word-break: break-word;
 `;
+
+@media (max-width: 640px) {
+    ${Th}, ${Td} {
+        display: block;
+        width: 100%;
+    }
+    ${Tr} {
+        display: block;
+        margin-bottom: ${({ theme }) => theme.spacing.sm};
+    }
+    ${Table} {
+        min-width: 100%;
+    }
+}
 
 export function DataTable<T>({ columns, data, onRowClick }: Props<T>) {
     return (

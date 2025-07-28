@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import styled from 'styled-components';
 
 interface Props {
@@ -26,9 +27,25 @@ const Panel = styled.div`
 
 export function Modal({ open, onClose, children }: Props) {
     if (!open) return null;
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [onClose]);
     return (
         <Overlay onClick={onClose}>
-            <Panel onClick={e => e.stopPropagation()}>{children}</Panel>
+            <Panel onClick={e => e.stopPropagation()}>
+                <button
+                    aria-label="Close"
+                    onClick={onClose}
+                    style={{ float: 'right' }}
+                >
+                    &times;
+                </button>
+                {children}
+            </Panel>
         </Overlay>
     );
 }

@@ -59,7 +59,7 @@ const LinkItem = styled(NavLink)`
 
 export function Sidebar({ open, onClose }: Props) {
     return (
-        <Wrapper open={open} onClick={onClose}>
+        <Wrapper role="button" aria-label="Close sidebar" open={open} onClick={onClose}>
             <Aside open={open} onClick={e => e.stopPropagation()}>
                 <Nav>
                     <LinkItem to="/" onClick={onClose}>Dashboard</LinkItem>

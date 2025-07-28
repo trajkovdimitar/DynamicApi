@@ -11,6 +11,7 @@ export const lightTheme: DefaultTheme = {
         border: '#d1d5db',
         success: '#16a34a',
         warning: '#f59e0b',
+        info: '#0ea5e9',
     },
     spacing: {
         sm: '0.5rem',
@@ -51,6 +52,7 @@ export const darkTheme: DefaultTheme = {
         border: '#374151',
         success: '#16a34a',
         warning: '#f59e0b',
+        info: '#0284c7',
     },
     spacing: {
         sm: '0.5rem',
@@ -87,11 +89,13 @@ export const GlobalStyle = createGlobalStyle`
   html, body {
     margin: 0;
     padding: 0;
+    scroll-behavior: smooth;
   }
   body {
     font-family: ${({ theme }) => theme.fonts.body};
     background: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
+    min-height: 100vh;
   }
 
   a {

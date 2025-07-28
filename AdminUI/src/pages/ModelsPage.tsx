@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getModels } from '../services/models';
+import { Button } from '../components/common/Button';
 import type { ModelDefinition } from '../types/models';
 import { DataTable } from '../components/DataTable';
 import Skeleton from '../components/common/Skeleton';
@@ -54,9 +55,9 @@ export default function ModelsPage() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Models</h2>
-                <Link className="btn btn-primary" to="/models/new">
+                <Button as={Link} to="/models/new" size="sm">
                     New Model
-                </Link>
+                </Button>
             </div>
             <DataTable columns={columns} data={models} />
         </div>
