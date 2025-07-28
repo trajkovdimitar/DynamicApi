@@ -5,6 +5,7 @@ import { getRecord, saveRecord, updateRecord } from '../services/data';
 import type { ModelDefinition } from '../types/models';
 import { FormFieldBuilder } from '../components/FormFieldBuilder';
 import { Button } from '../components/common/Button';
+import { Breadcrumb } from '../components/Breadcrumb';
 
 export default function RecordEditor() {
     const { name, id } = useParams();
@@ -41,6 +42,7 @@ export default function RecordEditor() {
 
     return (
         <div className="space-y-4">
+            <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Models', href: '/models' }, { label: name ?? '' }, { label: id === 'new' ? 'New' : String(id) }]} />
             <h2 className="text-xl font-semibold">{id === 'new' ? 'New' : 'Edit'} {name}</h2>
             <FormFieldBuilder fields={fields} values={values} onChange={(n, v) => setValues({ ...values, [n]: v })} />
             <Button onClick={save}>Save</Button>

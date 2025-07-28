@@ -13,6 +13,9 @@ interface Props<T> {
     columns: Column<T>[];
     data: T[];
     onRowClick?: (row: T) => void;
+    page?: number;
+    pageSize?: number;
+    onPageChange?: (page: number) => void;
 }
 
 
@@ -77,7 +80,11 @@ const Wrapper = styled.div`
 `;
 
 
-export function DataTable<T>({ columns, data, onRowClick }: Props<T>) {
+export function DataTable<T>({ columns, data, onRowClick, page = 1, pageSize = data.length, onPageChange }: Props<T>) {
+    const totalPages = Math.ceil(data.length / pageSize);
+    const start = (page - 1) * pageSize;
+    const pageData = data.slice(start, start + pageSize);
+
     return (
         <Wrapper>
             <Table>
@@ -96,12 +103,12 @@ export function DataTable<T>({ columns, data, onRowClick }: Props<T>) {
                     </tr>
                 </Thead>
                 <Tbody>
-                    {data.length === 0 ? (
+                    {pageData.length === 0 ? (
                         <Tr interactive={false} even={false}>
                             <Td colSpan={columns.length}>No data available</Td>
                         </Tr>
                     ) : (
-                        data.map((row, idx) => (
+                        pageData.map((row, idx) => (
                             <Tr
                                 key={idx}
                                 even={idx % 2 === 0}
@@ -123,6 +130,15 @@ export function DataTable<T>({ columns, data, onRowClick }: Props<T>) {
                     )}
                 </Tbody>
             </Table>
+            {totalPages > 1 && onPageChange && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', padding: '0.5rem' }}>
+                    <button disabled={page === 1} onClick={() => onPageChange(page - 1)}>Prev</button>
+                    <span style={{ alignSelf: 'center', fontSize: '0.875rem' }}>
+                        {page} / {totalPages}
+                    </span>
+                    <button disabled={page === totalPages} onClick={() => onPageChange(page + 1)}>Next</button>
+                </div>
+            )}
         </Wrapper>
     );
 }

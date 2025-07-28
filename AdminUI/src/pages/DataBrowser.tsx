@@ -7,6 +7,8 @@ import { DataTable } from '../components/DataTable';
 import { Drawer } from '../components/Drawer';
 import { FormFieldBuilder } from '../components/FormFieldBuilder';
 import { Button } from '../components/common/Button';
+import { Modal } from '../components/Modal';
+import { Breadcrumb } from '../components/Breadcrumb';
 import Skeleton from '../components/common/Skeleton';
 
 export default function DataBrowser() {
@@ -18,6 +20,7 @@ export default function DataBrowser() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [formValues, setFormValues] = useState<Record<string, unknown>>({});
+    const [confirmDelete, setConfirmDelete] = useState<unknown | null>(null);
 
     useEffect(() => {
         if (!name) return;
@@ -74,11 +77,12 @@ export default function DataBrowser() {
                 size="sm"
                 aria-label="Delete record"
                 onClick={() =>
-                    remove(
+                    setConfirmDelete(
                         (row as Record<string, unknown>).id ??
                             (row as Record<string, unknown>).Id,
                     )
                 }
+                title="Delete record"
             >
                 Delete
             </Button>
@@ -89,9 +93,10 @@ export default function DataBrowser() {
 
     return (
         <div className="space-y-4">
+            <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Models', href: '/models' }, { label: name ?? '' }]} />
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">{name}</h2>
-                <Button onClick={openCreate} aria-label="Create new record">New Record</Button>
+                <Button onClick={openCreate} aria-label="Create new record" title="Create new record">New Record</Button>
             </div>
             <DataTable columns={columns} data={records} onRowClick={r => { setSelected(r); setIsCreating(false); setDrawerOpen(true); }} />
             <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
@@ -114,6 +119,26 @@ export default function DataBrowser() {
                     </div>
                 ) : null}
             </Drawer>
+            <Modal open={confirmDelete !== null} onClose={() => setConfirmDelete(null)}>
+                <div className="space-y-4 w-64">
+                    <h3 className="text-lg font-semibold">Confirm Delete</h3>
+                    <p>Are you sure you want to delete this record?</p>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="secondary" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+                        <Button
+                            variant="danger"
+                            onClick={() => {
+                                if (confirmDelete !== null) {
+                                    remove(confirmDelete);
+                                    setConfirmDelete(null);
+                                }
+                            }}
+                        >
+                            Delete
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

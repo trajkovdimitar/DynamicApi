@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useTheme } from '../ThemeContext';
 import { Button } from './common/Button';
+import { SearchBar } from './SearchBar';
 
 interface Props {
     onMenuClick: () => void;
@@ -48,6 +49,12 @@ const Right = styled.div`
     gap: ${({ theme }) => theme.spacing.sm};
 `;
 
+const SearchContainer = styled.div`
+    flex: 1;
+    margin: 0 ${({ theme }) => theme.spacing.md};
+    max-width: 20rem;
+`;
+
 export function Header({ onMenuClick }: Props) {
     const { dark, toggle } = useTheme();
 
@@ -55,9 +62,16 @@ export function Header({ onMenuClick }: Props) {
         <HeaderWrapper>
             <MenuButton aria-label="Open menu" onClick={onMenuClick}>☰</MenuButton>
             <h1>AdminUI</h1>
+            <SearchContainer>
+                <SearchBar />
+            </SearchContainer>
             <Right>
-                <Button variant="secondary" onClick={toggle} aria-label="Toggle dark mode">
-                    {dark ? 'Light' : 'Dark'}
+                <Button
+                    variant="secondary"
+                    onClick={toggle}
+                    aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                    {dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                 </Button>
                 <Avatar role="img" aria-label="User avatar" />
             </Right>

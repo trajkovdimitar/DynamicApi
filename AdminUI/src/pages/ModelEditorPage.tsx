@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { saveModel, getModels } from '../services/models';
 import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
+import { Breadcrumb } from '../components/Breadcrumb';
 import type {
     ModelDefinition,
     PropertyDefinition,
@@ -71,6 +72,7 @@ export default function ModelEditorPage() {
 
     return (
         <div className="space-y-4">
+            <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Models', href: '/models' }, { label: name === 'new' ? 'New' : name ?? '' }]} />
             <h2 className="text-xl font-semibold">{name === 'new' ? 'New Model' : `Edit ${name}`}</h2>
             <div className="space-y-2">
                 <div className="flex flex-col">

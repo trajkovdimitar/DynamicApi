@@ -1,5 +1,10 @@
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import GavelIcon from '@mui/icons-material/Gavel';
+import WorkspacesIcon from '@mui/icons-material/Workspaces';
+import DataObjectIcon from '@mui/icons-material/DataObject';
 
 interface Props {
     open: boolean;
@@ -17,13 +22,13 @@ const Wrapper = styled.div<{ open: boolean }>`
 const Aside = styled.aside<{ open: boolean }>`
     width: 12rem;
     background: ${({ theme }) => theme.colors.primaryLight}10;
-    height: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
     @media (max-width: 768px) {
-        position: fixed;
-        left: 0;
-        top: 0;
         transform: ${({ open }) => (open ? 'translateX(0)' : 'translateX(-100%)')};
         transition: transform ${({ theme }) => theme.transitions.normal};
         box-shadow: ${({ theme }) => theme.shadows.lg};
@@ -57,16 +62,35 @@ const LinkItem = styled(NavLink)`
     }
 `;
 
+const Label = styled.span`
+    margin-left: ${({ theme }) => theme.spacing.sm};
+`;
+
 export function Sidebar({ open, onClose }: Props) {
     return (
         <Wrapper role="button" aria-label="Close sidebar" open={open} onClick={onClose}>
             <Aside open={open} onClick={e => e.stopPropagation()}>
                 <Nav>
-                    <LinkItem to="/" onClick={onClose}>Dashboard</LinkItem>
-                    <LinkItem to="/models" onClick={onClose}>Models</LinkItem>
-                    <LinkItem to="/rules" onClick={onClose}>Rules</LinkItem>
-                    <LinkItem to="/workflows" onClick={onClose}>Workflows</LinkItem>
-                    <LinkItem to="/workflow-dashboard" onClick={onClose}>Workflow Studio</LinkItem>
+                    <LinkItem to="/" onClick={onClose}>
+                        <DashboardIcon fontSize="small" />
+                        <Label>Dashboard</Label>
+                    </LinkItem>
+                    <LinkItem to="/models" onClick={onClose}>
+                        <TableChartIcon fontSize="small" />
+                        <Label>Models</Label>
+                    </LinkItem>
+                    <LinkItem to="/rules" onClick={onClose}>
+                        <GavelIcon fontSize="small" />
+                        <Label>Rules</Label>
+                    </LinkItem>
+                    <LinkItem to="/workflows" onClick={onClose}>
+                        <WorkspacesIcon fontSize="small" />
+                        <Label>Workflows</Label>
+                    </LinkItem>
+                    <LinkItem to="/workflow-dashboard" onClick={onClose}>
+                        <DataObjectIcon fontSize="small" />
+                        <Label>Workflow Studio</Label>
+                    </LinkItem>
                 </Nav>
             </Aside>
         </Wrapper>
