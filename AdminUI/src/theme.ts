@@ -1,4 +1,4 @@
-import { DefaultTheme, createGlobalStyle } from 'styled-components';
+import { DefaultTheme, createGlobalStyle, keyframes } from 'styled-components';
 
 export const lightTheme: DefaultTheme = {
     colors: {
@@ -9,6 +9,8 @@ export const lightTheme: DefaultTheme = {
         accent: '#ff6b6b',
         secondary: '#4f46e5',
         border: '#d1d5db',
+        success: '#16a34a',
+        warning: '#f59e0b',
     },
     spacing: {
         sm: '0.5rem',
@@ -17,6 +19,16 @@ export const lightTheme: DefaultTheme = {
         xl: '4rem',
     },
     radius: '4px',
+    shadows: {
+        sm: '0 1px 2px rgba(0,0,0,0.05)',
+        md: '0 4px 6px rgba(0,0,0,0.1)',
+        lg: '0 10px 15px rgba(0,0,0,0.15)',
+    },
+    transitions: {
+        fast: '0.2s',
+        normal: '0.3s',
+    },
+    maxWidth: '1200px',
     fontSizes: {
         sm: '0.875rem',
         md: '1rem',
@@ -37,6 +49,8 @@ export const darkTheme: DefaultTheme = {
         accent: '#ff8787',
         secondary: '#6366f1',
         border: '#374151',
+        success: '#16a34a',
+        warning: '#f59e0b',
     },
     spacing: {
         sm: '0.5rem',
@@ -45,6 +59,16 @@ export const darkTheme: DefaultTheme = {
         xl: '4rem',
     },
     radius: '4px',
+    shadows: {
+        sm: '0 1px 2px rgba(0,0,0,0.4)',
+        md: '0 4px 6px rgba(0,0,0,0.5)',
+        lg: '0 10px 15px rgba(0,0,0,0.6)',
+    },
+    transitions: {
+        fast: '0.2s',
+        normal: '0.3s',
+    },
+    maxWidth: '1200px',
     fontSizes: {
         sm: '0.875rem',
         md: '1rem',
@@ -57,8 +81,14 @@ export const darkTheme: DefaultTheme = {
 };
 
 export const GlobalStyle = createGlobalStyle`
-  body {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  html, body {
     margin: 0;
+    padding: 0;
+  }
+  body {
     font-family: ${({ theme }) => theme.fonts.body};
     background: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
@@ -70,6 +100,10 @@ export const GlobalStyle = createGlobalStyle`
     &:hover {
       text-decoration: underline;
     }
+    &:focus-visible {
+      outline: 2px solid ${({ theme }) => theme.colors.primaryLight};
+      outline-offset: 2px;
+    }
   }
 
   input,
@@ -77,5 +111,9 @@ export const GlobalStyle = createGlobalStyle`
   select,
   textarea {
     font-family: ${({ theme }) => theme.fonts.body};
+    &:focus-visible {
+      outline: 2px solid ${({ theme }) => theme.colors.primaryLight};
+      outline-offset: 2px;
+    }
   }
 `;

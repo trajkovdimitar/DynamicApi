@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getModels } from '../services/models';
 import type { ModelDefinition } from '../types/models';
 import { DataTable } from '../components/DataTable';
+import Skeleton from '../components/common/Skeleton';
 
 export default function ModelsPage() {
     const [models, setModels] = useState<ModelDefinition[]>([]);
@@ -23,7 +24,13 @@ export default function ModelsPage() {
     }, []);
 
     if (isLoading) {
-        return <div className="text-center">Loading models...</div>;
+        return (
+            <div className="space-y-2">
+                <Skeleton height="2rem" />
+                <Skeleton height="2rem" />
+                <Skeleton height="2rem" />
+            </div>
+        );
     }
 
     if (error) {

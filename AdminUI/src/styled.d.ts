@@ -10,6 +10,8 @@ declare module 'styled-components' {
       accent: string;
       secondary: string;
       border: string;
+      success: string;
+      warning: string;
     };
     spacing: {
       sm: string;
@@ -18,6 +20,16 @@ declare module 'styled-components' {
       xl: string;
     };
     radius: string;
+    shadows: {
+      sm: string;
+      md: string;
+      lg: string;
+    };
+    transitions: {
+      fast: string;
+      normal: string;
+    };
+    maxWidth: string;
     fontSizes: {
       sm: string;
       md: string;

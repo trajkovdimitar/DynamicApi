@@ -46,6 +46,7 @@ const Tr = styled.tr<{ interactive: boolean; even: boolean }>`
     ${({ interactive, theme }) =>
         interactive &&
         `cursor: pointer;
+        transition: background ${theme.transitions.fast};
         &:hover { background: ${theme.colors.accent}30; }`}
 `;
 
