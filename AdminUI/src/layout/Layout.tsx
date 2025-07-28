@@ -25,6 +25,12 @@ const Main = styled.main`
     padding: ${({ theme }) => theme.spacing.md};
 `;
 
+const Footer = styled.footer`
+    padding: ${({ theme }) => theme.spacing.sm};
+    text-align: center;
+    border-top: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
 export function Layout({ children }: Props) {
     return (
         <Wrapper>
@@ -32,6 +38,7 @@ export function Layout({ children }: Props) {
             <Content>
                 <Header />
                 <Main>{children}</Main>
+                <Footer>DynamicApi © 2025</Footer>
             </Content>
         </Wrapper>
     );

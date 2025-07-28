@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { saveModel, getModels } from '../services/models';
+import { Input } from '../components/common/Input';
+import { Button } from '../components/common/Button';
 import type {
     ModelDefinition,
     PropertyDefinition,
@@ -73,22 +75,19 @@ export default function ModelEditorPage() {
             <div className="space-y-2">
                 <div className="flex flex-col">
                     <label className="mb-1 text-sm">Model Name</label>
-                    <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                    <Input
                         value={model.modelName}
                         onChange={e => setModel({ ...model, modelName: e.target.value })}
                     />
                 </div>
                 {model.properties.map((p, idx) => (
                     <div key={idx} className="grid grid-cols-5 gap-2 items-end">
-                        <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                        <Input
                             placeholder="Name"
                             value={p.name}
                             onChange={e => updateField(idx, { name: e.target.value })}
                         />
-                        <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                        <Input
                             placeholder="Type"
                             value={p.type}
                             onChange={e => updateField(idx, { type: e.target.value })}
@@ -109,8 +108,7 @@ export default function ModelEditorPage() {
                                 onChange={e => updateField(idx, { isRequired: e.target.checked })}
                             />
                         </label>
-                        <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                        <Input
                             placeholder="Max Length"
                             value={p.maxLength ?? ''}
                             onChange={e =>
@@ -121,53 +119,42 @@ export default function ModelEditorPage() {
                         />
                     </div>
                 ))}
-                <button onClick={addField} className="btn btn-secondary">
-                    Add Field
-                </button>
+                <Button variant="secondary" onClick={addField}>Add Field</Button>
             </div>
             <div className="space-y-2">
                 <h3 className="font-semibold">Relationships</h3>
                 {model.relationships.map((r, idx) => (
                     <div key={idx} className="grid grid-cols-5 gap-2 items-end">
-                        <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                        <Input
                             placeholder="Type"
                             value={r.relationshipType}
                             onChange={e => updateRelationship(idx, { relationshipType: e.target.value })}
                         />
-                        <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                        <Input
                             placeholder="Target Model"
                             value={r.targetModel}
                             onChange={e => updateRelationship(idx, { targetModel: e.target.value })}
                         />
-                        <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                        <Input
                             placeholder="Navigation Name"
                             value={r.navigationName}
                             onChange={e => updateRelationship(idx, { navigationName: e.target.value })}
                         />
-                        <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                        <Input
                             placeholder="Foreign Key"
                             value={r.foreignKey}
                             onChange={e => updateRelationship(idx, { foreignKey: e.target.value })}
                         />
-                        <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                        <Input
                             placeholder="Inverse Navigation"
                             value={r.inverseNavigation}
                             onChange={e => updateRelationship(idx, { inverseNavigation: e.target.value })}
                         />
                     </div>
                 ))}
-                <button onClick={addRelationship} className="btn btn-secondary">
-                    Add Relationship
-                </button>
+                <Button variant="secondary" onClick={addRelationship}>Add Relationship</Button>
             </div>
-            <button onClick={save} className="btn btn-primary">
-                Save
-            </button>
+            <Button onClick={save}>Save</Button>
         </div>
     );
 }
