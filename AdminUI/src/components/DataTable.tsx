@@ -14,11 +14,6 @@ interface Props<T> {
     onRowClick?: (row: T) => void;
 }
 
-const Wrapper = styled.div`
-    overflow-x: auto;
-    border: 1px solid ${({ theme }) => theme.colors.primaryLight};
-    border-radius: 4px;
-`;
 
 const Table = styled.table`
     width: 100%;
@@ -60,19 +55,26 @@ const Td = styled.td`
     word-break: break-word;
 `;
 
-@media (max-width: 640px) {
-    ${Th}, ${Td} {
-        display: block;
-        width: 100%;
+const Wrapper = styled.div`
+    overflow-x: auto;
+    border: 1px solid ${({ theme }) => theme.colors.primaryLight};
+    border-radius: 4px;
+
+    @media (max-width: 640px) {
+        ${Th}, ${Td} {
+            display: block;
+            width: 100%;
+        }
+        ${Tr} {
+            display: block;
+            margin-bottom: ${({ theme }) => theme.spacing.sm};
+        }
+        ${Table} {
+            min-width: 100%;
+        }
     }
-    ${Tr} {
-        display: block;
-        margin-bottom: ${({ theme }) => theme.spacing.sm};
-    }
-    ${Table} {
-        min-width: 100%;
-    }
-}
+`;
+
 
 export function DataTable<T>({ columns, data, onRowClick }: Props<T>) {
     return (
