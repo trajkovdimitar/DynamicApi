@@ -4,6 +4,7 @@ import { getModels } from '../services/models';
 import type { Workflow } from '../types/models';
 import { RuleEditorForm } from '../components/RuleEditorForm';
 import { DataTable } from '../components/DataTable';
+import { Button } from '../components/common/Button';
 
 export default function RulesPage() {
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -102,9 +103,9 @@ export default function RulesPage() {
         <div className="space-y-4 p-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Rules</h2>
-                <button onClick={() => startEdit()} className="btn btn-primary">
+                <Button onClick={() => startEdit()} size="sm">
                     New
-                </button>
+                </Button>
             </div>
             <DataTable columns={columns} data={workflows} />
 
@@ -113,12 +114,12 @@ export default function RulesPage() {
                     <h3 className="text-lg font-semibold">{editing.workflowName ? `Editing: ${editing.workflowName}` : 'New Workflow'}</h3>
                     <RuleEditorForm workflow={editing} onChange={setEditing} suggestions={suggestions} />
                     <div className="flex justify-end space-x-2">
-                        <button onClick={() => setEditing(null)} className="btn btn-secondary" disabled={isSaving}>
+                        <Button variant="outline" onClick={() => setEditing(null)} size="sm" disabled={isSaving}>
                             Cancel
-                        </button>
-                        <button onClick={save} className="btn btn-primary" disabled={isSaving}>
+                        </Button>
+                        <Button onClick={save} size="sm" disabled={isSaving}>
                             {isSaving ? 'Saving...' : 'Save'}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

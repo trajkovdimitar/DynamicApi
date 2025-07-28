@@ -19,12 +19,17 @@ const Panel = styled.div<{ open: boolean }>`
     transition: transform ${({ theme }) => theme.transitions.normal};
     box-shadow: ${({ theme }) => theme.shadows.lg};
     overflow-y: auto;
+    @media (max-width: 768px) {
+        width: 80%;
+    }
 `;
 
 export function Drawer({ open, onClose, children }: Props) {
     return (
         <Panel open={open} onClick={e => e.stopPropagation()}>
-            <button style={{ float: 'right' }} onClick={onClose}>Close</button>
+            <button aria-label="Close" style={{ float: 'right' }} onClick={onClose}>
+                &times;
+            </button>
             {children}
         </Panel>
     );

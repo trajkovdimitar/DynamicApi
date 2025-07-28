@@ -4,7 +4,8 @@ Reusable UI elements for the Admin UI.
 
 ## Button
 ```
-<Button variant="primary">Save</Button>
+<Button variant="primary" size="md">Save</Button>
+<Button variant="outline" size="sm">Cancel</Button>
 ```
 
 ## Input

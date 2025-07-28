@@ -57,9 +57,19 @@ export default function DataBrowser() {
     columns.push({
         header: '',
         accessor: (row: Record<string, unknown>) => (
-            <button className="text-red-600" onClick={() => remove((row as Record<string, unknown>).id ?? (row as Record<string, unknown>).Id)}>
+            <Button
+                variant="danger"
+                size="sm"
+                aria-label="Delete record"
+                onClick={() =>
+                    remove(
+                        (row as Record<string, unknown>).id ??
+                            (row as Record<string, unknown>).Id,
+                    )
+                }
+            >
                 Delete
-            </button>
+            </Button>
         ),
     });
 

@@ -10,6 +10,7 @@ const StyledInput = styled.input`
     background: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
     font-size: ${({ theme }) => theme.fontSizes.md};
+    width: 100%;
     transition: border-color ${({ theme }) => theme.transitions.fast};
     &:focus-visible {
         outline: 2px solid ${({ theme }) => theme.colors.primaryLight};
