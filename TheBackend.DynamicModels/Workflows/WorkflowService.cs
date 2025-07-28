@@ -28,7 +28,8 @@ public class WorkflowService
         "CreateEntity",
         "UpdateEntity",
         "QueryEntity",
-        "SendEmail"
+        "SendEmail",
+        "LogEvent"
     };
     private static readonly HashSet<string> AllowedValueTypes = new(StringComparer.OrdinalIgnoreCase)
     {
