@@ -31,6 +31,10 @@ const Content = styled.div`
     display: flex;
     flex-direction: column;
     flex: 1;
+    padding-left: 12rem;
+    @media (max-width: 768px) {
+        padding-left: 0;
+    }
 `;
 
 const Main = styled.main`

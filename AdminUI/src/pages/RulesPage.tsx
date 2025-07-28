@@ -5,6 +5,7 @@ import type { Workflow } from '../types/models';
 import { RuleEditorForm } from '../components/RuleEditorForm';
 import { DataTable } from '../components/DataTable';
 import { Button } from '../components/common/Button';
+import { Breadcrumb } from '../components/Breadcrumb';
 
 export default function RulesPage() {
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -13,6 +14,10 @@ export default function RulesPage() {
     const [isLoading, setIsLoading] = useState(true); // Tracks initial data loading
     const [isSaving, setIsSaving] = useState(false); // Tracks saving process
     const [error, setError] = useState<string | null>(null); // Stores any error messages
+    const [sortField, setSortField] = useState<'name' | 'rules'>('name');
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
 
     const loadWorkflows = async () => {
         setIsLoading(true);
@@ -79,35 +84,73 @@ export default function RulesPage() {
         return <div className="text-center p-4 text-red-600">Error: {error}</div>;
     }
 
+    const toggleSort = (field: 'name' | 'rules') => {
+        if (sortField === field) {
+            setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+        } else {
+            setSortField(field);
+            setSortDir('asc');
+        }
+    };
+
+    const sorted = [...workflows].sort((a, b) => {
+        const dir = sortDir === 'asc' ? 1 : -1;
+        if (sortField === 'name') {
+            return a.workflowName.localeCompare(b.workflowName) * dir;
+        }
+        return (a.rules.length - b.rules.length) * dir;
+    });
+
     const columns = [
         {
-            header: 'Name',
+            header: `Name${sortField === 'name' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}`,
             accessor: (row: Workflow) => row.workflowName,
+            onHeaderClick: () => toggleSort('name'),
+            ariaSort: sortField === 'name' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none',
         },
         {
-            header: 'Rules',
+            header: `Rules${sortField === 'rules' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}`,
             accessor: (row: Workflow) => row.rules.length,
+            onHeaderClick: () => toggleSort('rules'),
+            ariaSort: sortField === 'rules' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none',
         },
         {
             header: 'Actions',
             accessor: (row: Workflow) => (
-                <Button size="sm" onClick={() => startEdit(row)}>Edit</Button>
+                <Button size="sm" onClick={() => startEdit(row)} title="Edit rule">Edit</Button>
             ),
         },
     ];
 
+    const totalPages = Math.ceil(sorted.length / pageSize);
+    const pageData = sorted.slice((page - 1) * pageSize, page * pageSize);
+
     return (
         <div className="space-y-4 p-4">
+            <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Rules' }]} />
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Rules</h2>
                 <div className="space-x-2">
-                    <Button onClick={() => startEdit()} size="sm">New</Button>
-                    <Button variant="secondary" size="sm" onClick={loadWorkflows}>
+                    <Button onClick={() => startEdit()} size="sm" title="Create new rule">New</Button>
+                    <Button variant="secondary" size="sm" onClick={loadWorkflows} title="Reload rules">
                         Refresh
                     </Button>
                 </div>
             </div>
-            <DataTable columns={columns} data={workflows} />
+            <DataTable columns={columns} data={pageData} page={page} pageSize={pageSize} onPageChange={setPage} />
+            {totalPages > 1 && (
+                <div className="flex justify-end gap-2">
+                    <Button size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+                        Prev
+                    </Button>
+                    <span className="self-center text-sm">
+                        {page} / {totalPages}
+                    </span>
+                    <Button size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+                        Next
+                    </Button>
+                </div>
+            )}
 
             {editing && (
                 <div className="space-y-2 mt-4 p-4 border rounded shadow-md dark:bg-neutral-700">

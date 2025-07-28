@@ -15,6 +15,7 @@ import { DataTable } from '../components/DataTable';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
+import { Breadcrumb } from '../components/Breadcrumb';
 
 export default function WorkflowsPage() {
     const queryClient = useQueryClient();
@@ -30,6 +31,9 @@ export default function WorkflowsPage() {
     const [sortField, setSortField] = useState<'name' | 'version'>('name');
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
     const [newModalOpen, setNewModalOpen] = useState(false);
+    const [confirmRollback, setConfirmRollback] = useState<{ name: string; version: number } | null>(null);
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
     const [selectedModel, setSelectedModel] = useState('');
     const [selectedEvent, setSelectedEvent] = useState<(typeof workflowEvents)[number]>(workflowEvents[0]);
 
@@ -103,6 +107,8 @@ export default function WorkflowsPage() {
     });
 
     const data = filtered.map((w, idx) => ({ ...w, idx }));
+    const totalPages = Math.ceil(data.length / pageSize);
+    const pageData = data.slice((page - 1) * pageSize, page * pageSize);
 
     const toggleSort = (field: 'name' | 'version') => {
         if (sortField === field) {
@@ -116,16 +122,17 @@ export default function WorkflowsPage() {
     return (
         <>
         <div className="p-4 space-y-2">
-            <h2 className="text-xl font-semibold">Workflows</h2>
-            <div className="space-y-2">
-                <Input
-                    placeholder="Search workflows"
-                    value={filter}
-                    onChange={e => setFilter(e.target.value)}
-                />
-                <div className="flex gap-2">
-                    <Button onClick={() => setNewModalOpen(true)}>New Workflow</Button>
-                    <Button variant="secondary" onClick={() => refetch()}>Refresh</Button>
+            <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Workflows' }]} />
+            <div className="flex items-end justify-between gap-2 flex-wrap">
+                <h2 className="text-xl font-semibold">Workflows</h2>
+                <div className="flex items-end gap-2 flex-1">
+                    <Input
+                        placeholder="Search workflows"
+                        value={filter}
+                        onChange={e => setFilter(e.target.value)}
+                    />
+                    <Button onClick={() => setNewModalOpen(true)} title="Create new workflow">New Workflow</Button>
+                    <Button variant="secondary" onClick={() => refetch()} title="Reload workflows">Refresh</Button>
                 </div>
             </div>
             <DataTable
@@ -159,10 +166,8 @@ export default function WorkflowsPage() {
                                     <Button
                                         size="sm"
                                         variant="danger"
-                                        onClick={() => {
-                                            if (confirm('Rollback to previous version?'))
-                                                rollbackWorkflow(row.workflowName, row.version! - 1).then(() => refetch());
-                                        }}
+                                        onClick={() => setConfirmRollback({ name: row.workflowName, version: row.version! - 1 })}
+                                        title="Rollback workflow"
                                     >
                                         Rollback
                                     </Button>
@@ -171,6 +176,7 @@ export default function WorkflowsPage() {
                                     size="sm"
                                     variant="secondary"
                                     onClick={() => navigator.clipboard.writeText(JSON.stringify(row, null, 2))}
+                                    title="Copy workflow JSON"
                                 >
                                     Copy JSON
                                 </Button>
@@ -178,7 +184,10 @@ export default function WorkflowsPage() {
                         ),
                     },
                 ]}
-                data={data}
+                data={pageData}
+                page={page}
+                pageSize={pageSize}
+                onPageChange={setPage}
             />
             {editing && (
                 <div className="space-y-4 mt-4 p-4 border rounded shadow-md dark:bg-neutral-700">
@@ -236,6 +245,32 @@ export default function WorkflowsPage() {
                         }}
                     >
                         Create
+                    </Button>
+                </div>
+            </div>
+        </Modal>
+        <Modal
+            open={!!confirmRollback}
+            onClose={() => setConfirmRollback(null)}
+        >
+            <div className="space-y-4 w-64">
+                <h3 className="text-lg font-semibold">Confirm Rollback</h3>
+                <p>Are you sure you want to rollback this workflow?</p>
+                <div className="flex justify-end gap-2">
+                    <Button variant="secondary" onClick={() => setConfirmRollback(null)}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="danger"
+                        onClick={() => {
+                            if (!confirmRollback) return;
+                            rollbackWorkflow(confirmRollback.name, confirmRollback.version).then(() => {
+                                setConfirmRollback(null);
+                                refetch();
+                            });
+                        }}
+                    >
+                        Rollback
                     </Button>
                 </div>
             </div>
