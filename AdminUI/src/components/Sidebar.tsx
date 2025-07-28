@@ -1,12 +1,34 @@
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-const Aside = styled.aside`
+interface Props {
+    open: boolean;
+    onClose?: () => void;
+}
+const Wrapper = styled.div<{ open: boolean }>`
+    @media (max-width: 768px) {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: ${({ open }) => (open ? 'block' : 'none')};
+    }
+`;
+
+const Aside = styled.aside<{ open: boolean }>`
     width: 12rem;
     background: ${({ theme }) => theme.colors.primaryLight}10;
     height: 100%;
     display: flex;
     flex-direction: column;
+    @media (max-width: 768px) {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: ${({ open }) => (open ? 'translateX(0)' : 'translateX(-100%)')};
+        transition: transform ${({ theme }) => theme.transitions.normal};
+        box-shadow: ${({ theme }) => theme.shadows.lg};
+        z-index: 20;
+    }
 `;
 
 const Nav = styled.nav`
@@ -22,6 +44,7 @@ const LinkItem = styled(NavLink)`
     border-radius: 4px;
     text-decoration: none;
     color: inherit;
+    transition: background ${({ theme }) => theme.transitions.fast};
 
     &:hover {
         background: ${({ theme }) => theme.colors.primaryLight};
@@ -34,16 +57,18 @@ const LinkItem = styled(NavLink)`
     }
 `;
 
-export function Sidebar() {
+export function Sidebar({ open, onClose }: Props) {
     return (
-        <Aside>
-            <Nav>
-                <LinkItem to="/">Dashboard</LinkItem>
-                <LinkItem to="/models">Models</LinkItem>
-                <LinkItem to="/rules">Rules</LinkItem>
-                <LinkItem to="/workflows">Workflows</LinkItem>
-                <LinkItem to="/workflow-dashboard">Workflow Studio</LinkItem>
-            </Nav>
-        </Aside>
+        <Wrapper open={open} onClick={onClose}>
+            <Aside open={open} onClick={e => e.stopPropagation()}>
+                <Nav>
+                    <LinkItem to="/" onClick={onClose}>Dashboard</LinkItem>
+                    <LinkItem to="/models" onClick={onClose}>Models</LinkItem>
+                    <LinkItem to="/rules" onClick={onClose}>Rules</LinkItem>
+                    <LinkItem to="/workflows" onClick={onClose}>Workflows</LinkItem>
+                    <LinkItem to="/workflow-dashboard" onClick={onClose}>Workflow Studio</LinkItem>
+                </Nav>
+            </Aside>
+        </Wrapper>
     );
 }

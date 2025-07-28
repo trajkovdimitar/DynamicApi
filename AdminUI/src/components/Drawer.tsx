@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import styled from 'styled-components';
 
 interface Props {
     open: boolean;
@@ -6,12 +7,25 @@ interface Props {
     children: ReactNode;
 }
 
+const Panel = styled.div<{ open: boolean }>`
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 16rem;
+    background: ${({ theme }) => theme.colors.background};
+    color: ${({ theme }) => theme.colors.text};
+    transform: ${({ open }) => (open ? 'translateX(0)' : 'translateX(100%)')};
+    transition: transform ${({ theme }) => theme.transitions.normal};
+    box-shadow: ${({ theme }) => theme.shadows.lg};
+    overflow-y: auto;
+`;
+
 export function Drawer({ open, onClose, children }: Props) {
     return (
-        <div className={`fixed inset-y-0 right-0 w-64 bg-white dark:bg-neutral-800 transform transition-transform ${open ? 'translate-x-0' : 'translate-x-full'}`}
-            onClick={e => e.stopPropagation()}>
-            <button className="p-2" onClick={onClose}>Close</button>
+        <Panel open={open} onClick={e => e.stopPropagation()}>
+            <button style={{ float: 'right' }} onClick={onClose}>Close</button>
             {children}
-        </div>
+        </Panel>
     );
 }

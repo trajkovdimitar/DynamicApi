@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
 import styled from 'styled-components';
@@ -23,6 +24,8 @@ const Main = styled.main`
     flex: 1;
     overflow: auto;
     padding: ${({ theme }) => theme.spacing.md};
+    max-width: ${({ theme }) => theme.maxWidth};
+    margin: 0 auto;
 `;
 
 const Footer = styled.footer`
@@ -32,11 +35,13 @@ const Footer = styled.footer`
 `;
 
 export function Layout({ children }: Props) {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
     return (
         <Wrapper>
-            <Sidebar />
+            <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
             <Content>
-                <Header />
+                <Header onMenuClick={() => setSidebarOpen(true)} />
                 <Main>{children}</Main>
                 <Footer>DynamicApi © 2025</Footer>
             </Content>

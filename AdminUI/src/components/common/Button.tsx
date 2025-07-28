@@ -24,9 +24,13 @@ const StyledButton = styled.button<{ variant: ButtonVariant }>`
                 return theme.colors.primary;
         }
     }};
-    transition: background 0.2s;
+    transition: background ${({ theme }) => theme.transitions.fast};
     &:hover {
         opacity: 0.9;
+    }
+    &:focus-visible {
+        outline: 2px solid ${({ theme }) => theme.colors.primaryLight};
+        outline-offset: 2px;
     }
     &:disabled {
         opacity: 0.5;
