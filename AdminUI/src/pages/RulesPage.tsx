@@ -14,25 +14,24 @@ export default function RulesPage() {
     const [isSaving, setIsSaving] = useState(false); // Tracks saving process
     const [error, setError] = useState<string | null>(null); // Stores any error messages
 
-    // Effect for initial data fetching
-    useEffect(() => {
-        const fetchWorkflows = async () => {
-            setIsLoading(true);
-            setError(null); // Clear previous errors
-            try {
-                const data = await getWorkflows();
-                setWorkflows(data);
-            } catch (err) {
-                console.error(err);
-                setError("Failed to load rules. Please try again later.");
-                setWorkflows([]); // Ensure it's an empty array even on fetch error
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const loadWorkflows = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const data = await getWorkflows();
+            setWorkflows(data);
+        } catch (err) {
+            console.error(err);
+            setError('Failed to load rules. Please try again later.');
+            setWorkflows([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        fetchWorkflows();
-    }, []); // Empty dependency array means this runs once on mount
+    useEffect(() => {
+        loadWorkflows();
+    }, []);
 
     useEffect(() => {
         if (!editing) return;
@@ -92,9 +91,7 @@ export default function RulesPage() {
         {
             header: 'Actions',
             accessor: (row: Workflow) => (
-                <button className="text-blue-600 hover:underline" onClick={() => startEdit(row)}>
-                    Edit
-                </button>
+                <Button size="sm" onClick={() => startEdit(row)}>Edit</Button>
             ),
         },
     ];
@@ -103,9 +100,12 @@ export default function RulesPage() {
         <div className="space-y-4 p-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Rules</h2>
-                <Button onClick={() => startEdit()} size="sm">
-                    New
-                </Button>
+                <div className="space-x-2">
+                    <Button onClick={() => startEdit()} size="sm">New</Button>
+                    <Button variant="secondary" size="sm" onClick={loadWorkflows}>
+                        Refresh
+                    </Button>
+                </div>
             </div>
             <DataTable columns={columns} data={workflows} />
 
