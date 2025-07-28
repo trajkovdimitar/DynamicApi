@@ -6,6 +6,7 @@ interface Column<T> {
     accessor: (row: T) => ReactNode;
     onHeaderClick?: () => void;
     headerClassName?: string;
+    ariaSort?: 'none' | 'ascending' | 'descending';
 }
 
 interface Props<T> {
@@ -87,6 +88,7 @@ export function DataTable<T>({ columns, data, onRowClick }: Props<T>) {
                                 clickable={!!col.onHeaderClick}
                                 key={idx}
                                 onClick={col.onHeaderClick}
+                                aria-sort={col.ariaSort}
                             >
                                 {col.header}
                             </Th>
@@ -94,18 +96,31 @@ export function DataTable<T>({ columns, data, onRowClick }: Props<T>) {
                     </tr>
                 </Thead>
                 <Tbody>
-                    {data.map((row, idx) => (
-                        <Tr
-                            key={idx}
-                            even={idx % 2 === 0}
-                            interactive={!!onRowClick}
-                            onClick={() => onRowClick?.(row)}
-                        >
-                            {columns.map((col, i) => (
-                                <Td key={i}>{col.accessor(row)}</Td>
-                            ))}
+                    {data.length === 0 ? (
+                        <Tr interactive={false} even={false}>
+                            <Td colSpan={columns.length}>No data available</Td>
                         </Tr>
-                    ))}
+                    ) : (
+                        data.map((row, idx) => (
+                            <Tr
+                                key={idx}
+                                even={idx % 2 === 0}
+                                interactive={!!onRowClick}
+                                onClick={() => onRowClick?.(row)}
+                                tabIndex={onRowClick ? 0 : -1}
+                                onKeyDown={e => {
+                                    if ((e.key === 'Enter' || e.key === ' ') && onRowClick) {
+                                        e.preventDefault();
+                                        onRowClick(row);
+                                    }
+                                }}
+                            >
+                                {columns.map((col, i) => (
+                                    <Td key={i}>{col.accessor(row)}</Td>
+                                ))}
+                            </Tr>
+                        ))
+                    )}
                 </Tbody>
             </Table>
         </Wrapper>

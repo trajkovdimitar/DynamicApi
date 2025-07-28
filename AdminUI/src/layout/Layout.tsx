@@ -14,6 +14,19 @@ const Wrapper = styled.div`
     background: ${({ theme }) => theme.colors.background};
 `;
 
+const SkipLink = styled.a`
+    position: absolute;
+    left: -999px;
+    top: 0;
+    padding: ${({ theme }) => theme.spacing.sm};
+    background: ${({ theme }) => theme.colors.accent};
+    color: #fff;
+    z-index: 100;
+    &:focus {
+        left: 0;
+    }
+`;
+
 const Content = styled.div`
     display: flex;
     flex-direction: column;
@@ -39,10 +52,11 @@ export function Layout({ children }: Props) {
 
     return (
         <Wrapper>
+            <SkipLink href="#main-content">Skip to content</SkipLink>
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
             <Content>
                 <Header onMenuClick={() => setSidebarOpen(true)} />
-                <Main>{children}</Main>
+                <Main id="main-content">{children}</Main>
                 <Footer>DynamicApi © 2025</Footer>
             </Content>
         </Wrapper>

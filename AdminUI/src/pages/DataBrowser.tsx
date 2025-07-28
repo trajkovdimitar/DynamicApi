@@ -7,11 +7,13 @@ import { DataTable } from '../components/DataTable';
 import { Drawer } from '../components/Drawer';
 import { FormFieldBuilder } from '../components/FormFieldBuilder';
 import { Button } from '../components/common/Button';
+import Skeleton from '../components/common/Skeleton';
 
 export default function DataBrowser() {
     const { name } = useParams();
     const [model, setModel] = useState<ModelDefinition | null>(null);
     const [records, setRecords] = useState<Record<string, unknown>[]>([]);
+    const [loading, setLoading] = useState(true);
     const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
@@ -19,12 +21,14 @@ export default function DataBrowser() {
 
     useEffect(() => {
         if (!name) return;
+        setLoading(true);
         getModels()
             .then(list => setModel(list.find(m => m.modelName === name) || null))
             .catch(console.error);
         getRecords(name)
             .then(setRecords)
-            .catch(console.error);
+            .catch(console.error)
+            .finally(() => setLoading(false));
     }, [name]);
 
     const remove = async (id: unknown) => {
@@ -47,7 +51,15 @@ export default function DataBrowser() {
         setDrawerOpen(false);
     };
 
-    if (!model) return <div>Loading...</div>;
+    if (loading || !model) {
+        return (
+            <div className="space-y-2">
+                <Skeleton height="2rem" />
+                <Skeleton height="2rem" />
+                <Skeleton height="2rem" />
+            </div>
+        );
+    }
 
     const columns = model.properties.map(p => ({
         header: p.name,
@@ -79,7 +91,7 @@ export default function DataBrowser() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">{name}</h2>
-                <Button onClick={openCreate}>New Record</Button>
+                <Button onClick={openCreate} aria-label="Create new record">New Record</Button>
             </div>
             <DataTable columns={columns} data={records} onRowClick={r => { setSelected(r); setIsCreating(false); setDrawerOpen(true); }} />
             <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
