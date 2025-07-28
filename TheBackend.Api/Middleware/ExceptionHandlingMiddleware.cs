@@ -41,10 +41,19 @@ public class ExceptionHandlingMiddleware : IMiddleware
             context.Response.StatusCode = StatusCodes.Status404NotFound;
             await context.Response.WriteAsJsonAsync(response);
         }
+        catch (ArgumentException argEx)
+        {
+            _logger.LogWarning(argEx, "Bad request");
+            var response = ApiResponse<object>.Fail(argEx.Message);
+            response.Meta.TraceId = context.TraceIdentifier;
+            response.Meta.StatusCode = StatusCodes.Status400BadRequest;
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsJsonAsync(response);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception");
-            var response = ApiResponse<object>.Fail("An unexpected error occurred.");
+            var response = ApiResponse<object>.Fail($"An unexpected error occurred: {ex.Message}");
             response.Meta.TraceId = context.TraceIdentifier;
             response.Meta.StatusCode = StatusCodes.Status500InternalServerError;
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;

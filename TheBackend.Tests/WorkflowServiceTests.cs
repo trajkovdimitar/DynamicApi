@@ -278,4 +278,33 @@ public class WorkflowServiceTests
         };
         Assert.Throws<ArgumentException>(() => wfService.SaveWorkflow(wf));
     }
+
+    [Fact]
+    public void SaveWorkflow_Allows_LogEventStep()
+    {
+        var config = new ConfigurationBuilder().Build();
+        var history = new WorkflowHistoryService(config, Guid.NewGuid().ToString());
+        var executor = new LogEventExecutor<object>(NullLogger<LogEventExecutor<object>>.Instance);
+        var services = new ServiceCollection();
+        services.AddSingleton(executor.GetType(), executor);
+        var registry = new WorkflowStepExecutorRegistry(new[] { executor }, services.BuildServiceProvider());
+        var wfService = new WorkflowService(history, registry, NullLogger<WorkflowService>.Instance, new ModelDefinitionService());
+        var wf = new WorkflowDefinition
+        {
+            WorkflowName = "LogTest",
+            Steps = new List<WorkflowStep>
+            {
+                new()
+                {
+                    Type = executor.SupportedType,
+                    Parameters = new List<Parameter>
+                    {
+                        new() { Key = "Message", ValueType = "string", Value = "Hello" }
+                    }
+                }
+            }
+        };
+        var ex = Record.Exception(() => wfService.SaveWorkflow(wf));
+        Assert.Null(ex);
+    }
 }
