@@ -46,7 +46,7 @@ const Tr = styled.tr<{ interactive: boolean; even: boolean }>`
     ${({ interactive, theme }) =>
         interactive &&
         `cursor: pointer;
-        &:hover { background: ${theme.colors.primaryLight}30; }`}
+        &:hover { background: ${theme.colors.accent}30; }`}
 `;
 
 const Td = styled.td`

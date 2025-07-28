@@ -13,7 +13,7 @@ const HeaderWrapper = styled.header`
 const ToggleButton = styled.button`
     padding: ${({ theme }) => theme.spacing.sm};
     border-radius: 4px;
-    background: ${({ theme }) => theme.colors.primaryLight};
+    background: ${({ theme }) => theme.colors.accent};
     color: #fff;
     cursor: pointer;
 `;
