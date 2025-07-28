@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme, GlobalStyle } from './theme';
 
@@ -20,8 +21,17 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
     const [dark, setDark] = useState(false);
 
     useEffect(() => {
-        setDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
+        const stored = localStorage.getItem('dark');
+        if (stored !== null) {
+            setDark(stored === 'true');
+        } else {
+            setDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
+        }
     }, []);
+
+    useEffect(() => {
+        localStorage.setItem('dark', String(dark));
+    }, [dark]);
 
     const toggle = () => setDark(prev => !prev);
     const theme = dark ? darkTheme : lightTheme;

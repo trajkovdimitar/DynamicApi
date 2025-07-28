@@ -7,6 +7,7 @@ declare module 'styled-components' {
       text: string;
       primary: string;
       primaryLight: string;
+      accent: string;
     };
     spacing: {
       sm: string;

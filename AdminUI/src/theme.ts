@@ -6,6 +6,7 @@ export const lightTheme: DefaultTheme = {
         text: '#222222',
         primary: '#6b46ff',
         primaryLight: '#7b61ff',
+        accent: '#ff6b6b',
     },
     spacing: {
         sm: '0.5rem',
@@ -20,6 +21,7 @@ export const darkTheme: DefaultTheme = {
         text: '#ffffff',
         primary: '#7b61ff',
         primaryLight: '#9176ff',
+        accent: '#ff8787',
     },
     spacing: {
         sm: '0.5rem',
@@ -34,5 +36,9 @@ export const GlobalStyle = createGlobalStyle`
     font-family: 'Inter', sans-serif;
     background: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
+  }
+
+  a {
+    color: ${({ theme }) => theme.colors.accent};
   }
 `;
