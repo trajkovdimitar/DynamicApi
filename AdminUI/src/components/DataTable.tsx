@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import styled from 'styled-components';
 
 interface Column<T> {
     header: string;
@@ -13,39 +14,78 @@ interface Props<T> {
     onRowClick?: (row: T) => void;
 }
 
+const Wrapper = styled.div`
+    overflow-x: auto;
+    border: 1px solid ${({ theme }) => theme.colors.primaryLight};
+    border-radius: 4px;
+`;
+
+const Table = styled.table`
+    width: 100%;
+    border-collapse: collapse;
+`;
+
+const Thead = styled.thead`
+    background: ${({ theme }) => theme.colors.primary};
+    color: #fff;
+`;
+
+const Th = styled.th<{ clickable: boolean }>`
+    padding: ${({ theme }) => theme.spacing.sm};
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    ${({ clickable }) => clickable && 'cursor: pointer; user-select: none;'}
+`;
+
+const Tbody = styled.tbody``;
+
+const Tr = styled.tr<{ interactive: boolean; even: boolean }>`
+    background: ${({ even, theme }) =>
+        even ? theme.colors.background : `${theme.colors.primaryLight}10`};
+    ${({ interactive, theme }) =>
+        interactive &&
+        `cursor: pointer;
+        &:hover { background: ${theme.colors.primaryLight}30; }`}
+`;
+
+const Td = styled.td`
+    padding: ${({ theme }) => theme.spacing.sm};
+    white-space: nowrap;
+`;
+
 export function DataTable<T>({ columns, data, onRowClick }: Props<T>) {
     return (
-        <div className="overflow-x-auto rounded border border-gray-200 dark:border-neutral-700 shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                <thead className="bg-primary text-white dark:bg-primary-dark">
+        <Wrapper>
+            <Table>
+                <Thead>
                     <tr>
                         {columns.map((col, idx) => (
-                            <th
+                            <Th
+                                clickable={!!col.onHeaderClick}
                                 key={idx}
-                                className={`px-3 py-2 text-left text-xs font-medium uppercase tracking-wider ${col.onHeaderClick ? 'cursor-pointer select-none' : ''} ${col.headerClassName ?? ''}`.trim()}
                                 onClick={col.onHeaderClick}
                             >
                                 {col.header}
-                            </th>
+                            </Th>
                         ))}
                     </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
+                </Thead>
+                <Tbody>
                     {data.map((row, idx) => (
-                        <tr
+                        <Tr
                             key={idx}
+                            even={idx % 2 === 0}
+                            interactive={!!onRowClick}
                             onClick={() => onRowClick?.(row)}
-                            className={`${idx % 2 === 0 ? 'bg-white dark:bg-neutral-900' : 'bg-gray-50 dark:bg-neutral-800'} ${onRowClick ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700' : ''}`}
                         >
                             {columns.map((col, i) => (
-                                <td key={i} className="px-3 py-2 whitespace-nowrap">
-                                    {col.accessor(row)}
-                                </td>
+                                <Td key={i}>{col.accessor(row)}</Td>
                             ))}
-                        </tr>
+                        </Tr>
                     ))}
-                </tbody>
-            </table>
-        </div>
+                </Tbody>
+            </Table>
+        </Wrapper>
     );
 }

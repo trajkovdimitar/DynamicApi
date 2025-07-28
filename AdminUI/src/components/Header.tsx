@@ -1,29 +1,46 @@
-import { useState } from 'react';
+import styled from 'styled-components';
+import { useTheme } from '../ThemeContext';
+
+const HeaderWrapper = styled.header`
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 ${({ theme }) => theme.spacing.md};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.primaryLight};
+`;
+
+const ToggleButton = styled.button`
+    padding: ${({ theme }) => theme.spacing.sm};
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.primaryLight};
+    color: #fff;
+    cursor: pointer;
+`;
+
+const Avatar = styled.div`
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: gray;
+`;
+
+const Right = styled.div`
+    display: flex;
+    align-items: center;
+    gap: ${({ theme }) => theme.spacing.sm};
+`;
 
 export function Header() {
-    const [dark, setDark] = useState(
-        window.matchMedia('(prefers-color-scheme: dark)').matches
-    );
-
-    const toggle = () => {
-        const root = document.documentElement;
-        if (dark) {
-            root.classList.remove('dark');
-        } else {
-            root.classList.add('dark');
-        }
-        setDark(!dark);
-    };
+    const { dark, toggle } = useTheme();
 
     return (
-        <header className="h-12 flex items-center justify-between px-4 border-b border-gray-200 dark:border-neutral-700">
-            <h1 className="text-lg font-semibold">AdminUI</h1>
-            <div className="flex items-center gap-3">
-                <button onClick={toggle} className="px-2 py-1 rounded bg-gray-200 dark:bg-neutral-700">
-                    {dark ? 'Light' : 'Dark'}
-                </button>
-                <div className="w-8 h-8 rounded-full bg-gray-400" />
-            </div>
-        </header>
+        <HeaderWrapper>
+            <h1>AdminUI</h1>
+            <Right>
+                <ToggleButton onClick={toggle}>{dark ? 'Light' : 'Dark'}</ToggleButton>
+                <Avatar />
+            </Right>
+        </HeaderWrapper>
     );
 }
