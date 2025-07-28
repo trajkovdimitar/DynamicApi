@@ -152,24 +152,26 @@ export default function WorkflowsPage() {
                         header: 'Actions',
                         accessor: (row: typeof data[number]) => (
                             <div className="space-x-2">
-                                <button onClick={() => openEditor(row.workflowName)} className="text-blue-600">Edit</button>
+                                <Button size="sm" onClick={() => openEditor(row.workflowName)}>Edit</Button>
                                 {row.version && row.version > 1 && (
-                                    <button
+                                    <Button
+                                        size="sm"
+                                        variant="danger"
                                         onClick={() => {
                                             if (confirm('Rollback to previous version?'))
                                                 rollbackWorkflow(row.workflowName, row.version! - 1).then(() => refetch());
                                         }}
-                                        className="text-red-600"
                                     >
                                         Rollback
-                                    </button>
+                                    </Button>
                                 )}
-                                <button
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
                                     onClick={() => navigator.clipboard.writeText(JSON.stringify(row, null, 2))}
-                                    className="text-green-700"
                                 >
                                     Copy JSON
-                                </button>
+                                </Button>
                             </div>
                         ),
                     },
