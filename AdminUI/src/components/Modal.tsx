@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 interface Props {
@@ -26,17 +26,22 @@ const Panel = styled.div`
 `;
 
 export function Modal({ open, onClose, children }: Props) {
+    const panelRef = useRef<HTMLDivElement>(null);
     if (!open) return null;
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
         };
         window.addEventListener('keydown', handler);
+        const first = panelRef.current?.querySelector<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        first?.focus();
         return () => window.removeEventListener('keydown', handler);
     }, [onClose]);
     return (
         <Overlay onClick={onClose}>
-            <Panel onClick={e => e.stopPropagation()}>
+            <Panel ref={panelRef} onClick={e => e.stopPropagation()}>
                 <button
                     aria-label="Close"
                     onClick={onClose}

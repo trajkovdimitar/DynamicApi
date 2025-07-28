@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import styled from 'styled-components';
 
 interface Props {
@@ -6,6 +7,14 @@ interface Props {
     onClose: () => void;
     children: ReactNode;
 }
+
+const Overlay = styled.div<{ open: boolean }>`
+    display: ${({ open }) => (open ? 'block' : 'none')};
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 20;
+`;
 
 const Panel = styled.div<{ open: boolean }>`
     position: fixed;
@@ -25,12 +34,23 @@ const Panel = styled.div<{ open: boolean }>`
 `;
 
 export function Drawer({ open, onClose, children }: Props) {
+    useEffect(() => {
+        if (!open) return;
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [open, onClose]);
+
     return (
-        <Panel open={open} onClick={e => e.stopPropagation()}>
-            <button aria-label="Close" style={{ float: 'right' }} onClick={onClose}>
-                &times;
-            </button>
-            {children}
-        </Panel>
+        <Overlay open={open} onClick={onClose} aria-label="Close drawer">
+            <Panel open={open} onClick={e => e.stopPropagation()}>
+                <button aria-label="Close" style={{ float: 'right' }} onClick={onClose}>
+                    &times;
+                </button>
+                {children}
+            </Panel>
+        </Overlay>
     );
 }

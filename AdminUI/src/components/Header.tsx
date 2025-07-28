@@ -59,7 +59,7 @@ export function Header({ onMenuClick }: Props) {
                 <Button variant="secondary" onClick={toggle} aria-label="Toggle dark mode">
                     {dark ? 'Light' : 'Dark'}
                 </Button>
-                <Avatar />
+                <Avatar role="img" aria-label="User avatar" />
             </Right>
         </HeaderWrapper>
     );

@@ -138,11 +138,13 @@ export default function WorkflowsPage() {
                         header: `Name${sortField === 'name' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}`,
                         accessor: (row: typeof data[number]) => row.workflowName,
                         onHeaderClick: () => toggleSort('name'),
+                        ariaSort: sortField === 'name' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none',
                     },
                     {
                         header: `Version${sortField === 'version' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}`,
                         accessor: (row: typeof data[number]) => row.version ?? 1,
                         onHeaderClick: () => toggleSort('version'),
+                        ariaSort: sortField === 'version' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none',
                     },
                     {
                         header: 'Steps',
