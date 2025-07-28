@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import styled from 'styled-components';
 
 interface Props {
     open: boolean;
@@ -6,13 +7,26 @@ interface Props {
     children: ReactNode;
 }
 
+const Backdrop = styled.div`
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+const Box = styled.div`
+    background: ${({ theme }) => theme.colors.background};
+    padding: ${({ theme }) => theme.spacing.md};
+    border-radius: 4px;
+`;
+
 export function Modal({ open, onClose, children }: Props) {
     if (!open) return null;
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center" onClick={onClose}>
-            <div className="bg-white dark:bg-neutral-800 p-4 rounded" onClick={e => e.stopPropagation()}>
-                {children}
-            </div>
-        </div>
+        <Backdrop onClick={onClose}>
+            <Box onClick={e => e.stopPropagation()}>{children}</Box>
+        </Backdrop>
     );
 }

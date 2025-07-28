@@ -39,10 +39,10 @@ export default function RecordEditor() {
     const fields = model.properties.map(p => ({ name: p.name, label: p.name, type: 'text' }));
 
     return (
-        <div className="space-y-4">
-            <h2 className="text-xl font-semibold">{id === 'new' ? 'New' : 'Edit'} {name}</h2>
+        <div>
+            <h2>{id === 'new' ? 'New' : 'Edit'} {name}</h2>
             <FormFieldBuilder fields={fields} values={values} onChange={(n, v) => setValues({ ...values, [n]: v })} />
-            <button onClick={save} className="btn btn-primary">
+            <button onClick={save}>
                 Save
             </button>
         </div>

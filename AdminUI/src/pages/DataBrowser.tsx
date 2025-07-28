@@ -56,7 +56,7 @@ export default function DataBrowser() {
     columns.push({
         header: '',
         accessor: (row: Record<string, unknown>) => (
-            <button className="text-red-600" onClick={() => remove((row as Record<string, unknown>).id ?? (row as Record<string, unknown>).Id)}>
+            <button onClick={() => remove((row as Record<string, unknown>).id ?? (row as Record<string, unknown>).Id)}>
                 Delete
             </button>
         ),
@@ -65,30 +65,30 @@ export default function DataBrowser() {
     const fields = model.properties.map(p => ({ name: p.name, label: p.name, type: 'text' }));
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">{name}</h2>
-                <button className="btn btn-primary" onClick={openCreate}>
+        <div>
+            <div>
+                <h2>{name}</h2>
+                <button onClick={openCreate}>
                     New Record
                 </button>
             </div>
             <DataTable columns={columns} data={records} onRowClick={r => { setSelected(r); setIsCreating(false); setDrawerOpen(true); }} />
             <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
                 {isCreating ? (
-                    <div className="p-4 space-y-4">
-                        <h3 className="text-lg font-semibold mb-2">New {name}</h3>
+                    <div>
+                        <h3>New {name}</h3>
                         <FormFieldBuilder fields={fields} values={formValues} onChange={(n, v) => setFormValues({ ...formValues, [n]: v })} />
-                        <button className="btn btn-primary" onClick={create}>
+                        <button onClick={create}>
                             Create
                         </button>
                     </div>
                 ) : selected ? (
-                    <div className="p-4 space-y-2">
-                        <h3 className="text-lg font-semibold mb-2">Details</h3>
-                        <ul className="space-y-1">
+                    <div>
+                        <h3>Details</h3>
+                        <ul>
                             {Object.entries(selected).map(([k, v]) => (
                                 <li key={k}>
-                                    <span className="font-semibold">{k}:</span> {String(v)}
+                                    <span>{k}:</span> {String(v)}
                                 </li>
                             ))}
                         </ul>

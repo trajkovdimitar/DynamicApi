@@ -68,32 +68,32 @@ export default function ModelEditorPage() {
     };
 
     return (
-        <div className="space-y-4">
-            <h2 className="text-xl font-semibold">{name === 'new' ? 'New Model' : `Edit ${name}`}</h2>
-            <div className="space-y-2">
-                <div className="flex flex-col">
-                    <label className="mb-1 text-sm">Model Name</label>
+        <div>
+            <h2>{name === 'new' ? 'New Model' : `Edit ${name}`}</h2>
+            <div>
+                <div>
+                    <label>Model Name</label>
                     <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                       
                         value={model.modelName}
                         onChange={e => setModel({ ...model, modelName: e.target.value })}
                     />
                 </div>
                 {model.properties.map((p, idx) => (
-                    <div key={idx} className="grid grid-cols-5 gap-2 items-end">
+                    <div key={idx}>
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Name"
                             value={p.name}
                             onChange={e => updateField(idx, { name: e.target.value })}
                         />
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Type"
                             value={p.type}
                             onChange={e => updateField(idx, { type: e.target.value })}
                         />
-                        <label className="flex items-center gap-1">
+                        <label>
                             Key
                             <input
                                 type="checkbox"
@@ -101,7 +101,7 @@ export default function ModelEditorPage() {
                                 onChange={e => updateField(idx, { isKey: e.target.checked })}
                             />
                         </label>
-                        <label className="flex items-center gap-1">
+                        <label>
                             Required
                             <input
                                 type="checkbox"
@@ -110,7 +110,7 @@ export default function ModelEditorPage() {
                             />
                         </label>
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Max Length"
                             value={p.maxLength ?? ''}
                             onChange={e =>
@@ -121,51 +121,51 @@ export default function ModelEditorPage() {
                         />
                     </div>
                 ))}
-                <button onClick={addField} className="btn btn-secondary">
+                <button onClick={addField}>
                     Add Field
                 </button>
             </div>
-            <div className="space-y-2">
-                <h3 className="font-semibold">Relationships</h3>
+            <div>
+                <h3>Relationships</h3>
                 {model.relationships.map((r, idx) => (
-                    <div key={idx} className="grid grid-cols-5 gap-2 items-end">
+                    <div key={idx}>
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Type"
                             value={r.relationshipType}
                             onChange={e => updateRelationship(idx, { relationshipType: e.target.value })}
                         />
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Target Model"
                             value={r.targetModel}
                             onChange={e => updateRelationship(idx, { targetModel: e.target.value })}
                         />
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Navigation Name"
                             value={r.navigationName}
                             onChange={e => updateRelationship(idx, { navigationName: e.target.value })}
                         />
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Foreign Key"
                             value={r.foreignKey}
                             onChange={e => updateRelationship(idx, { foreignKey: e.target.value })}
                         />
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Inverse Navigation"
                             value={r.inverseNavigation}
                             onChange={e => updateRelationship(idx, { inverseNavigation: e.target.value })}
                         />
                     </div>
                 ))}
-                <button onClick={addRelationship} className="btn btn-secondary">
+                <button onClick={addRelationship}>
                     Add Relationship
                 </button>
             </div>
-            <button onClick={save} className="btn btn-primary">
+            <button onClick={save}>
                 Save
             </button>
         </div>

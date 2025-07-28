@@ -7,7 +7,7 @@ These guidelines apply to the `AdminUI` React application.
 - Maintain strict TypeScript checking.
 - Centralize API requests in `src/services`.
 - Use Zustand for global state only when necessary.
-- Style components with Tailwind utility classes.
+- Style components using `styled-components` and a shared theme.
 - Reuse generic UI components such as `DataTable` and `Modal`.
 - Avoid committing binary files. Store large assets externally if required.
 
@@ -15,7 +15,6 @@ These guidelines apply to the `AdminUI` React application.
 
 - Keep foundational components like `Button`, `Input`, and `Card` under `src/components/common` so pages share the same building blocks.
 - Compose complex widgets from these primitives to maintain a unified look and reduce duplication.
-- Extend `tailwind.config.js` with a shared color palette and enable the `@tailwindcss/forms` plugin for consistent form controls.
 - Use `clsx` for conditional class names instead of inline styles.
 - Provide layout templates in `src/layout` to standardize page structure.
 - Document component APIs in a `README.md` inside each component folder.

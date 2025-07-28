@@ -1,19 +1,38 @@
 import type { ReactNode } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
+import styled from 'styled-components';
 
 interface Props {
     children: ReactNode;
 }
 
+const Root = styled.div`
+    display: flex;
+    height: 100vh;
+    background: ${({ theme }) => theme.colors.background};
+`;
+
+const Content = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+`;
+
+const Main = styled.main`
+    flex: 1;
+    overflow: auto;
+    padding: ${({ theme }) => theme.spacing.md};
+`;
+
 export function Layout({ children }: Props) {
     return (
-        <div className="flex h-screen bg-gray-100 dark:bg-neutral-900">
+        <Root>
             <Sidebar />
-            <div className="flex flex-col flex-1">
+            <Content>
                 <Header />
-                <main className="flex-1 overflow-auto p-4">{children}</main>
-            </div>
-        </div>
+                <Main>{children}</Main>
+            </Content>
+        </Root>
     );
 }

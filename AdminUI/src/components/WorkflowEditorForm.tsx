@@ -161,20 +161,20 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
     };
 
     return (
-        <div className="space-y-4">
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm">Workflow Name</label>
+        <div>
+            <div>
+                <label>Workflow Name</label>
                 <input
-                    className="border rounded p-2 dark:bg-neutral-800"
+                   
                     placeholder="e.g. OrderProcessing"
                     value={workflow.workflowName}
                     onChange={e => onChange({ ...workflow, workflowName: e.target.value })}
                 />
                 {eventInfo && (
-                    <p className="text-xs text-neutral-500 mt-1">{eventInfo}</p>
+                    <p>{eventInfo}</p>
                 )}
             </div>
-            <label className="flex items-center gap-2">
+            <label>
                 <input
                     type="checkbox"
                     checked={workflow.isTransactional}
@@ -182,18 +182,18 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                 />
                 Transactional
             </label>
-            <div className="space-y-2">
-                <h3 className="font-semibold">Global Variables</h3>
+            <div>
+                <h3>Global Variables</h3>
                 {workflow.globalVariables.map((p, idx) => (
-                    <div key={idx} className="grid grid-cols-4 gap-2 items-end">
+                    <div key={idx}>
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Key"
                             value={p.key}
                             onChange={e => updateGlobalVariable(idx, { key: e.target.value })}
                         />
                         <select
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             value={p.valueType}
                             onChange={e => updateGlobalVariable(idx, { valueType: e.target.value as any })}
                         >
@@ -202,40 +202,40 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                             ))}
                         </select>
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Value"
                             value={p.value}
                             onChange={e => updateGlobalVariable(idx, { value: e.target.value })}
                         />
-                        <button className="text-red-600" onClick={() => removeGlobalVariable(idx)}>Delete</button>
+                        <button onClick={() => removeGlobalVariable(idx)}>Delete</button>
                     </div>
                 ))}
-                <button onClick={addGlobalVariable} className="btn btn-secondary">
+                <button onClick={addGlobalVariable}>
                     Add Variable
                 </button>
             </div>
-            <div className="space-y-2">
-                <h3 className="font-semibold">Steps</h3>
+            <div>
+                <h3>Steps</h3>
                 {workflow.steps.length === 0 && (
-                    <p className="text-sm text-neutral-500">No steps added.</p>
+                    <p>No steps added.</p>
                 )}
                 {workflow.steps.map((s, idx) => (
-                    <div key={idx} className="border p-2 rounded space-y-2">
-                        <div className="flex justify-between items-center">
-                            <span className="font-medium cursor-pointer" onClick={() => toggleStep(idx)}>
+                    <div key={idx}>
+                        <div>
+                            <span onClick={() => toggleStep(idx)}>
                                 {expanded.includes(idx) ? '▼' : '►'} Step {idx + 1} - {s.type}
                             </span>
-                            <div className="space-x-2">
-                                <button className="text-xs" onClick={() => moveStep(idx, -1)}>Up</button>
-                                <button className="text-xs" onClick={() => moveStep(idx, 1)}>Down</button>
-                                <button className="text-xs" onClick={() => duplicateStep(idx)}>Copy</button>
-                                <button className="text-red-600" onClick={() => removeStep(idx)}>Delete</button>
+                            <div>
+                                <button onClick={() => moveStep(idx, -1)}>Up</button>
+                                <button onClick={() => moveStep(idx, 1)}>Down</button>
+                                <button onClick={() => duplicateStep(idx)}>Copy</button>
+                                <button onClick={() => removeStep(idx)}>Delete</button>
                             </div>
                         </div>
                         {expanded.includes(idx) && (
                             <>
                                 <select
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             value={s.type}
                             onChange={e => updateStep(idx, { type: e.target.value })}
                         >
@@ -243,37 +243,37 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                                 <option key={t} value={t}>{t}</option>
                             ))}
                         </select>
-                        <p className="text-xs text-neutral-500">{stepDescriptions[s.type]}</p>
+                        <p>{stepDescriptions[s.type]}</p>
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Condition (optional)"
                             value={s.condition ?? ''}
                             onChange={e => updateStep(idx, { condition: e.target.value })}
                         />
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="On Error policy"
                             value={s.onError ?? ''}
                             onChange={e => updateStep(idx, { onError: e.target.value })}
                         />
                         <input
-                            className="border rounded p-2 dark:bg-neutral-800"
+                           
                             placeholder="Output Variable name"
                             value={s.outputVariable ?? ''}
                             onChange={e => updateStep(idx, { outputVariable: e.target.value })}
                         />
-                                <div className="space-y-1">
-                                    <h4 className="font-medium">Parameters</h4>
+                                <div>
+                                    <h4>Parameters</h4>
                                     {s.parameters?.map((p, pIdx) => (
-                                        <div key={pIdx} className="grid grid-cols-4 gap-2 items-end">
+                                        <div key={pIdx}>
                                             <input
-                                                className="border rounded p-2 dark:bg-neutral-800"
+                                               
                                                 placeholder="Key"
                                                 value={p.key}
                                                 onChange={e => updateParameter(idx, pIdx, { key: e.target.value })}
                                             />
                                             <select
-                                                className="border rounded p-2 dark:bg-neutral-800"
+                                               
                                                 value={p.valueType}
                                                 onChange={e => updateParameter(idx, pIdx, { valueType: e.target.value as any })}
                                             >
@@ -283,7 +283,7 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                                             </select>
                                             {p.key === 'ModelName' ? (
                                                 <select
-                                                    className="border rounded p-2 dark:bg-neutral-800"
+                                                   
                                                     value={p.value}
                                                     onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
                                                 >
@@ -294,23 +294,23 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                                                 </select>
                                             ) : p.key === 'Mappings' ? (
                                                 <textarea
-                                                    className="border rounded p-2 dark:bg-neutral-800 h-24"
+                                                   
                                                     placeholder="JSON"
                                                     value={p.value}
                                                     onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
                                                 />
                                             ) : (
                                                 <input
-                                                    className="border rounded p-2 dark:bg-neutral-800"
+                                                   
                                                     placeholder="Value"
                                                     value={p.value}
                                                     onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
                                                 />
                                             )}
-                                            <button className="text-red-600" onClick={() => removeParameter(idx, pIdx)}>Delete</button>
+                                            <button onClick={() => removeParameter(idx, pIdx)}>Delete</button>
                                         </div>
                                     ))}
-                                    <button onClick={() => addParameter(idx)} className="btn btn-secondary">
+                                    <button onClick={() => addParameter(idx)}>
                                         Add Parameter
                                     </button>
                                 </div>
@@ -318,11 +318,11 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                         )}
                     </div>
                 ))}
-                <div className="flex gap-2">
-                    <button onClick={addStep} className="btn btn-secondary">Add Step</button>
+                <div>
+                    <button onClick={addStep}>Add Step</button>
                     <button
                         onClick={() => navigator.clipboard.writeText(JSON.stringify(workflow, null, 2))}
-                        className="btn btn-secondary"
+                       
                     >
                         Copy JSON
                     </button>

@@ -23,18 +23,18 @@ export default function ModelsPage() {
     }, []);
 
     if (isLoading) {
-        return <div className="text-center">Loading models...</div>;
+        return <div style={{ textAlign: 'center' }}>Loading models...</div>;
     }
 
     if (error) {
-        return <div className="text-center text-red-600">{error}</div>;
+        return <div style={{ textAlign: 'center', color: 'red' }}>{error}</div>;
     }
 
     const columns = [
         {
             header: 'Name',
             accessor: (row: ModelDefinition) => (
-                <Link className="text-blue-600 hover:underline" to={`/models/${row.modelName}`}>{row.modelName}</Link>
+                <Link to={`/models/${row.modelName}`}>{row.modelName}</Link>
             ),
         },
         {
@@ -44,12 +44,10 @@ export default function ModelsPage() {
     ];
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Models</h2>
-                <Link className="btn btn-primary" to="/models/new">
-                    New Model
-                </Link>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Models</h2>
+                <Link to="/models/new">New Model</Link>
             </div>
             <DataTable columns={columns} data={models} />
         </div>

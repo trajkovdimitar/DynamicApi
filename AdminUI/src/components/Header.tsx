@@ -1,29 +1,32 @@
-import { useState } from 'react';
+import styled from 'styled-components';
+import { useTheme } from '../ThemeContext';
+
+const Root = styled.header`
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 ${({ theme }) => theme.spacing.md};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
+const ThemeButton = styled.button`
+    padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.primary};
+    color: white;
+`;
 
 export function Header() {
-    const [dark, setDark] = useState(
-        window.matchMedia('(prefers-color-scheme: dark)').matches
-    );
-
-    const toggle = () => {
-        const root = document.documentElement;
-        if (dark) {
-            root.classList.remove('dark');
-        } else {
-            root.classList.add('dark');
-        }
-        setDark(!dark);
-    };
+    const { dark, toggle } = useTheme();
 
     return (
-        <header className="h-12 flex items-center justify-between px-4 border-b border-gray-200 dark:border-neutral-700">
-            <h1 className="text-lg font-semibold">AdminUI</h1>
-            <div className="flex items-center gap-3">
-                <button onClick={toggle} className="px-2 py-1 rounded bg-gray-200 dark:bg-neutral-700">
-                    {dark ? 'Light' : 'Dark'}
-                </button>
-                <div className="w-8 h-8 rounded-full bg-gray-400" />
+        <Root>
+            <h1 style={{ fontSize: '1rem', fontWeight: 600 }}>AdminUI</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <ThemeButton onClick={toggle}>{dark ? 'Light' : 'Dark'}</ThemeButton>
+                <div style={{ width: '2rem', height: '2rem', borderRadius: '50%', background: '#9ca3af' }} />
             </div>
-        </header>
+        </Root>
     );
 }

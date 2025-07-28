@@ -113,20 +113,20 @@ export default function WorkflowsPage() {
 
     return (
         <>
-        <div className="p-4 space-y-2">
-            <h2 className="text-xl font-semibold">Workflows</h2>
-            <div className="space-y-2">
+        <div>
+            <h2>Workflows</h2>
+            <div>
                 <input
-                    className="border rounded p-2 dark:bg-neutral-800"
+                   
                     placeholder="Search workflows"
                     value={filter}
                     onChange={e => setFilter(e.target.value)}
                 />
-                <div className="flex gap-2">
-                    <button className="btn btn-primary" onClick={() => setNewModalOpen(true)}>
+                <div>
+                    <button onClick={() => setNewModalOpen(true)}>
                         New Workflow
                     </button>
-                    <button className="btn btn-secondary" onClick={() => refetch()}>
+                    <button onClick={() => refetch()}>
                         Refresh
                     </button>
                 </div>
@@ -154,22 +154,22 @@ export default function WorkflowsPage() {
                     {
                         header: 'Actions',
                         accessor: (row: typeof data[number]) => (
-                            <div className="space-x-2">
-                                <button onClick={() => openEditor(row.workflowName)} className="text-blue-600">Edit</button>
+                            <div>
+                                <button onClick={() => openEditor(row.workflowName)}>Edit</button>
                                 {row.version && row.version > 1 && (
                                     <button
                                         onClick={() => {
                                             if (confirm('Rollback to previous version?'))
                                                 rollbackWorkflow(row.workflowName, row.version! - 1).then(() => refetch());
                                         }}
-                                        className="text-red-600"
+                                       
                                     >
                                         Rollback
                                     </button>
                                 )}
                                 <button
                                     onClick={() => navigator.clipboard.writeText(JSON.stringify(row, null, 2))}
-                                    className="text-green-700"
+                                   
                                 >
                                     Copy JSON
                                 </button>
@@ -180,17 +180,17 @@ export default function WorkflowsPage() {
                 data={data}
             />
             {editing && (
-                <div className="space-y-4 mt-4 p-4 border rounded shadow-md dark:bg-neutral-700">
+                <div>
                     {hasChanges && (
-                        <p className="text-sm text-orange-600">You have unsaved changes.</p>
+                        <p>You have unsaved changes.</p>
                     )}
                     <WorkflowEditorForm workflow={editing} onChange={setEditing} />
-                    <div className="flex justify-end space-x-2">
-                        <button onClick={reset} className="btn btn-secondary">Reset</button>
-                        <button onClick={cancelEdit} className="btn btn-secondary">Cancel</button>
+                    <div>
+                        <button onClick={reset}>Reset</button>
+                        <button onClick={cancelEdit}>Cancel</button>
                         <button
                             onClick={() => editing && save(editing)}
-                            className="btn btn-primary"
+                           
                             disabled={saveMutation.isPending}
                         >
                             {saveMutation.isPending ? 'Saving...' : 'Save'}
@@ -201,10 +201,10 @@ export default function WorkflowsPage() {
         </div>
         <Toast message={toast} onClose={() => setToast('')} />
         <Modal open={newModalOpen} onClose={() => setNewModalOpen(false)}>
-            <div className="space-y-2 w-64">
-                <h3 className="text-lg font-semibold">New Workflow</h3>
+            <div>
+                <h3>New Workflow</h3>
                 <select
-                    className="border rounded p-2 w-full dark:bg-neutral-800"
+                   
                     value={selectedModel}
                     onChange={e => setSelectedModel(e.target.value)}
                 >
@@ -216,7 +216,7 @@ export default function WorkflowsPage() {
                     ))}
                 </select>
                 <select
-                    className="border rounded p-2 w-full dark:bg-neutral-800"
+                   
                     value={selectedEvent}
                     onChange={e => setSelectedEvent(e.target.value as any)}
                 >
@@ -226,13 +226,13 @@ export default function WorkflowsPage() {
                         </option>
                     ))}
                 </select>
-                <div className="flex justify-end gap-2">
-                    <button className="btn btn-secondary" onClick={() => setNewModalOpen(false)}>
+                <div>
+                    <button onClick={() => setNewModalOpen(false)}>
                         Cancel
                     </button>
                     <button
                         disabled={!selectedModel}
-                        className="btn btn-primary disabled:opacity-50"
+                       
                         onClick={() => {
                             if (!selectedModel) return;
                             startNewWorkflow(`${selectedModel}.${selectedEvent}`);

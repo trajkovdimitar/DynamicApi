@@ -1,9 +1,21 @@
 import { useEffect } from 'react';
+import styled from 'styled-components';
 
 interface Props {
     message: string;
     onClose: () => void;
 }
+
+const Box = styled.div`
+    position: fixed;
+    bottom: ${({ theme }) => theme.spacing.md};
+    right: ${({ theme }) => theme.spacing.md};
+    background: black;
+    color: white;
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+`;
 
 export default function Toast({ message, onClose }: Props) {
     useEffect(() => {
@@ -13,9 +25,5 @@ export default function Toast({ message, onClose }: Props) {
     }, [message, onClose]);
 
     if (!message) return null;
-    return (
-        <div className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded shadow">
-            {message}
-        </div>
-    );
+    return <Box>{message}</Box>;
 }

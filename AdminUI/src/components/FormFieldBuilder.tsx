@@ -1,3 +1,5 @@
+import styled from 'styled-components';
+
 interface Field {
     name: string;
     label: string;
@@ -10,20 +12,37 @@ interface Props {
     onChange: (name: string, value: unknown) => void;
 }
 
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: ${({ theme }) => theme.spacing.md};
+`;
+
+const FieldWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+const Input = styled.input`
+    padding: ${({ theme }) => theme.spacing.sm};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.background};
+`;
+
 export function FormFieldBuilder({ fields, values, onChange }: Props) {
     return (
-        <div className="space-y-4">
+        <Container>
             {fields.map(f => (
-                <div key={f.name} className="flex flex-col">
-                    <label className="mb-1 text-sm">{f.label}</label>
-                    <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                <FieldWrapper key={f.name}>
+                    <label style={{ marginBottom: '4px', fontSize: '0.875rem' }}>{f.label}</label>
+                    <Input
                         type={f.type}
-                        value={values[f.name] as string || ''}
+                        value={(values[f.name] as string) || ''}
                         onChange={e => onChange(f.name, e.target.value)}
                     />
-                </div>
+                </FieldWrapper>
             ))}
-        </div>
+        </Container>
     );
 }

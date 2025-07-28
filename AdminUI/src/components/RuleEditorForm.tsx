@@ -1,10 +1,31 @@
 import { Rule, Workflow } from '../types/models';
+import styled from 'styled-components';
 
 interface Props {
     workflow: Workflow;
     onChange: (wf: Workflow) => void;
     suggestions: string[];
 }
+
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: ${({ theme }) => theme.spacing.md};
+`;
+
+const Row = styled.div`
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: ${({ theme }) => theme.spacing.sm};
+    align-items: end;
+`;
+
+const Input = styled.input`
+    padding: ${({ theme }) => theme.spacing.sm};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.background};
+`;
 
 export function RuleEditorForm({ workflow, onChange, suggestions }: Props) {
     const updateRule = (index: number, partial: Partial<Rule>) => {
@@ -26,52 +47,43 @@ export function RuleEditorForm({ workflow, onChange, suggestions }: Props) {
     };
 
     return (
-        <div className="space-y-3">
-            <div className="flex flex-col">
-                <label className="mb-1 text-sm">Workflow Name</label>
-                <input
-                    className="border rounded p-2 dark:bg-neutral-800"
+        <Container>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ marginBottom: '4px', fontSize: '0.875rem' }}>Workflow Name</label>
+                <Input
                     value={workflow.workflowName}
                     onChange={e => onChange({ ...workflow, workflowName: e.target.value })}
                 />
             </div>
             {workflow.rules.map((r, idx) => (
-                <div key={idx} className="grid grid-cols-4 gap-2 items-end">
-                    <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                <Row key={idx}>
+                    <Input
                         placeholder="Rule Name"
                         value={r.ruleName}
                         onChange={e => updateRule(idx, { ruleName: e.target.value })}
                     />
-                    <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                    <Input
                         placeholder="Expression"
                         list="exprSuggestions"
                         value={r.expression ?? ''}
                         onChange={e => updateRule(idx, { expression: e.target.value })}
                     />
-                    <input
-                        className="border rounded p-2 dark:bg-neutral-800"
+                    <Input
                         placeholder="Error Message"
                         value={r.errorMessage ?? ''}
                         onChange={e => updateRule(idx, { errorMessage: e.target.value })}
                     />
-                    <button
-                        className="text-red-600"
-                        onClick={() => removeRule(idx)}
-                    >
+                    <button style={{ color: 'red' }} onClick={() => removeRule(idx)}>
                         Delete
                     </button>
-                </div>
+                </Row>
             ))}
             <datalist id="exprSuggestions">
                 {suggestions.map(s => (
                     <option key={s} value={`entity.${s}`} />
                 ))}
             </datalist>
-            <button onClick={addRule} className="btn btn-secondary">
-                Add Rule
-            </button>
-        </div>
+            <button onClick={addRule}>Add Rule</button>
+        </Container>
     );
 }

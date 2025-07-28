@@ -72,11 +72,11 @@ export default function RulesPage() {
 
     // Render logic based on states
     if (isLoading) {
-        return <div className="text-center p-4">Loading rules...</div>;
+        return <div>Loading rules...</div>;
     }
 
     if (error) {
-        return <div className="text-center p-4 text-red-600">Error: {error}</div>;
+        return <div>Error: {error}</div>;
     }
 
     const columns = [
@@ -91,7 +91,7 @@ export default function RulesPage() {
         {
             header: 'Actions',
             accessor: (row: Workflow) => (
-                <button className="text-blue-600 hover:underline" onClick={() => startEdit(row)}>
+                <button onClick={() => startEdit(row)}>
                     Edit
                 </button>
             ),
@@ -99,24 +99,24 @@ export default function RulesPage() {
     ];
 
     return (
-        <div className="space-y-4 p-4">
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Rules</h2>
-                <button onClick={() => startEdit()} className="btn btn-primary">
+        <div>
+            <div>
+                <h2>Rules</h2>
+                <button onClick={() => startEdit()}>
                     New
                 </button>
             </div>
             <DataTable columns={columns} data={workflows} />
 
             {editing && (
-                <div className="space-y-2 mt-4 p-4 border rounded shadow-md dark:bg-neutral-700">
-                    <h3 className="text-lg font-semibold">{editing.workflowName ? `Editing: ${editing.workflowName}` : 'New Workflow'}</h3>
+                <div>
+                    <h3>{editing.workflowName ? `Editing: ${editing.workflowName}` : 'New Workflow'}</h3>
                     <RuleEditorForm workflow={editing} onChange={setEditing} suggestions={suggestions} />
-                    <div className="flex justify-end space-x-2">
-                        <button onClick={() => setEditing(null)} className="btn btn-secondary" disabled={isSaving}>
+                    <div>
+                        <button onClick={() => setEditing(null)} disabled={isSaving}>
                             Cancel
                         </button>
-                        <button onClick={save} className="btn btn-primary" disabled={isSaving}>
+                        <button onClick={save} disabled={isSaving}>
                             {isSaving ? 'Saving...' : 'Save'}
                         </button>
                     </div>
