@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import GavelIcon from '@mui/icons-material/Gavel';
@@ -10,89 +9,52 @@ interface Props {
     open: boolean;
     onClose?: () => void;
 }
-const Wrapper = styled.div<{ open: boolean }>`
-    @media (max-width: 768px) {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: ${({ open }) => (open ? 'block' : 'none')};
-    }
-`;
-
-const Aside = styled.aside<{ open: boolean }>`
-    width: 12rem;
-    background: ${({ theme }) => theme.colors.primaryLight}10;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    @media (max-width: 768px) {
-        transform: ${({ open }) => (open ? 'translateX(0)' : 'translateX(-100%)')};
-        transition: transform ${({ theme }) => theme.transitions.normal};
-        box-shadow: ${({ theme }) => theme.shadows.lg};
-        z-index: 20;
-    }
-`;
-
-const Nav = styled.nav`
-    flex: 1;
-    padding: ${({ theme }) => theme.spacing.sm};
-    display: flex;
-    flex-direction: column;
-    gap: ${({ theme }) => theme.spacing.sm};
-`;
-
-const LinkItem = styled(NavLink)`
-    padding: ${({ theme }) => theme.spacing.sm};
-    border-radius: 4px;
-    text-decoration: none;
-    color: inherit;
-    transition: background ${({ theme }) => theme.transitions.fast};
-
-    &:hover {
-        background: ${({ theme }) => theme.colors.primaryLight};
-        color: #fff;
-    }
-
-    &.active {
-        background: ${({ theme }) => theme.colors.primary};
-        color: #fff;
-    }
-`;
-
-const Label = styled.span`
-    margin-left: ${({ theme }) => theme.spacing.sm};
-`;
 
 export function Sidebar({ open, onClose }: Props) {
     return (
-        <Wrapper role="button" aria-label="Close sidebar" open={open} onClick={onClose}>
-            <Aside open={open} onClick={e => e.stopPropagation()}>
-                <Nav>
-                    <LinkItem to="/" onClick={onClose}>
-                        <DashboardIcon fontSize="small" />
-                        <Label>Dashboard</Label>
-                    </LinkItem>
-                    <LinkItem to="/models" onClick={onClose}>
-                        <TableChartIcon fontSize="small" />
-                        <Label>Models</Label>
-                    </LinkItem>
-                    <LinkItem to="/rules" onClick={onClose}>
-                        <GavelIcon fontSize="small" />
-                        <Label>Rules</Label>
-                    </LinkItem>
-                    <LinkItem to="/workflows" onClick={onClose}>
-                        <WorkspacesIcon fontSize="small" />
-                        <Label>Workflows</Label>
-                    </LinkItem>
-                    <LinkItem to="/workflow-dashboard" onClick={onClose}>
-                        <DataObjectIcon fontSize="small" />
-                        <Label>Workflow Studio</Label>
-                    </LinkItem>
-                </Nav>
-            </Aside>
-        </Wrapper>
+        <div
+            className="hidden md:block md:w-48"
+            aria-hidden={!open}
+        >
+            <aside className="fixed inset-y-0 left-0 flex w-48 flex-col bg-indigo-50 dark:bg-gray-800">
+                <nav className="flex flex-1 flex-col gap-2 p-2 text-sm">
+                    <NavLink
+                        to="/"
+                        className="flex items-center gap-2 rounded px-2 py-1 hover:bg-indigo-200 [&.active]:bg-indigo-500 [&.active]:text-white"
+                        onClick={onClose}
+                    >
+                        <DashboardIcon fontSize="small" /> Dashboard
+                    </NavLink>
+                    <NavLink
+                        to="/models"
+                        className="flex items-center gap-2 rounded px-2 py-1 hover:bg-indigo-200 [&.active]:bg-indigo-500 [&.active]:text-white"
+                        onClick={onClose}
+                    >
+                        <TableChartIcon fontSize="small" /> Models
+                    </NavLink>
+                    <NavLink
+                        to="/rules"
+                        className="flex items-center gap-2 rounded px-2 py-1 hover:bg-indigo-200 [&.active]:bg-indigo-500 [&.active]:text-white"
+                        onClick={onClose}
+                    >
+                        <GavelIcon fontSize="small" /> Rules
+                    </NavLink>
+                    <NavLink
+                        to="/workflows"
+                        className="flex items-center gap-2 rounded px-2 py-1 hover:bg-indigo-200 [&.active]:bg-indigo-500 [&.active]:text-white"
+                        onClick={onClose}
+                    >
+                        <WorkspacesIcon fontSize="small" /> Workflows
+                    </NavLink>
+                    <NavLink
+                        to="/workflow-dashboard"
+                        className="flex items-center gap-2 rounded px-2 py-1 hover:bg-indigo-200 [&.active]:bg-indigo-500 [&.active]:text-white"
+                        onClick={onClose}
+                    >
+                        <DataObjectIcon fontSize="small" /> Workflow Studio
+                    </NavLink>
+                </nav>
+            </aside>
+        </div>
     );
 }
