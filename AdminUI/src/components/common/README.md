@@ -12,3 +12,21 @@ Reusable UI elements for the Admin UI.
 ```
 <Input placeholder="Enter name" />
 ```
+
+## Table
+```
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableCell isHeader>Name</TableCell>
+      <TableCell isHeader>Fields</TableCell>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>Model</TableCell>
+      <TableCell>3</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+```
