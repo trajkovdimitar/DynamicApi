@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import clsx from 'clsx';
 
 export type ButtonVariant = 'primary' | 'outline' | 'secondary' | 'danger';
-export type ButtonSize = 'sm' | 'md';
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
@@ -13,10 +13,15 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
 }
 
-const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'px-4 py-3 text-sm',
-  md: 'px-5 py-3.5 text-sm',
+const sizeClasses = {
+  xs: "px-3 py-2 text-xs",
+  sm: "px-4 py-3 text-sm",
+  md: "px-5 py-3.5 text-sm",
+  lg: "px-6 py-4 text-base",
+  xl: "px-7 py-4.5 text-lg",
+  "2xl": "px-8 py-5 text-xl",
 };
+
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
