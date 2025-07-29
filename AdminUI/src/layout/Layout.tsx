@@ -1,24 +1,29 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
-import { Sidebar } from '../components/Sidebar';
+import { SidebarProvider, useSidebar } from '../context/SidebarContext';
+import AppSidebar from './AppSidebar';
+import Backdrop from './Backdrop';
 import { Header } from '../components/Header';
 
 interface Props {
     children: ReactNode;
 }
 
-export function Layout({ children }: Props) {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+const LayoutContent: React.FC<Props> = ({ children }) => {
+    const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
     return (
-        <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
-            <a href="#main-content" className="sr-only focus:not-sr-only">
-                Skip to content
-            </a>
-            <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            <div className="flex flex-col flex-1">
-                <Header onMenuClick={() => setSidebarOpen(true)} />
-                <main id="main-content" className="flex-1 overflow-auto p-4 md:p-6 2xl:p-11">
+        <div className="min-h-screen xl:flex">
+            <div>
+                <AppSidebar />
+                <Backdrop />
+            </div>
+            <div
+                className={`flex-1 transition-all duration-300 ease-in-out ${
+                    isExpanded || isHovered ? 'lg:ml-[290px]' : 'lg:ml-[90px]'
+                } ${isMobileOpen ? 'ml-0' : ''}`}
+            >
+                <Header />
+                <main id="main-content" className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
                     {children}
                 </main>
                 <footer className="border-t border-gray-200 p-2 text-center text-sm text-gray-500">
@@ -26,5 +31,13 @@ export function Layout({ children }: Props) {
                 </footer>
             </div>
         </div>
+    );
+};
+
+export function Layout({ children }: Props) {
+    return (
+        <SidebarProvider>
+            <LayoutContent>{children}</LayoutContent>
+        </SidebarProvider>
     );
 }
