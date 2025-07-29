@@ -16,7 +16,7 @@ export function Layout({ children }: Props) {
                 Skip to content
             </a>
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            <div className="flex flex-col flex-1 pl-48 max-md:pl-0">
+            <div className="flex flex-col flex-1">
                 <Header onMenuClick={() => setSidebarOpen(true)} />
                 <main id="main-content" className="flex-1 overflow-auto p-4 mx-auto w-full max-w-screen-xl">
                     {children}
