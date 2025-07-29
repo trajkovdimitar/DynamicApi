@@ -64,9 +64,6 @@ export const Header: FC = () => {
                     >
                         <MoreVertIcon fontSize="small" />
                     </button>
-                    <div className="hidden xl:block w-full max-w-sm">
-                        <SearchBar />
-                    </div>
                 </div>
                 <div
                     className={clsx(

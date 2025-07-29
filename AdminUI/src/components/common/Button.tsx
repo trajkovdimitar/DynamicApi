@@ -1,43 +1,58 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import clsx from 'clsx';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'outline';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'outline';
+export type ButtonSize = 'sm' | 'md';
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: ButtonVariant;
-    size?: ButtonSize;
-    className?: string;
+  children: ReactNode;
+  size?: ButtonSize;
+  variant?: ButtonVariant;
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  className?: string;
 }
 
 const sizeClasses: Record<ButtonSize, string> = {
-    sm: 'px-2 py-1 text-sm',
-    md: 'px-3 py-2 text-base',
-    lg: 'px-4 py-3 text-lg',
+  sm: 'px-4 py-3 text-sm',
+  md: 'px-5 py-3.5 text-sm',
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
-    outline: 'border border-indigo-600 text-indigo-600 hover:bg-indigo-50',
+  primary:
+    'bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300',
+  outline:
+    'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300',
 };
 
 export function Button({
-    variant = 'primary',
-    size = 'md',
-    className,
-    ...props
+  children,
+  variant = 'primary',
+  size = 'md',
+  startIcon,
+  endIcon,
+  className,
+  disabled,
+  ...props
 }: Props) {
-    return (
-        <button
-            className={clsx(
-                'rounded focus:outline-none focus:ring focus:ring-indigo-300 disabled:opacity-50',
-                sizeClasses[size],
-                variantClasses[variant],
-                className
-            )}
-            {...props}
-        />
-    );
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className={clsx(
+        'inline-flex items-center justify-center gap-2 rounded-lg transition',
+        sizeClasses[size],
+        variantClasses[variant],
+        {
+          'cursor-not-allowed opacity-50': disabled,
+        },
+        className
+      )}
+      {...props}
+    >
+      {startIcon && <span className="flex items-center">{startIcon}</span>}
+      {children}
+      {endIcon && <span className="flex items-center">{endIcon}</span>}
+    </button>
+  );
 }
