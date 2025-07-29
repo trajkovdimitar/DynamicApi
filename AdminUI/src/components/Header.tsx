@@ -8,17 +8,23 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SearchBar } from './SearchBar';
 import { useTheme } from '../ThemeContext';
+import { useSidebar } from '../context/SidebarContext';
 
-interface Props {
-    onMenuClick: () => void;
-}
-
-export const Header: FC<Props> = ({ onMenuClick }) => {
+export const Header: FC = () => {
     // Subscribe to theme changes to re-render when toggled
     useTheme();
+    const { toggleSidebar, toggleMobileSidebar } = useSidebar();
     const [notifyOpen, setNotifyOpen] = useState(false);
     const [userOpen, setUserOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+
+    const handleToggle = () => {
+        if (window.innerWidth >= 1024) {
+            toggleSidebar();
+        } else {
+            toggleMobileSidebar();
+        }
+    };
 
     return (
         <header
@@ -40,8 +46,8 @@ export const Header: FC<Props> = ({ onMenuClick }) => {
                             'border-gray-200 text-gray-500',
                             'xl:h-11 xl:w-11 xl:border dark:border-gray-800 dark:text-gray-400'
                         )}
-                        aria-label="Open sidebar"
-                        onClick={onMenuClick}
+                        aria-label="Toggle sidebar"
+                        onClick={handleToggle}
                     >
                         <MenuIcon fontSize="small" />
                     </button>
