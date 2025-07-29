@@ -3,8 +3,7 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import MenuIcon from '@mui/icons-material/Menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
+import { ThemeToggleButton } from './common/ThemeToggleButton';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SearchBar } from './SearchBar';
@@ -15,7 +14,8 @@ interface Props {
 }
 
 export const Header: FC<Props> = ({ onMenuClick }) => {
-    const { theme, toggleTheme } = useTheme();
+    // Subscribe to theme changes to re-render when toggled
+    useTheme();
     const [notifyOpen, setNotifyOpen] = useState(false);
     const [userOpen, setUserOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -69,24 +69,7 @@ export const Header: FC<Props> = ({ onMenuClick }) => {
                     )}
                 >
                     <div className="flex items-center gap-2">
-                        <button
-                            onClick={toggleTheme}
-                            aria-label="Toggle theme"
-                            className={clsx(
-                                'hover:text-dark-900 relative flex h-11 w-11 items-center justify-center',
-                                'rounded-full',
-                                'border border-gray-200 bg-white text-gray-500 transition-colors',
-                                'hover:bg-gray-100 hover:text-gray-700',
-                                'dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400',
-                                'dark:hover:bg-gray-800 dark:hover:text-white'
-                            )}
-                        >
-                            {theme === 'dark' ? (
-                                <LightModeIcon fontSize="small" />
-                            ) : (
-                                <DarkModeIcon fontSize="small" />
-                            )}
-                        </button>
+                        <ThemeToggleButton />
                         <div className="relative">
                             <button
                                 onClick={() => setNotifyOpen(o => !o)}
