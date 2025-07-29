@@ -2,67 +2,29 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
-import styled from 'styled-components';
 
 interface Props {
     children: ReactNode;
 }
 
-const Wrapper = styled.div`
-    display: flex;
-    height: 100vh;
-    background: ${({ theme }) => theme.colors.background};
-`;
-
-const SkipLink = styled.a`
-    position: absolute;
-    left: -999px;
-    top: 0;
-    padding: ${({ theme }) => theme.spacing.sm};
-    background: ${({ theme }) => theme.colors.accent};
-    color: #fff;
-    z-index: 100;
-    &:focus {
-        left: 0;
-    }
-`;
-
-const Content = styled.div`
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    padding-left: 12rem;
-    @media (max-width: 768px) {
-        padding-left: 0;
-    }
-`;
-
-const Main = styled.main`
-    flex: 1;
-    overflow: auto;
-    padding: ${({ theme }) => theme.spacing.md};
-    max-width: ${({ theme }) => theme.maxWidth};
-    margin: 0 auto;
-`;
-
-const Footer = styled.footer`
-    padding: ${({ theme }) => theme.spacing.sm};
-    text-align: center;
-    border-top: 1px solid ${({ theme }) => theme.colors.border};
-`;
-
 export function Layout({ children }: Props) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <Wrapper>
-            <SkipLink href="#main-content">Skip to content</SkipLink>
+        <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+            <a href="#main-content" className="sr-only focus:not-sr-only">
+                Skip to content
+            </a>
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            <Content>
+            <div className="flex flex-col flex-1">
                 <Header onMenuClick={() => setSidebarOpen(true)} />
-                <Main id="main-content">{children}</Main>
-                <Footer>DynamicApi © 2025</Footer>
-            </Content>
-        </Wrapper>
+                <main id="main-content" className="flex-1 overflow-auto p-4 md:p-6 2xl:p-11">
+                    {children}
+                </main>
+                <footer className="border-t border-gray-200 p-2 text-center text-sm text-gray-500">
+                    DynamicApi © 2025
+                </footer>
+            </div>
+        </div>
     );
 }

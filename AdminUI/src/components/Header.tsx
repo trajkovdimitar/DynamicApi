@@ -1,5 +1,4 @@
-import styled from 'styled-components';
-import { useTheme } from '../ThemeContext';
+import type { FC } from 'react';
 import { Button } from './common/Button';
 import { SearchBar } from './SearchBar';
 
@@ -7,74 +6,24 @@ interface Props {
     onMenuClick: () => void;
 }
 
-const HeaderWrapper = styled.header`
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 ${({ theme }) => theme.spacing.md};
-    border-bottom: 1px solid ${({ theme }) => theme.colors.primaryLight};
-    background: ${({ theme }) => theme.colors.background};
-    box-shadow: ${({ theme }) => theme.shadows.sm};
-`;
-
-const MenuButton = styled.button`
-    display: none;
-    background: none;
-    border: none;
-    font-size: ${({ theme }) => theme.fontSizes.lg};
-    @media (max-width: 768px) {
-        display: inline-block;
-    }
-    &:focus-visible {
-        outline: 2px solid ${({ theme }) => theme.colors.primaryLight};
-        outline-offset: 2px;
-    }
-`;
-
-
-const Avatar = styled.div`
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    background: gray;
-`;
-
-const Right = styled.div`
-    display: flex;
-    align-items: center;
-    gap: ${({ theme }) => theme.spacing.sm};
-`;
-
-const SearchContainer = styled.div`
-    flex: 1;
-    margin: 0 ${({ theme }) => theme.spacing.md};
-    max-width: 20rem;
-`;
-
-export function Header({ onMenuClick }: Props) {
-    const { dark, toggle } = useTheme();
-
-    return (
-        <HeaderWrapper>
-            <MenuButton aria-label="Open menu" onClick={onMenuClick}>☰</MenuButton>
-            <h1>AdminUI</h1>
-            <SearchContainer>
-                <SearchBar />
-            </SearchContainer>
-            <Right>
-                <Button
-                    variant="secondary"
-                    onClick={toggle}
-                    aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-                >
-                    {dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                </Button>
-                <Avatar role="img" aria-label="User avatar" />
-            </Right>
-        </HeaderWrapper>
-    );
-}
+export const Header: FC<Props> = ({ onMenuClick }) => (
+    <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <button
+            className="mr-2 hidden text-lg max-md:block"
+            aria-label="Open menu"
+            onClick={onMenuClick}
+        >
+            ☰
+        </button>
+        <h1 className="text-lg font-semibold">AdminUI</h1>
+        <div className="mx-4 flex-1 max-w-xs">
+            <SearchBar />
+        </div>
+        <div className="flex items-center gap-2">
+            <Button variant="secondary" onClick={() => document.documentElement.classList.toggle('dark')}>
+                Toggle Theme
+            </Button>
+            <div className="h-8 w-8 rounded-full bg-gray-400" role="img" aria-label="User avatar" />
+        </div>
+    </header>
+);
