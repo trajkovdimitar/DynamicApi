@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ModelsPage from './pages/ModelsPage';
 import ModelEditorPage from './pages/ModelEditorPage';
 import DataBrowser from './pages/DataBrowser';
@@ -13,7 +12,7 @@ export default function App() {
         <BrowserRouter>
             <Layout>
                 <Routes>
-                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/" element={<Navigate to="/models" replace />} />
                     <Route path="/models" element={<ModelsPage />} />
                     <Route path="/models/:name" element={<ModelEditorPage />} />
                     <Route path="/data/:name" element={<DataBrowser />} />

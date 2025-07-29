@@ -70,5 +70,5 @@ export default tseslint.config([
 
 ## Theme
 
-The application uses `styled-components` for styling. Colors and spacing are defined in `src/theme.ts` and typings in `src/styled.d.ts`. Toggle between light and dark mode using the button in the header.
+The UI is styled entirely with Tailwind CSS. Dark mode is toggled by adding the `dark` class to the document root.
 

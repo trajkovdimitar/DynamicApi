@@ -1,23 +1,18 @@
-import styled from 'styled-components';
 import type { InputHTMLAttributes } from 'react';
+import clsx from 'clsx';
 
-interface Props extends InputHTMLAttributes<HTMLInputElement> {}
+interface Props extends InputHTMLAttributes<HTMLInputElement> {
+    className?: string;
+}
 
-const StyledInput = styled.input`
-    padding: ${({ theme }) => theme.spacing.sm};
-    border-radius: ${({ theme }) => theme.radius};
-    border: 1px solid ${({ theme }) => theme.colors.border};
-    background: ${({ theme }) => theme.colors.background};
-    color: ${({ theme }) => theme.colors.text};
-    font-size: ${({ theme }) => theme.fontSizes.md};
-    width: 100%;
-    transition: border-color ${({ theme }) => theme.transitions.fast};
-    &:focus-visible {
-        outline: 2px solid ${({ theme }) => theme.colors.primaryLight};
-        outline-offset: 2px;
-    }
-`;
-
-export function Input(props: Props) {
-    return <StyledInput {...props} />;
+export function Input({ className, ...props }: Props) {
+    return (
+        <input
+            className={clsx(
+                'w-full rounded border border-gray-300 bg-white px-2 py-1 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500',
+                className
+            )}
+            {...props}
+        />
+    );
 }

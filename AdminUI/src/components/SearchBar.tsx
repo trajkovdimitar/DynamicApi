@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import { searchEntities } from '../services/search';
 import { Input } from './common/Input';
 
@@ -10,32 +9,6 @@ interface SearchResult {
     path: string;
 }
 
-const Wrapper = styled.div`
-    position: relative;
-`;
-
-const Results = styled.div`
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: ${({ theme }) => theme.colors.background};
-    border: 1px solid ${({ theme }) => theme.colors.border};
-    max-height: 16rem;
-    overflow-y: auto;
-    z-index: 30;
-`;
-
-const ResultItem = styled(Link)`
-    display: block;
-    padding: ${({ theme }) => theme.spacing.sm};
-    text-decoration: none;
-    color: inherit;
-    &:hover {
-        background: ${({ theme }) => theme.colors.primaryLight};
-        color: #fff;
-    }
-`;
 
 export function SearchBar() {
     const [q, setQ] = useState('');
@@ -67,7 +40,7 @@ export function SearchBar() {
     }, []);
 
     return (
-        <Wrapper ref={containerRef}>
+        <div className="relative" ref={containerRef}>
             <Input
                 placeholder="Search"
                 value={q}
@@ -75,14 +48,19 @@ export function SearchBar() {
                 aria-label="Global search"
             />
             {results.length > 0 && (
-                <Results>
+                <div className="absolute left-0 right-0 top-full z-30 max-h-64 overflow-y-auto border border-gray-300 bg-white dark:bg-gray-800">
                     {results.map((r, idx) => (
-                        <ResultItem key={idx} to={r.path} onClick={() => setResults([])}>
+                        <Link
+                            key={idx}
+                            to={r.path}
+                            onClick={() => setResults([])}
+                            className="block px-2 py-1 hover:bg-indigo-500 hover:text-white"
+                        >
                             {r.type}: {r.name}
-                        </ResultItem>
+                        </Link>
                     ))}
-                </Results>
+                </div>
             )}
-        </Wrapper>
+        </div>
     );
 }

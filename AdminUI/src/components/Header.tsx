@@ -1,80 +1,98 @@
-import styled from 'styled-components';
-import { useTheme } from '../ThemeContext';
-import { Button } from './common/Button';
+import type { FC } from 'react';
+import { useState } from 'react';
+import clsx from 'clsx';
+import MenuIcon from '@mui/icons-material/Menu';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { SearchBar } from './SearchBar';
+import { useTheme } from '../ThemeContext';
 
 interface Props {
     onMenuClick: () => void;
 }
 
-const HeaderWrapper = styled.header`
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 ${({ theme }) => theme.spacing.md};
-    border-bottom: 1px solid ${({ theme }) => theme.colors.primaryLight};
-    background: ${({ theme }) => theme.colors.background};
-    box-shadow: ${({ theme }) => theme.shadows.sm};
-`;
-
-const MenuButton = styled.button`
-    display: none;
-    background: none;
-    border: none;
-    font-size: ${({ theme }) => theme.fontSizes.lg};
-    @media (max-width: 768px) {
-        display: inline-block;
-    }
-    &:focus-visible {
-        outline: 2px solid ${({ theme }) => theme.colors.primaryLight};
-        outline-offset: 2px;
-    }
-`;
-
-
-const Avatar = styled.div`
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    background: gray;
-`;
-
-const Right = styled.div`
-    display: flex;
-    align-items: center;
-    gap: ${({ theme }) => theme.spacing.sm};
-`;
-
-const SearchContainer = styled.div`
-    flex: 1;
-    margin: 0 ${({ theme }) => theme.spacing.md};
-    max-width: 20rem;
-`;
-
-export function Header({ onMenuClick }: Props) {
+export const Header: FC<Props> = ({ onMenuClick }) => {
     const { dark, toggle } = useTheme();
+    const [notifyOpen, setNotifyOpen] = useState(false);
+    const [userOpen, setUserOpen] = useState(false);
 
     return (
-        <HeaderWrapper>
-            <MenuButton aria-label="Open menu" onClick={onMenuClick}>☰</MenuButton>
-            <h1>AdminUI</h1>
-            <SearchContainer>
-                <SearchBar />
-            </SearchContainer>
-            <Right>
-                <Button
-                    variant="secondary"
-                    onClick={toggle}
-                    aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+        <header
+            className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-2 shadow-sm
+                dark:border-gray-700 dark:bg-gray-800"
+        >
+            <div className="flex items-center justify-between gap-2">
+                <button
+                    className="text-gray-700 xl:hidden"
+                    aria-label="Open menu"
+                    onClick={onMenuClick}
                 >
-                    {dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                </Button>
-                <Avatar role="img" aria-label="User avatar" />
-            </Right>
-        </HeaderWrapper>
+                    <MenuIcon />
+                </button>
+                <h1 className="text-lg font-semibold">AdminUI</h1>
+                <div className="mx-4 hidden flex-1 max-w-sm xl:block">
+                    <SearchBar />
+                </div>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={toggle}
+                        aria-label="Toggle theme"
+                        className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                        {dark ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                    </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => setNotifyOpen(o => !o)}
+                            aria-label="Notifications"
+                            className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                            <NotificationsNoneIcon fontSize="small" />
+                        </button>
+                        {notifyOpen && (
+                            <div
+                                className={clsx(
+                                    'absolute right-0 mt-2 w-56 rounded border border-gray-200 bg-white p-3 text-sm',
+                                    'shadow-lg',
+                                    'dark:border-gray-700 dark:bg-gray-900'
+                                )}
+                            >
+                                No notifications
+                            </div>
+                        )}
+                    </div>
+                    <div className="relative">
+                        <button
+                            onClick={() => setUserOpen(o => !o)}
+                            className="flex items-center gap-1 rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            aria-haspopup="true"
+                        >
+                            <div className="h-8 w-8 rounded-full bg-gray-400" role="img" aria-label="User avatar" />
+                            <ExpandMoreIcon
+                                fontSize="small"
+                                className={userOpen ? 'rotate-180 transition-transform' : 'transition-transform'}
+                            />
+                        </button>
+                        {userOpen && (
+                            <div
+                                className={clsx(
+                                    'absolute right-0 mt-2 w-48 rounded border border-gray-200 bg-white py-2 shadow-lg',
+                                    'dark:border-gray-700 dark:bg-gray-900'
+                                )}
+                            >
+                                <button
+                                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100
+                                        dark:hover:bg-gray-700"
+                                >
+                                    Sign out
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </header>
     );
-}
+};

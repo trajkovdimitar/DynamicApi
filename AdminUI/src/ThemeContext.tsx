@@ -1,7 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 /* eslint-disable react-refresh/only-export-components */
-import { ThemeProvider } from 'styled-components';
-import { lightTheme, darkTheme, GlobalStyle } from './theme';
 
 interface ThemeContextValue {
     dark: boolean;
@@ -31,17 +29,16 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         localStorage.setItem('dark', String(dark));
+        const root = document.documentElement;
+        if (dark) root.classList.add('dark');
+        else root.classList.remove('dark');
     }, [dark]);
 
     const toggle = () => setDark(prev => !prev);
-    const theme = dark ? darkTheme : lightTheme;
 
     return (
         <ThemeContext.Provider value={{ dark, toggle }}>
-            <ThemeProvider theme={theme}>
-                <GlobalStyle />
-                {children}
-            </ThemeProvider>
+            {children}
         </ThemeContext.Provider>
     );
 }

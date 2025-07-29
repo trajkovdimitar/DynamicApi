@@ -9,25 +9,19 @@ interface Props {
 
 export function Modal({ open, onClose, children }: Props) {
     const panelRef = useRef<HTMLDivElement>(null);
+    if (!open) return null;
 
     useEffect(() => {
-        if (!open) return;
-
         const handler = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
         };
-
         window.addEventListener('keydown', handler);
-
         const first = panelRef.current?.querySelector<HTMLElement>(
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
         first?.focus();
-
         return () => window.removeEventListener('keydown', handler);
-    }, [open, onClose]);
-
-    if (!open) return null;
+    }, [onClose]);
 
     return (
         <div
