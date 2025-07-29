@@ -1,14 +1,16 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 /* eslint-disable react-refresh/only-export-components */
 
+type Theme = 'light' | 'dark';
+
 interface ThemeContextValue {
-    dark: boolean;
-    toggle: () => void;
+    theme: Theme;
+    toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-    dark: false,
-    toggle: () => {},
+    theme: 'light',
+    toggleTheme: () => {},
 });
 
 export function useTheme() {
@@ -16,28 +18,27 @@ export function useTheme() {
 }
 
 export function ThemeContextProvider({ children }: { children: ReactNode }) {
-    const [dark, setDark] = useState(false);
+    const [theme, setTheme] = useState<Theme>('light');
+    const [initialized, setInitialized] = useState(false);
 
     useEffect(() => {
-        const stored = localStorage.getItem('dark');
-        if (stored !== null) {
-            setDark(stored === 'true');
-        } else {
-            setDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
-        }
+        const stored = localStorage.getItem('theme') as Theme | null;
+        setTheme(stored || 'light');
+        setInitialized(true);
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('dark', String(dark));
+        if (!initialized) return;
+        localStorage.setItem('theme', theme);
         const root = document.documentElement;
-        if (dark) root.classList.add('dark');
+        if (theme === 'dark') root.classList.add('dark');
         else root.classList.remove('dark');
-    }, [dark]);
+    }, [theme, initialized]);
 
-    const toggle = () => setDark(prev => !prev);
+    const toggleTheme = () => setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
 
     return (
-        <ThemeContext.Provider value={{ dark, toggle }}>
+        <ThemeContext.Provider value={{ theme, toggleTheme }}>
             {children}
         </ThemeContext.Provider>
     );
