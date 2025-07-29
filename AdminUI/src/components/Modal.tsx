@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
-import styled from 'styled-components';
 
 interface Props {
     open: boolean;
@@ -8,49 +7,47 @@ interface Props {
     children: ReactNode;
 }
 
-const Overlay = styled.div`
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`;
-
-const Panel = styled.div`
-    background: ${({ theme }) => theme.colors.background};
-    color: ${({ theme }) => theme.colors.text};
-    padding: ${({ theme }) => theme.spacing.md};
-    border-radius: ${({ theme }) => theme.radius};
-    box-shadow: ${({ theme }) => theme.shadows.md};
-`;
-
 export function Modal({ open, onClose, children }: Props) {
     const panelRef = useRef<HTMLDivElement>(null);
-    if (!open) return null;
+
     useEffect(() => {
+        if (!open) return;
+
         const handler = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
         };
+
         window.addEventListener('keydown', handler);
+
         const first = panelRef.current?.querySelector<HTMLElement>(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
         first?.focus();
+
         return () => window.removeEventListener('keydown', handler);
-    }, [onClose]);
+    }, [open, onClose]);
+
+    if (!open) return null;
+
     return (
-        <Overlay onClick={onClose}>
-            <Panel ref={panelRef} onClick={e => e.stopPropagation()}>
+        <div
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/50"
+            onClick={onClose}
+        >
+            <div
+                ref={panelRef}
+                onClick={e => e.stopPropagation()}
+                className="rounded bg-white p-4 shadow-lg dark:bg-gray-800"
+            >
                 <button
                     aria-label="Close"
                     onClick={onClose}
-                    style={{ float: 'right' }}
+                    className="float-right text-lg"
                 >
                     &times;
                 </button>
                 {children}
-            </Panel>
-        </Overlay>
+            </div>
+        </div>
     );
 }
