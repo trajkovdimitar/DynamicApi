@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const Header: FC<Props> = ({ onMenuClick }) => {
-    const { dark, toggle } = useTheme();
+    const { theme, toggleTheme } = useTheme();
     const [notifyOpen, setNotifyOpen] = useState(false);
     const [userOpen, setUserOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -70,7 +70,7 @@ export const Header: FC<Props> = ({ onMenuClick }) => {
                 >
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={toggle}
+                            onClick={toggleTheme}
                             aria-label="Toggle theme"
                             className={clsx(
                                 'hover:text-dark-900 relative flex h-11 w-11 items-center justify-center',
@@ -81,7 +81,11 @@ export const Header: FC<Props> = ({ onMenuClick }) => {
                                 'dark:hover:bg-gray-800 dark:hover:text-white'
                             )}
                         >
-                            {dark ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                            {theme === 'dark' ? (
+                                <LightModeIcon fontSize="small" />
+                            ) : (
+                                <DarkModeIcon fontSize="small" />
+                            )}
                         </button>
                         <div className="relative">
                             <button
