@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import styled from 'styled-components';
+import clsx from 'clsx';
 
 interface Column<T> {
     header: string;
@@ -19,65 +19,6 @@ interface Props<T> {
 }
 
 
-const Table = styled.table`
-    width: 100%;
-    min-width: 100%;
-    border-collapse: collapse;
-`;
-
-const Thead = styled.thead`
-    background: ${({ theme }) => theme.colors.primary};
-    color: #fff;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-`;
-
-const Th = styled.th<{ clickable: boolean }>`
-    padding: ${({ theme }) => theme.spacing.sm};
-    text-align: left;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    ${({ clickable }) => clickable && 'cursor: pointer; user-select: none;'}
-`;
-
-const Tbody = styled.tbody``;
-
-const Tr = styled.tr<{ interactive: boolean; even: boolean }>`
-    background: ${({ even, theme }) =>
-        even ? theme.colors.background : `${theme.colors.primaryLight}10`};
-    ${({ interactive, theme }) =>
-        interactive &&
-        `cursor: pointer;
-        transition: background ${theme.transitions.fast};
-        &:hover { background: ${theme.colors.accent}30; }`}
-`;
-
-const Td = styled.td`
-    padding: ${({ theme }) => theme.spacing.sm};
-    white-space: nowrap;
-    word-break: break-word;
-`;
-
-const Wrapper = styled.div`
-    overflow-x: auto;
-    border: 1px solid ${({ theme }) => theme.colors.primaryLight};
-    border-radius: 4px;
-
-    @media (max-width: 640px) {
-        ${Th}, ${Td} {
-            display: block;
-            width: 100%;
-        }
-        ${Tr} {
-            display: block;
-            margin-bottom: ${({ theme }) => theme.spacing.sm};
-        }
-        ${Table} {
-            min-width: 100%;
-        }
-    }
-`;
 
 
 export function DataTable<T>({ columns, data, onRowClick, page = 1, pageSize = data.length, onPageChange }: Props<T>) {
@@ -86,59 +27,71 @@ export function DataTable<T>({ columns, data, onRowClick, page = 1, pageSize = d
     const pageData = data.slice(start, start + pageSize);
 
     return (
-        <Wrapper>
-            <Table>
-                <Thead>
+        <div className="overflow-x-auto rounded border border-indigo-200">
+            <table className="min-w-full border-collapse">
+                <thead className="sticky top-0 z-10 bg-indigo-600 text-white">
                     <tr>
                         {columns.map((col, idx) => (
-                            <Th
-                                clickable={!!col.onHeaderClick}
+                            <th
                                 key={idx}
                                 onClick={col.onHeaderClick}
                                 aria-sort={col.ariaSort}
+                                className={clsx(
+                                    'p-2 text-left text-xs uppercase',
+                                    col.headerClassName,
+                                    col.onHeaderClick && 'cursor-pointer select-none'
+                                )}
                             >
                                 {col.header}
-                            </Th>
+                            </th>
                         ))}
                     </tr>
-                </Thead>
-                <Tbody>
+                </thead>
+                <tbody>
                     {pageData.length === 0 ? (
-                        <Tr interactive={false} even={false}>
-                            <Td colSpan={columns.length}>No data available</Td>
-                        </Tr>
+                        <tr>
+                            <td className="p-2" colSpan={columns.length}>No data available</td>
+                        </tr>
                     ) : (
                         pageData.map((row, idx) => (
-                            <Tr
+                            <tr
                                 key={idx}
-                                even={idx % 2 === 0}
-                                interactive={!!onRowClick}
-                                onClick={() => onRowClick?.(row)}
                                 tabIndex={onRowClick ? 0 : -1}
+                                onClick={() => onRowClick?.(row)}
                                 onKeyDown={e => {
                                     if ((e.key === 'Enter' || e.key === ' ') && onRowClick) {
                                         e.preventDefault();
                                         onRowClick(row);
                                     }
                                 }}
+                                className={clsx(
+                                    idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700',
+                                    onRowClick && 'cursor-pointer hover:bg-indigo-50 dark:hover:bg-gray-600'
+                                )}
                             >
                                 {columns.map((col, i) => (
-                                    <Td key={i}>{col.accessor(row)}</Td>
+                                    <td key={i} className="p-2 whitespace-nowrap break-words">
+                                        {col.accessor(row)}
+                                    </td>
                                 ))}
-                            </Tr>
+                            </tr>
                         ))
                     )}
-                </Tbody>
-            </Table>
+                </tbody>
+            </table>
             {totalPages > 1 && onPageChange && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', padding: '0.5rem' }}>
-                    <button disabled={page === 1} onClick={() => onPageChange(page - 1)}>Prev</button>
-                    <span style={{ alignSelf: 'center', fontSize: '0.875rem' }}>
+                <div className="flex justify-end gap-2 p-2 text-sm">
+                    <button disabled={page === 1} onClick={() => onPageChange(page - 1)}>
+                        Prev
+                    </button>
+                    <span className="self-center">
                         {page} / {totalPages}
                     </span>
-                    <button disabled={page === totalPages} onClick={() => onPageChange(page + 1)}>Next</button>
+                    <button disabled={page === totalPages} onClick={() => onPageChange(page + 1)}>
+                        Next
+                    </button>
                 </div>
             )}
-        </Wrapper>
+        </div>
     );
 }
