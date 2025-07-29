@@ -5,6 +5,7 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PeopleIcon from '@mui/icons-material/People';
 
 interface MenuItem {
     id: string;
@@ -40,6 +41,12 @@ const MENU: MenuGroup[] = [
                 label: 'Workflows',
                 icon: <BarChartIcon fontSize="small" />,
                 to: '/workflows',
+            },
+            {
+                id: 'users',
+                label: 'Users',
+                icon: <PeopleIcon fontSize="small" />,
+                to: '/users',
             },
         ],
     },
