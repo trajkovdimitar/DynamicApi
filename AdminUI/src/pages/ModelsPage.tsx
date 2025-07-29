@@ -3,7 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getModels } from '../services/models';
 import { Button } from '../components/common/Button';
 import type { ModelDefinition } from '../types/models';
-import { DataTable } from '../components/DataTable';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHeader,
+    TableRow,
+} from '../../theme/src/components/ui/table';
 import Skeleton from '../components/common/Skeleton';
 import { Breadcrumb } from '../components/Breadcrumb';
 
@@ -66,28 +72,6 @@ export default function ModelsPage() {
         return (a.properties.length - b.properties.length) * dir;
     });
 
-    const columns = [
-        {
-            header: `Name${sortField === 'name' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}`,
-            accessor: (row: ModelDefinition) => row.modelName,
-            onHeaderClick: () => toggleSort('name'),
-            ariaSort: sortField === 'name' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none',
-        },
-        {
-            header: `Fields${sortField === 'fields' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}`,
-            accessor: (row: ModelDefinition) => row.properties.length,
-            onHeaderClick: () => toggleSort('fields'),
-            ariaSort: sortField === 'fields' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none',
-        },
-        {
-            header: 'Actions',
-            accessor: (row: ModelDefinition) => (
-                <Button size="sm" onClick={() => navigate(`/models/${row.modelName}`)} title="Edit model">
-                    Edit
-                </Button>
-            ),
-        },
-    ];
 
     const totalPages = Math.ceil(sorted.length / pageSize);
     const pageData = sorted.slice((page - 1) * pageSize, page * pageSize);
@@ -106,7 +90,58 @@ export default function ModelsPage() {
                     </Button>
                 </div>
             </div>
-            <DataTable columns={columns} data={pageData} page={page} pageSize={pageSize} onPageChange={setPage} />
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+                <div className="max-w-full overflow-x-auto">
+                    <Table>
+                        <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                            <TableRow>
+                                <TableCell
+                                    isHeader
+                                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 cursor-pointer"
+                                    onClick={() => toggleSort('name')}
+                                >
+                                    Name{sortField === 'name' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                                </TableCell>
+                                <TableCell
+                                    isHeader
+                                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 cursor-pointer"
+                                    onClick={() => toggleSort('fields')}
+                                >
+                                    Fields{sortField === 'fields' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                                </TableCell>
+                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                                    Actions
+                                </TableCell>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                            {pageData.length === 0 ? (
+                                <TableRow>
+                                    <TableCell className="p-4" colSpan={3}>
+                                        No data available
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                pageData.map(m => (
+                                    <TableRow key={m.modelName} className="hover:bg-gray-50 dark:hover:bg-white/[0.05]">
+                                        <TableCell className="px-5 py-3 text-gray-800 text-theme-sm dark:text-white/90">
+                                            {m.modelName}
+                                        </TableCell>
+                                        <TableCell className="px-5 py-3 text-gray-800 text-theme-sm dark:text-white/90">
+                                            {m.properties.length}
+                                        </TableCell>
+                                        <TableCell className="px-5 py-3">
+                                            <Button size="sm" onClick={() => navigate(`/models/${m.modelName}`)} title="Edit model">
+                                                Edit
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
             {totalPages > 1 && (
                 <div className="flex justify-end gap-2">
                     <Button size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
