@@ -7,7 +7,7 @@ interface Props {
 }
 
 export const Header: FC<Props> = ({ onMenuClick }) => (
-    <header className="sticky top-0 z-10 flex h-12 items-center justify-between border-b border-indigo-200 bg-white px-4 shadow-sm dark:bg-gray-800">
+    <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <button
             className="mr-2 hidden text-lg max-md:block"
             aria-label="Open menu"

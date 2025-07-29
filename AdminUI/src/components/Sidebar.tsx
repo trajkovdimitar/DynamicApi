@@ -31,13 +31,13 @@ export function Sidebar({ open, onClose }: Props) {
             )}
             <aside
                 className={clsx(
-                    'fixed top-0 left-0 z-50 flex h-screen flex-col overflow-y-auto border-r border-gray-200 bg-white px-4 transition-all duration-300 dark:border-gray-800 dark:bg-gray-900 xl:static',
+                    'fixed top-0 left-0 z-50 flex h-screen w-[290px] flex-col overflow-y-auto border-r border-gray-200 bg-white px-5 transition-all duration-300 dark:border-gray-800 dark:bg-black xl:static',
                     open ? 'translate-x-0' : '-translate-x-full xl:translate-x-0',
-                    collapsed ? 'xl:w-[90px]' : 'xl:w-[260px]'
+                    collapsed ? 'xl:w-[90px]' : 'xl:w-[290px]'
                 )}
             >
-                <div className="flex items-center justify-between py-4">
-                    <span className={clsx('text-lg font-semibold', collapsed && 'hidden xl:block')}>AdminUI</span>
+                <div className={clsx('flex items-center gap-2 pt-8 pb-7', collapsed ? 'justify-center' : 'justify-between')}>
+                    <span className={clsx('text-xl font-semibold text-gray-900 dark:text-white', collapsed && 'hidden xl:block')}>AdminUI</span>
                     <button
                         className="xl:hidden"
                         aria-label="Close sidebar"
@@ -53,7 +53,7 @@ export function Sidebar({ open, onClose }: Props) {
                         {collapsed ? '›' : '‹'}
                     </button>
                 </div>
-                <nav className="flex flex-1 flex-col gap-2 text-sm">
+                <nav className="flex flex-1 flex-col gap-1 text-sm">
                     <NavLink
                         to="/"
                         className={({ isActive }) =>
