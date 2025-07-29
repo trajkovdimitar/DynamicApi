@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import clsx from 'clsx';
 
-export type ButtonVariant = 'primary' | 'outline';
+export type ButtonVariant = 'primary' | 'outline' | 'secondary' | 'danger';
 export type ButtonSize = 'sm' | 'md';
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -23,7 +23,12 @@ const variantClasses: Record<ButtonVariant, string> = {
     'bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300',
   outline:
     'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300',
+  secondary:
+    'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/[0.05] dark:text-white/80 dark:hover:bg-white/[0.1]',
+  danger:
+    'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-300 dark:bg-red-600 dark:hover:bg-red-700',
 };
+
 
 export function Button({
   children,

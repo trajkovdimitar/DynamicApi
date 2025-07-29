@@ -26,9 +26,6 @@ const LayoutContent: React.FC<Props> = ({ children }) => {
                 <main id="main-content" className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
                     {children}
                 </main>
-                <footer className="border-t border-gray-200 p-2 text-center text-sm text-gray-500">
-                    DynamicApi © 2025
-                </footer>
             </div>
         </div>
     );
