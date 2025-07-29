@@ -1,21 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import { useEffect, useState, type ReactElement } from 'react';
 import clsx from 'clsx';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import DescriptionIcon from '@mui/icons-material/Description';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import ChatIcon from '@mui/icons-material/Chat';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import WidgetsIcon from '@mui/icons-material/Widgets';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 interface MenuItem {
@@ -33,166 +21,25 @@ interface MenuGroup {
 
 const MENU: MenuGroup[] = [
     {
-        title: 'Menu',
+        title: 'Core',
         items: [
             {
-                id: 'Dashboard',
-                label: 'Dashboard',
-                icon: <DashboardIcon fontSize="small" />,
-                children: [
-                    { label: 'eCommerce' },
-                    { label: 'Analytics' },
-                    { label: 'Marketing' },
-                    { label: 'CRM' },
-                    { label: 'Stocks' },
-                    { label: 'SaaS' },
-                    { label: 'Logistics' },
-                ],
-            },
-            {
-                id: 'AI',
-                label: 'AI Assistant',
-                icon: <SmartToyIcon fontSize="small" />,
-                children: [
-                    { label: 'Text Generator' },
-                    { label: 'Image Generator' },
-                    { label: 'Code Generator' },
-                    { label: 'Video Generator' },
-                ],
-            },
-            {
-                id: 'Ecommerce',
-                label: 'E-commerce',
-                icon: <ShoppingCartIcon fontSize="small" />,
-                children: [
-                    { label: 'Products' },
-                    { label: 'Add Product' },
-                    { label: 'Billing' },
-                    { label: 'Invoices' },
-                ],
-            },
-            {
-                id: 'Calendar',
-                label: 'Calendar',
-                icon: <CalendarTodayIcon fontSize="small" />,
-                to: '#',
-            },
-            {
-                id: 'Profile',
-                label: 'User Profile',
-                icon: <PersonOutlineIcon fontSize="small" />,
-                to: '#',
-            },
-            {
-                id: 'Task',
-                label: 'Task',
-                icon: <AssignmentIcon fontSize="small" />,
-                children: [
-                    { label: 'List' },
-                    { label: 'Kanban' },
-                ],
-            },
-            {
-                id: 'Forms',
-                label: 'Forms',
-                icon: <DescriptionIcon fontSize="small" />,
-                children: [
-                    { label: 'Form Elements' },
-                    { label: 'Form Layout' },
-                ],
-            },
-            {
-                id: 'Tables',
-                label: 'Tables',
+                id: 'models',
+                label: 'Models',
                 icon: <TableChartIcon fontSize="small" />,
-                children: [
-                    { label: 'Basic Tables' },
-                    { label: 'Data Tables' },
-                ],
+                to: '/models',
             },
             {
-                id: 'Pages',
-                label: 'Pages',
-                icon: <InsertDriveFileIcon fontSize="small" />,
-                children: [
-                    { label: 'File Manager' },
-                    { label: 'Pricing Tables' },
-                    { label: 'Faq' },
-                    { label: 'API Keys' },
-                    { label: 'Integrations' },
-                    { label: 'Blank Page' },
-                    { label: '404 Error' },
-                    { label: '500 Error' },
-                    { label: '503 Error' },
-                    { label: 'Coming Soon' },
-                    { label: 'Maintenance' },
-                    { label: 'Success' },
-                ],
-            },
-        ],
-    },
-    {
-        title: 'Support',
-        items: [
-            {
-                id: 'Chat',
-                label: 'Chat',
-                icon: <ChatIcon fontSize="small" />,
-                to: '#',
+                id: 'rules',
+                label: 'Rules',
+                icon: <AssignmentIcon fontSize="small" />,
+                to: '/rules',
             },
             {
-                id: 'Support',
-                label: 'Support Ticket',
-                icon: <SupportAgentIcon fontSize="small" />,
-                children: [
-                    { label: 'Ticket List' },
-                    { label: 'Ticket Reply' },
-                ],
-            },
-            {
-                id: 'Email',
-                label: 'Email',
-                icon: <MailOutlineIcon fontSize="small" />,
-                children: [
-                    { label: 'Inbox' },
-                    { label: 'Details' },
-                ],
-            },
-        ],
-    },
-    {
-        title: 'Others',
-        items: [
-            {
-                id: 'Charts',
-                label: 'Charts',
+                id: 'workflows',
+                label: 'Workflows',
                 icon: <BarChartIcon fontSize="small" />,
-                children: [
-                    { label: 'Line Chart' },
-                    { label: 'Bar Chart' },
-                    { label: 'Pie Chart' },
-                ],
-            },
-            {
-                id: 'UiElements',
-                label: 'UI Elements',
-                icon: <WidgetsIcon fontSize="small" />,
-                children: [
-                    { label: 'Alerts' },
-                    { label: 'Avatars' },
-                    { label: 'Badge' },
-                ],
-            },
-            {
-                id: 'Authentication',
-                label: 'Authentication',
-                icon: <LockOutlinedIcon fontSize="small" />,
-                children: [
-                    { label: 'Sign In' },
-                    { label: 'Sign Up' },
-                    { label: 'Reset Password' },
-                    { label: 'Two Step Verification' },
-                ],
+                to: '/workflows',
             },
         ],
     },
