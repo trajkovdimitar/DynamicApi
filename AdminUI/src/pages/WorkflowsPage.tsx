@@ -10,7 +10,8 @@ import type { WorkflowDefinition, ModelDefinition } from '../types/models';
 import { stepTypes, workflowEvents } from '../types/models';
 import Toast from '../components/Toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import WorkflowEditorForm, { defaultParams } from '../components/WorkflowEditorForm';
+import WorkflowEditor from '../components/WorkflowEditor/WorkflowEditor';
+import { defaultParams } from '../components/WorkflowEditor/defaultParams';
 import Skeleton from '../components/common/Skeleton';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/common/Button';
@@ -42,6 +43,7 @@ export default function WorkflowsPage() {
   const [page, setPage] = useState(1);
   const [selectedModel, setSelectedModel] = useState('');
   const [selectedEvent, setSelectedEvent] = useState<typeof workflowEvents[number]>(workflowEvents[0]);
+  const [selectedStep, setSelectedStep] = useState<number | null>(null);
   const pageSize = 10;
 
   const saveMutation = useMutation<void, Error, WorkflowDefinition>({
@@ -203,7 +205,12 @@ export default function WorkflowsPage() {
             {hasChanges && (
               <p className="text-sm text-orange-600">You have unsaved changes.</p>
             )}
-            <WorkflowEditorForm workflow={editing} onChange={setEditing} />
+            <WorkflowEditor
+              workflow={editing}
+              onChange={setEditing}
+              selectedStepIndex={selectedStep}
+              setSelectedStepIndex={setSelectedStep}
+            />
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={reset}>Reset</Button>
               <Button variant="outline" onClick={cancelEdit}>Cancel</Button>
