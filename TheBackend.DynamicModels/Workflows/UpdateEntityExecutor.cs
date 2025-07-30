@@ -35,26 +35,21 @@ public class UpdateEntityExecutor<TInput, TOutput> : IWorkflowStepExecutor<TInpu
         if (!paramDict.TryGetValue("Id", out var idObj))
             throw new InvalidOperationException("Missing Id parameter");
 
-        var modelType = dbContextService.GetModelType(modelName) ?? throw new InvalidOperationException($"Model not found: {modelName}");
+        var modelType = dbContextService.GetModelType(modelName)
+            ?? throw new InvalidOperationException($"Model not found: {modelName}");
         var db = dbContextService.GetDbContext();
 
-        object? idValue = idObj;
-        if (idObj is string idStr)
-        {
-            if (idStr.StartsWith("Input."))
-            {
-                var prop = inputEntity?.GetType().GetProperty(idStr.Substring(6));
-                idValue = prop?.GetValue(inputEntity);
-            }
-            else if (idStr.StartsWith("Var."))
-            {
-                variables.TryGetValue(idStr.Substring(4), out var val);
-                idValue = val;
-            }
-        }
+        var entityTypeModel = db.Model.FindEntityType(modelType);
+        var pk = entityTypeModel?.FindPrimaryKey()?.Properties.FirstOrDefault()
+                 ?? throw new InvalidOperationException("Unable to determine key type");
+
+        object? idValue = idObj is string s ? step.GetResolvedString("Id", inputEntity, variables) ?? s : idObj;
 
         if (idValue == null)
             throw new InvalidOperationException("Id value could not be resolved");
+
+        if (!pk.ClrType.IsAssignableFrom(idValue.GetType()))
+            idValue = Convert.ChangeType(idValue, pk.ClrType);
 
         var entity = await db.FindAsync(modelType, idValue);
         if (entity == null)
