@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace TheBackend.DynamicModels.Workflows;
 
@@ -85,6 +87,18 @@ public class CreateEntityExecutor<TInput, TOutput> : IWorkflowStepExecutor<TInpu
         }
 
         var db = dbContextService.GetDbContext();
+        var entityType = db.Model.FindEntityType(modelType);
+        if (entityType != null)
+        {
+            var missing = entityType.GetProperties()
+                .Where(p => !p.IsNullable && p.ClrType.IsClass && p.ValueGenerated == ValueGenerated.Never)
+                .Where(p => modelType.GetProperty(p.Name)?.GetValue(newEntity) == null)
+                .Select(p => p.Name)
+                .ToList();
+            if (missing.Any())
+                throw new ArgumentException($"Missing required properties: {string.Join(", ", missing)}");
+        }
+
         db.Add(newEntity);
         await db.SaveChangesAsync();
         return (TOutput)newEntity;
