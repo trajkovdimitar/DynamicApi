@@ -6,7 +6,7 @@ import { Drawer } from '../components/Drawer';
 import { FormFieldBuilder } from '../components/FormFieldBuilder';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
+import Input from '../components/common/Input';
 import Skeleton from '../components/common/Skeleton';
 import { getModels } from '../services/models';
 import { deleteRecord, getRecords, saveRecord } from '../services/data';

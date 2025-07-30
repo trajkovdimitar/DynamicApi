@@ -1,5 +1,5 @@
 import { Rule, Workflow } from '../types/models';
-import { Input } from './common/Input';
+import Input from './common/Input';
 import { Button } from './common/Button';
 
 interface Props {

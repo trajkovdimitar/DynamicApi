@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { searchEntities } from '../services/search';
-import { Input } from './common/Input';
+import Input from './common/Input';
 
 interface SearchResult {
     type: 'model' | 'rule' | 'workflow';

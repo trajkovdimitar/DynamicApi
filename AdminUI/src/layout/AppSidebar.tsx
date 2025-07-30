@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { TableIcon, PlugInIcon, ListIcon } from '../icons';
+import { TableIcon, PlugInIcon, ListIcon } from '../components/ui/icons';
 import { useSidebar } from '../context/SidebarContext';
 
 interface NavItem {

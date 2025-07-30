@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { stepTypes, valueTypes, workflowEvents } from '../types/models';
 import { getModels } from '../services/models';
 import type { WorkflowDefinition, WorkflowStep, Parameter } from '../types/models';
-import { Input } from './common/Input';
+import Input from './common/Input';
 import { Button } from './common/Button';
 
 const stepDescriptions: Record<string, string> = {

@@ -14,7 +14,7 @@ import WorkflowEditorForm, { defaultParams } from '../components/WorkflowEditorF
 import Skeleton from '../components/common/Skeleton';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
+import Input from '../components/common/Input';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../components/common/Table';
 
