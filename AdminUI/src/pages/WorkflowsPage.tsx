@@ -10,14 +10,14 @@ import type { WorkflowDefinition, ModelDefinition } from '../types/models';
 import { stepTypes, workflowEvents } from '../types/models';
 import Toast from '../components/Toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import WorkflowEditorForm, { defaultParams } from '../components/WorkflowEditorForm';
+import WorkflowEditor from '../components/WorkflowEditor/WorkflowEditor';
 import Skeleton from '../components/common/Skeleton';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/common/Button';
 import Input from '../components/common/Input';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../components/common/Table';
-
+import { getDefaultParams } from '../components/WorkflowEditor/utils';
 export default function WorkflowsPage() {
   const queryClient = useQueryClient();
   const {
@@ -40,6 +40,7 @@ export default function WorkflowsPage() {
   const [newModalOpen, setNewModalOpen] = useState(false);
   const [confirmRollback, setConfirmRollback] = useState<{ name: string; version: number } | null>(null);
   const [page, setPage] = useState(1);
+  const [selectedStepIndex, setSelectedStepIndex] = useState<number | null>(null);
   const [selectedModel, setSelectedModel] = useState('');
   const [selectedEvent, setSelectedEvent] = useState<typeof workflowEvents[number]>(workflowEvents[0]);
   const pageSize = 10;
@@ -54,12 +55,13 @@ export default function WorkflowsPage() {
   });
 
   const startNewWorkflow = (name: string) => {
+    const modelName = name.split('.')[0];
     const def: WorkflowDefinition = {
       workflowName: name,
       steps: [
         {
           type: stepTypes[0],
-          parameters: JSON.parse(JSON.stringify(defaultParams[stepTypes[0]])),
+          parameters: getDefaultParams(stepTypes[0], modelName),
           condition: '',
           onError: '',
           outputVariable: '',
@@ -70,6 +72,7 @@ export default function WorkflowsPage() {
     };
     setOriginal(def);
     setEditing(def);
+    setSelectedStepIndex(0);
   };
 
   const openEditor = async (name: string | null) => {
@@ -77,6 +80,7 @@ export default function WorkflowsPage() {
     const wf = await getWorkflow(name);
     setOriginal(wf);
     setEditing(JSON.parse(JSON.stringify(wf)));
+    setSelectedStepIndex(0);
   };
 
   const save = async (def: WorkflowDefinition) => {
@@ -203,7 +207,12 @@ export default function WorkflowsPage() {
             {hasChanges && (
               <p className="text-sm text-orange-600">You have unsaved changes.</p>
             )}
-            <WorkflowEditorForm workflow={editing} onChange={setEditing} />
+            <WorkflowEditor
+              workflow={editing}
+              onChange={setEditing}
+              selectedStepIndex={selectedStepIndex}
+              setSelectedStepIndex={setSelectedStepIndex}
+            />
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={reset}>Reset</Button>
               <Button variant="outline" onClick={cancelEdit}>Cancel</Button>
