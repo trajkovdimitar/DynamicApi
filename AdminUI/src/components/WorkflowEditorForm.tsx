@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { stepTypes, valueTypes, workflowEvents } from '../types/models';
 import { getModels } from '../services/models';
-import type { WorkflowDefinition, WorkflowStep, Parameter } from '../types/models';
+import type { WorkflowDefinition, WorkflowStep, Parameter, ModelDefinition } from '../types/models';
+import MappingsEditor from './WorkflowEditor/MappingsEditor';
+import { getDefaultParams, getRequiredProperties } from './WorkflowEditor/utils';
 import Input from './common/Input';
 import { Button } from './common/Button';
 
@@ -12,26 +14,6 @@ const stepDescriptions: Record<string, string> = {
     SendEmail: 'Send an email using the configured provider.',
 };
 
-export const defaultParams: Record<string, Parameter[]> = {
-    CreateEntity: [
-        { key: 'ModelName', valueType: 'string', value: '' },
-        { key: 'Mappings', valueType: 'json', value: '[]' },
-    ],
-    UpdateEntity: [
-        { key: 'ModelName', valueType: 'string', value: '' },
-        { key: 'Id', valueType: 'string', value: '' },
-        { key: 'Mappings', valueType: 'json', value: '[]' },
-    ],
-    QueryEntity: [
-        { key: 'ModelName', valueType: 'string', value: '' },
-        { key: 'Filter', valueType: 'string', value: '' },
-    ],
-    SendEmail: [
-        { key: 'To', valueType: 'string', value: '' },
-        { key: 'Subject', valueType: 'string', value: '' },
-        { key: 'Body', valueType: 'string', value: '' },
-    ],
-};
 
 interface Props {
     workflow: WorkflowDefinition;
@@ -40,7 +22,8 @@ interface Props {
 
 export default function WorkflowEditorForm({ workflow, onChange }: Props) {
     const [expanded, setExpanded] = useState<number[]>(workflow.steps.map((_, i) => i));
-    const [models, setModels] = useState<string[]>([]);
+    const [modelsFull, setModelsFull] = useState<ModelDefinition[]>([]);
+    const modelNames = modelsFull.map(m => m.modelName);
     const eventInfo = (() => {
         const parts = workflow.workflowName.split('.');
         if (parts.length === 2 && (workflowEvents as readonly string[]).includes(parts[1])) {
@@ -50,14 +33,14 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
     })();
 
     useEffect(() => {
-        getModels().then(list => setModels(list.map(m => m.modelName))).catch(console.error);
+        getModels().then(list => setModelsFull(list)).catch(console.error);
     }, []);
     const updateStep = (index: number, partial: Partial<WorkflowStep>) => {
         const steps = [...workflow.steps];
         const current = { ...steps[index] } as WorkflowStep;
         const next = { ...current, ...partial } as WorkflowStep;
         if (partial.type && partial.type !== current.type) {
-            next.parameters = JSON.parse(JSON.stringify(defaultParams[partial.type] || []));
+            next.parameters = getDefaultParams(partial.type);
         }
         steps[index] = next;
         onChange({ ...workflow, steps });
@@ -70,7 +53,7 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                 ...workflow.steps,
                 {
                     type: stepTypes[0],
-                    parameters: JSON.parse(JSON.stringify(defaultParams[stepTypes[0]])),
+                    parameters: getDefaultParams(stepTypes[0]),
                     condition: '',
                     onError: '',
                     outputVariable: '',
@@ -115,7 +98,23 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
         const steps = [...workflow.steps];
         const step = { ...steps[stepIndex] } as WorkflowStep;
         const list = [...(step.parameters ?? [])];
-        list[paramIndex] = { ...list[paramIndex], ...partial } as Parameter;
+        const currentParam = list[paramIndex];
+        const updated = { ...currentParam, ...partial } as Parameter;
+        list[paramIndex] = updated;
+
+        if (
+            step.type === 'CreateEntity' &&
+            currentParam.key === 'ModelName' &&
+            partial.value &&
+            typeof partial.value === 'string'
+        ) {
+            const modelDef = (modelsFull ?? []).find(m => m.modelName === partial.value);
+            const mappingDefault = getDefaultParams('CreateEntity', modelDef).find(p => p.key === 'Mappings');
+            const mapIdx = list.findIndex(p => p.key === 'Mappings');
+            if (mapIdx >= 0 && mappingDefault) {
+                list[mapIdx] = { ...list[mapIdx], value: mappingDefault.value };
+            }
+        }
         step.parameters = list;
         steps[stepIndex] = step;
         onChange({ ...workflow, steps });
@@ -289,16 +288,15 @@ export default function WorkflowEditorForm({ workflow, onChange }: Props) {
                                                     onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
                                                 >
                                                     <option value="">Select model</option>
-                                                    {models.map(m => (
+                                                    {modelNames.map(m => (
                                                         <option key={m} value={m}>{m}</option>
                                                     ))}
                                                 </select>
                                             ) : p.key === 'Mappings' ? (
-                                                <textarea
-                                                    className="border rounded p-2 dark:bg-neutral-800 h-24"
-                                                    placeholder="JSON"
+                                                <MappingsEditor
                                                     value={p.value}
-                                                    onChange={e => updateParameter(idx, pIdx, { value: e.target.value })}
+                                                    onChange={val => updateParameter(idx, pIdx, { value: val })}
+                                                    requiredFields={getRequiredProperties(modelsFull.find(m => m.modelName === s.parameters.find(pp => pp.key === 'ModelName')?.value))}
                                                 />
                                             ) : (
                                                 <input

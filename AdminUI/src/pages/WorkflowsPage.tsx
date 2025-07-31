@@ -10,7 +10,8 @@ import type { WorkflowDefinition, ModelDefinition } from '../types/models';
 import { stepTypes, workflowEvents } from '../types/models';
 import Toast from '../components/Toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import WorkflowEditorForm, { defaultParams } from '../components/WorkflowEditorForm';
+import WorkflowEditorForm from '../components/WorkflowEditorForm';
+import { getDefaultParams } from '../components/WorkflowEditor/utils';
 import Skeleton from '../components/common/Skeleton';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/common/Button';
@@ -59,7 +60,7 @@ export default function WorkflowsPage() {
       steps: [
         {
           type: stepTypes[0],
-          parameters: JSON.parse(JSON.stringify(defaultParams[stepTypes[0]])),
+          parameters: getDefaultParams(stepTypes[0]),
           condition: '',
           onError: '',
           outputVariable: '',
