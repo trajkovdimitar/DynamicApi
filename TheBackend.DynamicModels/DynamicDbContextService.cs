@@ -12,9 +12,7 @@ using TheBackend.Domain.Models;
 using TheBackend.DynamicModels;
 using System.Linq;
 using System.Collections.Generic;
-
 namespace TheBackend.DynamicModels;
-
 public class DynamicDbContextService : IDisposable
 {
     private readonly ModelDefinitionService _modelService;
@@ -24,20 +22,17 @@ public class DynamicDbContextService : IDisposable
     private Type _dynamicDbContextType = default!;
     private AssemblyLoadContext? _loadContext;
     private readonly InMemoryDatabaseRoot _inMemoryRoot = new();
-
     private readonly string ProjectDir;
     private string ModelsDir => Path.Combine(ProjectDir, "Models");
     private string MigrationsDir => Path.Combine(ProjectDir, "Migrations");
     private string DbContextFile => Path.Combine(ProjectDir, "DynamicDbContext.cs");
     private string DesignTimeFactoryFile => Path.Combine(ProjectDir, "DesignTimeFactory.cs");
-
     public ModelDefinition? GetModelDefinition(string modelName)
     {
         return _modelService
             .LoadModels()
             .FirstOrDefault(m => m.ModelName.Equals(modelName, StringComparison.OrdinalIgnoreCase));
     }
-
     public DynamicDbContextService(ModelDefinitionService modelService, IConfiguration config, ModelHistoryService historyService)
     {
         _modelService = modelService;
@@ -47,19 +42,16 @@ public class DynamicDbContextService : IDisposable
         Directory.CreateDirectory(ModelsDir);
         Directory.CreateDirectory(MigrationsDir);
     }
-
     private static string GetProjectDirectory()
     {
         var directory = AppDomain.CurrentDomain.BaseDirectory;
         return Path.GetFullPath(Path.Combine(directory, "..", "..", "..", "..", "TheBackend.DynamicModels"));
     }
-
     public async Task RegenerateAndMigrateAsync()
     {
         var models = _modelService.LoadModels();
         var currentHash = _modelService.ComputeModelsHash();
         var lastHash = _historyService.GetLastHash() ?? _modelService.LoadLastModelsHash();
-
         foreach (var model in models)
         {
             File.WriteAllText(
@@ -68,7 +60,6 @@ public class DynamicDbContextService : IDisposable
         }
         File.WriteAllText(DbContextFile, GenerateDbContextCode(models));
         File.WriteAllText(DesignTimeFactoryFile, GenerateDesignTimeFactory());
-
         if (currentHash != lastHash)
         {
             try
@@ -89,16 +80,12 @@ public class DynamicDbContextService : IDisposable
                     throw;
             }
         }
-
         _dynamicAssembly = CompileInMemory(models);
         _dynamicDbContextType = _dynamicAssembly.GetType("TheBackend.DynamicModels.DynamicDbContext")
             ?? throw new InvalidOperationException("DynamicDbContext not found");
-
         using var dbContext = CreateDbContextInstance();
-
         await dbContext.Database.MigrateAsync();
     }
-
     private string GenerateDesignTimeFactory()
     {
         var connString = _config.GetConnectionString("Default")!.Replace(@"\", @"\\").Replace("\"", "\\\"");
@@ -110,7 +97,6 @@ public class DynamicDbContextService : IDisposable
                 : $"optionsBuilder.UseInMemoryDatabase(\"{connString}\");";
         return $@"using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-
 namespace TheBackend.DynamicModels
 {{
     public class DesignTimeFactory : IDesignTimeDbContextFactory<DynamicDbContext>
@@ -124,7 +110,6 @@ namespace TheBackend.DynamicModels
     }}
 }}";
     }
-
     private Assembly CompileInMemory(List<ModelDefinition> models)
     {
         var syntaxTrees = new List<SyntaxTree>();
@@ -135,7 +120,6 @@ namespace TheBackend.DynamicModels
             syntaxTrees.Add(CSharpSyntaxTree.ParseText(modelCode));
         }
         syntaxTrees.Add(CSharpSyntaxTree.ParseText(File.ReadAllText(DbContextFile)));
-
         if (Directory.Exists(MigrationsDir))
         {
             foreach (var file in Directory.GetFiles(MigrationsDir, "*.cs"))
@@ -143,7 +127,6 @@ namespace TheBackend.DynamicModels
                 syntaxTrees.Add(CSharpSyntaxTree.ParseText(File.ReadAllText(file)));
             }
         }
-
         var dbProvider = _config["DbProvider"];
         string providerAssemblyName = dbProvider == "SqlServer"
             ? "Microsoft.EntityFrameworkCore.SqlServer"
@@ -157,45 +140,36 @@ namespace TheBackend.DynamicModels
         {
             providerAssembly = Assembly.Load(providerAssemblyName);
         }
-
         var references = AppDomain.CurrentDomain.GetAssemblies()
             .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
             .Select(a => MetadataReference.CreateFromFile(a.Location)).ToList();
-
         if (providerAssembly != null)
         {
             references.Add(MetadataReference.CreateFromFile(providerAssembly.Location));
         }
-
         var compilation = CSharpCompilation.Create(
             "DynamicModelsAssembly",
             syntaxTrees,
             references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
         using var ms = new MemoryStream();
         var result = compilation.Emit(ms);
-
         if (!result.Success)
         {
             var errors = string.Join("\n", result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error));
             throw new Exception($"Compilation failed:\n{errors}");
         }
-
         ms.Seek(0, SeekOrigin.Begin);
         _loadContext?.Unload();
         _loadContext = new AssemblyLoadContext("DynamicContext", isCollectible: true);
         return _loadContext.LoadFromStream(ms);
     }
-
     private DbContext CreateDbContextInstance()
     {
         var connString = _config.GetConnectionString("Default");
         var dbProvider = _config["DbProvider"];
-
         var builderType = typeof(DbContextOptionsBuilder<>).MakeGenericType(_dynamicDbContextType);
         var optionsBuilder = (DbContextOptionsBuilder)Activator.CreateInstance(builderType)!;
-
         if (dbProvider == "SqlServer")
             optionsBuilder.UseSqlServer(connString);
         else if (dbProvider == "Postgres")
@@ -204,12 +178,9 @@ namespace TheBackend.DynamicModels
             optionsBuilder.UseInMemoryDatabase(connString ?? "DynamicInMemory", _inMemoryRoot);
         else
             throw new NotSupportedException("Unknown provider");
-
         var options = optionsBuilder.Options;
-
         return (DbContext)Activator.CreateInstance(_dynamicDbContextType, options)!;
     }
-
     private void RunDotnetCommand(string arguments, string? workingDir = null)
     {
         using var process = new Process();
@@ -220,11 +191,9 @@ namespace TheBackend.DynamicModels
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
         process.Start();
-
         string output = process.StandardOutput.ReadToEnd();
         string error = process.StandardError.ReadToEnd();
         process.WaitForExit();
-
         if (process.ExitCode != 0)
         {
             string buildOutput = "";
@@ -239,7 +208,6 @@ namespace TheBackend.DynamicModels
                 buildProcess.StartInfo.RedirectStandardOutput = true;
                 buildProcess.StartInfo.RedirectStandardError = true;
                 buildProcess.Start();
-
                 buildOutput = buildProcess.StandardOutput.ReadToEnd();
                 buildError = buildProcess.StandardError.ReadToEnd();
                 buildProcess.WaitForExit();
@@ -250,7 +218,6 @@ namespace TheBackend.DynamicModels
             throw new Exception(msg);
         }
     }
-
     private string GenerateSingleModelCode(
         ModelDefinition model,
         List<ModelDefinition> allModels,
@@ -264,11 +231,10 @@ namespace TheBackend.DynamicModels
         sb.AppendLine("using System.Threading.Tasks;");
         sb.AppendLine($"namespace {@namespace}");
         sb.AppendLine("{");
-        sb.AppendLine($"    public class {model.ModelName}");
-        sb.AppendLine("    {");
+        sb.AppendLine($" public class {model.ModelName}");
+        sb.AppendLine(" {");
         foreach (var prop in model.Properties)
-            sb.AppendLine($"        public {prop.Type} {prop.Name} {{ get; set; }}");
-
+            sb.AppendLine($" public {prop.Type.ToCSharpType()} {prop.Name} {{ get; set; }}");
         var neededForeignKeys = allModels
             .SelectMany(m => m.Relationships.Select(r => (Model: m, Rel: r)))
             .Where(x =>
@@ -277,20 +243,17 @@ namespace TheBackend.DynamicModels
                 !string.IsNullOrWhiteSpace(x.Rel.ForeignKey) &&
                 !model.Properties.Any(p => p.Name == x.Rel.ForeignKey))
             .ToList();
-
         foreach (var (principalModel, rel) in neededForeignKeys)
         {
-            var fkType = principalModel.Properties.FirstOrDefault(p => p.IsKey)?.Type ?? "int";
-            sb.AppendLine($"        public {fkType} {rel.ForeignKey} {{ get; set; }}");
+            var fkType = principalModel.Properties.FirstOrDefault(p => p.IsKey)?.Type.ToCSharpType() ?? "int";
+            sb.AppendLine($" public {fkType} {rel.ForeignKey} {{ get; set; }}");
         }
-
         var inverseNavigations = allModels
             .SelectMany(m => m.Relationships.Select(r => (Model: m, Rel: r)))
             .Where(x =>
                 x.Rel.TargetModel == model.ModelName &&
                 !string.IsNullOrWhiteSpace(x.Rel.InverseNavigation))
             .ToList();
-
         foreach (var (sourceModel, rel) in inverseNavigations)
         {
             var inverseName = rel.InverseNavigation!;
@@ -309,14 +272,13 @@ namespace TheBackend.DynamicModels
             if (isCollection)
             {
                 sb.AppendLine(
-                    $"        public ICollection<{sourceModel.ModelName}> {inverseName} {{ get; set; }} = new List<{sourceModel.ModelName}>();");
+                    $" public ICollection<{sourceModel.ModelName}> {inverseName} {{ get; set; }} = new List<{sourceModel.ModelName}>();");
             }
             else
             {
-                sb.AppendLine($"        public {sourceModel.ModelName}? {inverseName} {{ get; set; }}");
+                sb.AppendLine($" public {sourceModel.ModelName}? {inverseName} {{ get; set; }}");
             }
         }
-
         foreach (var rel in model.Relationships)
         {
             var fkOnThis = rel.RelationshipType == "ManyToOne" || rel.RelationshipType == "OneToOne";
@@ -327,67 +289,64 @@ namespace TheBackend.DynamicModels
                 var targetKeyType = allModels
                     .FirstOrDefault(m => m.ModelName == rel.TargetModel)?
                     .Properties.FirstOrDefault(p => p.IsKey)?.Type;
-                var fkType = targetKeyType ?? "int";
-                sb.AppendLine($"        public {fkType} {rel.ForeignKey} {{ get; set; }}");
+                var fkType = targetKeyType?.ToCSharpType() ?? "int";
+                sb.AppendLine($" public {fkType} {rel.ForeignKey} {{ get; set; }}");
             }
-
             var isCollection = rel.RelationshipType == "OneToMany" || rel.RelationshipType == "ManyToMany";
             if (isCollection)
                 sb.AppendLine(
-                    $"        public ICollection<{rel.TargetModel}> {rel.NavigationName} {{ get; set; }} = " +
+                    $" public ICollection<{rel.TargetModel}> {rel.NavigationName} {{ get; set; }} = " +
                     $"new List<{rel.TargetModel}>();");
             else
-                sb.AppendLine($"        public {rel.TargetModel}? {rel.NavigationName} {{ get; set; }}");
+                sb.AppendLine($" public {rel.TargetModel}? {rel.NavigationName} {{ get; set; }}");
         }
-        sb.AppendLine("    }");
+        sb.AppendLine(" }");
         sb.AppendLine("}");
         return sb.ToString();
     }
-
     private string GenerateDbContextCode(List<ModelDefinition> models, string @namespace = "TheBackend.DynamicModels")
     {
         var sb = new StringBuilder();
         sb.AppendLine("using Microsoft.EntityFrameworkCore;");
         sb.AppendLine($"namespace {@namespace}");
         sb.AppendLine("{");
-        sb.AppendLine("    public class DynamicDbContext : DbContext");
-        sb.AppendLine("    {");
-        sb.AppendLine("        public DynamicDbContext(DbContextOptions<DynamicDbContext> options) : base(options) { }");
+        sb.AppendLine(" public class DynamicDbContext : DbContext");
+        sb.AppendLine(" {");
+        sb.AppendLine(" public DynamicDbContext(DbContextOptions<DynamicDbContext> options) : base(options) { }");
         foreach (var model in models)
-            sb.AppendLine($"        public DbSet<{model.ModelName}> {model.ModelName}s {{ get; set; }}");
-        sb.AppendLine("        protected override void OnModelCreating(ModelBuilder modelBuilder)");
-        sb.AppendLine("        {");
+            sb.AppendLine($" public DbSet<{model.ModelName}> {model.ModelName}s {{ get; set; }}");
+        sb.AppendLine(" protected override void OnModelCreating(ModelBuilder modelBuilder)");
+        sb.AppendLine(" {");
         foreach (var model in models)
         {
-            sb.AppendLine($"            modelBuilder.Entity<{model.ModelName}>(entity =>");
-            sb.AppendLine("            {");
+            sb.AppendLine($" modelBuilder.Entity<{model.ModelName}>(entity =>");
+            sb.AppendLine(" {");
             foreach (var prop in model.Properties)
             {
                 if (prop.IsKey)
-                    sb.AppendLine($"                entity.HasKey(e => e.{prop.Name});");
+                    sb.AppendLine($" entity.HasKey(e => e.{prop.Name});");
                 if (prop.IsRequired)
-                    sb.AppendLine($"                entity.Property(e => e.{prop.Name}).IsRequired();");
+                    sb.AppendLine($" entity.Property(e => e.{prop.Name}).IsRequired();");
                 if (prop.MaxLength.HasValue)
                     sb.AppendLine(
-                        $"                entity.Property(e => e.{prop.Name}).HasMaxLength({prop.MaxLength});");
+                        $" entity.Property(e => e.{prop.Name}).HasMaxLength({prop.MaxLength});");
             }
             foreach (var rel in model.Relationships)
             {
                 if (!models.Any(m => m.ModelName == rel.TargetModel))
                     continue;
-
                 var hasFk = !string.IsNullOrWhiteSpace(rel.ForeignKey);
                 var inverse = string.IsNullOrWhiteSpace(rel.InverseNavigation) ? null : rel.InverseNavigation;
                 switch (rel.RelationshipType)
                 {
                     case "ManyToOne":
-                        sb.AppendLine($"                entity.HasOne<{rel.TargetModel}>(e => e.{rel.NavigationName})");
-                        sb.Append("                    .WithMany(");
+                        sb.AppendLine($" entity.HasOne<{rel.TargetModel}>(e => e.{rel.NavigationName})");
+                        sb.Append(" .WithMany(");
                         sb.Append(string.IsNullOrWhiteSpace(inverse) ? ")" : $"d => d.{inverse})");
                         if (hasFk)
                         {
                             sb.AppendLine();
-                            sb.AppendLine($"                    .HasForeignKey(e => e.{rel.ForeignKey});");
+                            sb.AppendLine($" .HasForeignKey(e => e.{rel.ForeignKey});");
                         }
                         else
                         {
@@ -395,14 +354,14 @@ namespace TheBackend.DynamicModels
                         }
                         break;
                     case "OneToMany":
-                        sb.AppendLine($"                entity.HasMany(e => e.{rel.NavigationName})");
-                        sb.Append("                    .WithOne(");
+                        sb.AppendLine($" entity.HasMany(e => e.{rel.NavigationName})");
+                        sb.Append(" .WithOne(");
                         sb.Append(string.IsNullOrWhiteSpace(inverse) ? ")" : $"d => d.{inverse})");
                         if (hasFk)
                         {
                             sb.AppendLine();
                             sb.AppendLine(
-                                $"                    .HasForeignKey(d => d.{rel.ForeignKey});");
+                                $" .HasForeignKey(d => d.{rel.ForeignKey});");
                         }
                         else
                         {
@@ -410,14 +369,14 @@ namespace TheBackend.DynamicModels
                         }
                         break;
                     case "OneToOne":
-                        sb.AppendLine($"                entity.HasOne<{rel.TargetModel}>(e => e.{rel.NavigationName})");
-                        sb.Append("                    .WithOne(");
+                        sb.AppendLine($" entity.HasOne<{rel.TargetModel}>(e => e.{rel.NavigationName})");
+                        sb.Append(" .WithOne(");
                         sb.Append(string.IsNullOrWhiteSpace(inverse) ? ")" : $"d => d.{inverse})");
                         if (hasFk)
                         {
                             sb.AppendLine();
                             sb.AppendLine(
-                                $"                    .HasForeignKey<{model.ModelName}>(e => e.{rel.ForeignKey});");
+                                $" .HasForeignKey<{model.ModelName}>(e => e.{rel.ForeignKey});");
                         }
                         else
                         {
@@ -425,27 +384,25 @@ namespace TheBackend.DynamicModels
                         }
                         break;
                     case "ManyToMany":
-                        sb.AppendLine($"                entity.HasMany(e => e.{rel.NavigationName})");
-                        sb.Append("                    .WithMany(");
+                        sb.AppendLine($" entity.HasMany(e => e.{rel.NavigationName})");
+                        sb.Append(" .WithMany(");
                         sb.Append(string.IsNullOrWhiteSpace(inverse) ? ")" : $"d => d.{inverse})");
                         sb.AppendLine(";");
                         break;
                 }
             }
-            sb.AppendLine("            });");
+            sb.AppendLine(" });");
         }
-        sb.AppendLine("        }");
-        sb.AppendLine("    }");
+        sb.AppendLine(" }");
+        sb.AppendLine(" }");
         sb.AppendLine("}");
         return sb.ToString();
     }
-
     public Type? GetModelType(string modelName)
     {
         return _dynamicAssembly.GetTypes()
             .FirstOrDefault(t => t.Name.Equals(modelName, StringComparison.OrdinalIgnoreCase));
     }
-
     public IEnumerable<Type> GetAllModelTypes()
     {
         return _dynamicAssembly.GetTypes()
@@ -458,9 +415,7 @@ namespace TheBackend.DynamicModels
                         !t.Name.EndsWith("DesignTimeFactory") &&
                         !Attribute.IsDefined(t, typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute)));
     }
-
     public DbContext GetDbContext() => CreateDbContextInstance();
-
     public void Dispose()
     {
         _loadContext?.Unload();
