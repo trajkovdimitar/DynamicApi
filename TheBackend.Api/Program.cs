@@ -7,6 +7,7 @@ using TheBackend.Domain.Models;
 using TheBackend.Api.Middleware;
 using TheBackend.Application.Services;
 using TheBackend.Infrastructure.Services;
+using TheBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<ModelDefinitionService>();
@@ -14,6 +15,9 @@ builder.Services.AddSingleton<DynamicDbContextService>();
 builder.Services.AddSingleton<ModelHistoryService>();
 builder.Services.AddSingleton<RuleHistoryService>();
 builder.Services.AddSingleton<WorkflowHistoryService>();
+
+builder.Services.AddScoped<IFileAssetService, FileAssetService>();
+
 var rulesPath = Path.Combine(AppContext.BaseDirectory, "rules.json");
 builder.Services.AddSingleton(_ => new BusinessRuleService(rulesPath));
 builder.Services.AddSingleton<WorkflowService>();
@@ -71,6 +75,7 @@ builder.Services.AddControllers()
     });
 
 var app = builder.Build();
+app.UseStaticFiles();
 var dbService = app.Services.GetRequiredService<DynamicDbContextService>();
 app.Lifetime.ApplicationStopped.Register(() => dbService.Dispose());
 await dbService.RegenerateAndMigrateAsync();

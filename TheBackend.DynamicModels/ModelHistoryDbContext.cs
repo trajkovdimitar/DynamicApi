@@ -12,6 +12,7 @@ public class ModelHistoryDbContext : DbContext
     public DbSet<ParameterRecord> Parameters { get; set; } = default!;
     public DbSet<GlobalVariableRecord> GlobalVariables { get; set; } = default!;
     public DbSet<WorkflowHistoryRecord> WorkflowHistories { get; set; } = default!;
+    public DbSet<FileAsset> FileAssets { get; set; } = default!;
 
     public ModelHistoryDbContext(DbContextOptions<ModelHistoryDbContext> options) : base(options) { }
 
@@ -34,5 +35,15 @@ public class ModelHistoryDbContext : DbContext
             .WithOne(p => p.WorkflowStep)
             .HasForeignKey(p => p.WorkflowStepId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<FileAsset>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.FileName).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Path).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.ContentType).HasMaxLength(100);
+            entity.Property(e => e.Size).IsRequired();
+            entity.Property(e => e.UploadedAt).IsRequired();
+        });
     }
 }

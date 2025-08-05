@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-
 namespace TheBackend.DynamicModels
 {
     public class DesignTimeFactory : IDesignTimeDbContextFactory<DynamicDbContext>
