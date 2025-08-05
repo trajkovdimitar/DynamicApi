@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.OData;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.ModelBuilder;
 using System.Text.Json.Serialization;
-using TheBackend.DynamicModels;
-using TheBackend.DynamicModels.Workflows;
-using TheBackend.Domain.Models;
 using TheBackend.Api.Middleware;
 using TheBackend.Application.Services;
+using TheBackend.Domain.Models;
+using TheBackend.DynamicModels;
+using TheBackend.DynamicModels.Workflows;
 using TheBackend.Infrastructure.Services;
 using TheBackend.Services;
 
@@ -15,6 +16,8 @@ builder.Services.AddSingleton<DynamicDbContextService>();
 builder.Services.AddSingleton<ModelHistoryService>();
 builder.Services.AddSingleton<RuleHistoryService>();
 builder.Services.AddSingleton<WorkflowHistoryService>();
+builder.Services.AddDbContext<ModelHistoryDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddScoped<IFileAssetService, FileAssetService>();
 

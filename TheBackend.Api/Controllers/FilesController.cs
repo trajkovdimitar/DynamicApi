@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TheBackend.Application.Services;
 using TheBackend.Domain.Models;
-
 namespace TheBackend.Api.Controllers
 {
     [ApiController]
@@ -9,13 +8,10 @@ namespace TheBackend.Api.Controllers
     public class FilesController : ControllerBase
     {
         private readonly IFileAssetService _fileService;
-        private readonly string _uploadPath;  // Inject or resolve path
 
         public FilesController(IFileAssetService fileService)
         {
             _fileService = fileService;
-            // Assume _uploadPath is injected or from config; for simplicity, hardcode or resolve here
-            _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");  // Adjust as per your setup
         }
 
         [HttpPost("upload")]
@@ -32,12 +28,12 @@ namespace TheBackend.Api.Controllers
             }
         }
 
-        [HttpDelete("{path}")]
-        public IActionResult Delete(string path)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(Guid id)
         {
             try
             {
-                _fileService.DeleteFile(path);
+                _fileService.DeleteFile(id);
                 return Ok(ApiResponse<string>.Ok("File deleted"));
             }
             catch (Exception ex)
@@ -46,24 +42,29 @@ namespace TheBackend.Api.Controllers
             }
         }
 
-        // New: Serve the image (e.g., GET /api/files/0380ed1e-33fa-4674-b348-6f363188117e.png)
-        [HttpGet("{fileName}")]
-        public IActionResult GetFile(string fileName)
+        // Updated: Serve the file by ID (e.g., GET /api/files/0380ed1e-33fa-4674-b348-6f363188117e)
+        [HttpGet("{id}")]
+        public IActionResult GetFile(Guid id)
         {
-            var fullPath = Path.Combine(_uploadPath, fileName);
-            if (!System.IO.File.Exists(fullPath)) 
+            var details = _fileService.GetFileDetails(id);
+            if (details == null)
                 return NotFound(ApiResponse<string>.Fail("File not found"));
 
-            var extension = Path.GetExtension(fileName).ToLowerInvariant();
-            var contentType = extension switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".png" => "image/png",
-                ".gif" => "image/gif",
-                _ => "application/octet-stream"  // Fallback for other files
-            };
+            return PhysicalFile(details.FullPath, details.ContentType, details.FileName);
+        }
 
-            return PhysicalFile(fullPath, contentType, fileName);
+        [HttpGet]
+        public async Task<IActionResult> GetAllFiles()
+        {
+            try
+            {
+                var files = await _fileService.GetAllFilesAsync();
+                return Ok(ApiResponse<List<FileAssetMetadata>>.Ok(files));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<string>.Fail(ex.Message));
+            }
         }
     }
 }

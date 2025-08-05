@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TheBackend.Domain.Models;
 
 namespace TheBackend.DynamicModels;
@@ -18,32 +19,50 @@ public class ModelHistoryDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<WorkflowDefinitionRecord>()
-            .HasMany(d => d.Steps)
+        modelBuilder.ApplyConfiguration(new WorkflowDefinitionRecordConfiguration());
+        modelBuilder.ApplyConfiguration(new WorkflowStepRecordConfiguration());
+        modelBuilder.ApplyConfiguration(new FileAssetConfiguration());
+    }
+}
+
+public class WorkflowDefinitionRecordConfiguration : IEntityTypeConfiguration<WorkflowDefinitionRecord>
+{
+    public void Configure(EntityTypeBuilder<WorkflowDefinitionRecord> builder)
+    {
+        builder.HasMany(d => d.Steps)
             .WithOne(s => s.WorkflowDefinition)
             .HasForeignKey(s => s.WorkflowDefinitionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<WorkflowDefinitionRecord>()
-            .HasMany(d => d.GlobalVariables)
+        builder.HasMany(d => d.GlobalVariables)
             .WithOne(v => v.WorkflowDefinition)
             .HasForeignKey(v => v.WorkflowDefinitionId)
             .OnDelete(DeleteBehavior.Cascade);
+    }
+}
 
-        modelBuilder.Entity<WorkflowStepRecord>()
-            .HasMany(s => s.Parameters)
+public class WorkflowStepRecordConfiguration : IEntityTypeConfiguration<WorkflowStepRecord>
+{
+    public void Configure(EntityTypeBuilder<WorkflowStepRecord> builder)
+    {
+        builder.HasMany(s => s.Parameters)
             .WithOne(p => p.WorkflowStep)
             .HasForeignKey(p => p.WorkflowStepId)
             .OnDelete(DeleteBehavior.Cascade);
+    }
+}
 
-        modelBuilder.Entity<FileAsset>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.FileName).IsRequired().HasMaxLength(255);
-            entity.Property(e => e.Path).IsRequired().HasMaxLength(500);
-            entity.Property(e => e.ContentType).HasMaxLength(100);
-            entity.Property(e => e.Size).IsRequired();
-            entity.Property(e => e.UploadedAt).IsRequired();
-        });
+public class FileAssetConfiguration : IEntityTypeConfiguration<FileAsset>
+{
+    public void Configure(EntityTypeBuilder<FileAsset> builder)
+    {
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.FileName).IsRequired().HasMaxLength(255);
+        builder.Property(e => e.Path).IsRequired().HasMaxLength(500);
+        builder.Property(e => e.ContentType).HasMaxLength(100);
+        builder.Property(e => e.Size).IsRequired();
+        builder.Property(e => e.UploadedAt).IsRequired();
+        // Optional: Add index for frequent queries
+        builder.HasIndex(e => e.Path);
     }
 }
