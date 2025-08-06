@@ -42,7 +42,6 @@ namespace TheBackend.Api.Controllers
             }
         }
 
-        // Updated: Serve the file by ID (e.g., GET /api/files/0380ed1e-33fa-4674-b348-6f363188117e)
         [HttpGet("{id}")]
         public IActionResult GetFile(Guid id)
         {
