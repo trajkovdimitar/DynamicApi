@@ -4,12 +4,14 @@ export interface PropertyDefinition {
     isKey?: boolean;
     isRequired?: boolean;
     maxLength?: number | null;
+    allowedExtensions?: string[];  // Fixed: Added for FileAsset
 }
 
 export interface ModelDefinition {
     modelName: string;
     properties: PropertyDefinition[];
     relationships: RelationshipDefinition[];
+    ignoreMissingRelationships?: boolean;  // Fixed: Added to match backend
 }
 
 export interface RelationshipDefinition {
@@ -84,7 +86,6 @@ export interface Parameter {
     valueType: (typeof valueTypes)[number];
     value: string;
 }
-
 
 export interface ApiResponse<T> {
     success: boolean;

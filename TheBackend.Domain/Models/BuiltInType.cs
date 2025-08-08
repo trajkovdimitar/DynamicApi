@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 namespace TheBackend.Domain.Models
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))] // Add this attribute
+    [JsonConverter(typeof(JsonStringEnumConverter))] 
     public enum BuiltInType
     {
         Boolean, // bool / System.Boolean -> bit (SQL Server), boolean (PostgreSQL)

@@ -71,6 +71,13 @@ namespace TheBackend.Api.Controllers
             }
         }
 
+        [HttpGet("types")]
+        public IActionResult GetBuiltInTypes()
+        {
+            var types = Enum.GetNames(typeof(BuiltInType)).ToList();
+            return Ok(ApiResponse<List<string>>.Ok(types));
+        }
+
         // New validation method
         private void ValidateModelRelationships(List<ModelDefinition> models)
         {
